@@ -1,0 +1,2484 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D RC Column Interaction (Biaxial)</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        eng: { primary: '#0e7490', secondary: '#f0f9ff', dark: '#155e75', accent: '#fbbf24' }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        .input-group label { font-size: 0.85rem; font-weight: 600; color: #64748b; }
+        .input-group input { font-family: 'Courier New', monospace; font-weight: bold; }
+        canvas { display: block; }
+        .data-table { width: 100%; border-collapse: collapse; font-size: 0.75rem; }
+        .data-table th { background: #f1f5f9; padding: 4px; border: 1px solid #cbd5e1; color: #475569; font-weight: 600; }
+        .data-table td { border: 1px solid #cbd5e1; padding: 0; }
+        .data-table input { width: 100%; border: none; padding: 4px; text-align: center; outline: none; background: transparent; }
+        .data-table input:focus { background: #f0f9ff; }
+        .btn-icon { cursor: pointer; color: #94a3b8; transition: color 0.2s; }
+        .btn-icon:hover { color: #dc2626; }
+        .btn-add { width: 100%; padding: 4px; background: #f1f5f9; border: 1px dashed #cbd5e1; text-align: center; font-size: 0.75rem; color: #64748b; cursor: pointer; margin-top: 4px; border-radius: 4px; }
+        .btn-add:hover { background: #e2e8f0; color: #0f172a; }
+        
+        /* --- Dark Mode Overrides --- */
+        .dark body { background-color: #0f172a; color: #f1f5f9; }
+        .dark #sidebar { background-color: #1e293b; border-color: #334155; }
+        .dark .input-group label { color: #94a3b8; }
+        .dark input, .dark select, .dark textarea { 
+            background-color: #334155 !important; 
+            border-color: #475569 !important; 
+            color: #f8fafc !important; 
+        }
+        .dark .bg-white { background-color: #1e293b !important; color: #e2e8f0; }
+        .dark .bg-gray-50 { background-color: #0f172a !important; }
+        .dark .bg-gray-100 { background-color: #1e293b !important; }
+        .dark .border-gray-200, .dark .border-gray-300, .dark .border-blue-100 { border-color: #334155 !important; }
+        .dark .text-slate-800 { color: #f1f5f9 !important; }
+        .dark .text-gray-500, .dark .text-gray-600, .dark .text-gray-700 { color: #94a3b8 !important; }
+        
+        /* Specific Panel Fixes */
+        .dark .bg-amber-50 { background-color: #451a03 !important; border-color: #78350f !important; }
+        .dark .text-amber-800 { color: #fbbf24 !important; }
+        .dark .text-amber-900 { color: #fde68a !important; }
+        .dark .text-blue-800 { color: #93c5fd !important; }
+        .dark th { background-color: #334155 !important; color: #e2e8f0 !important; border-color: #475569 !important; }
+        .dark td { border-color: #475569 !important; }
+        .dark .btn-add { background-color: #334155; color: #94a3b8; border-color: #475569; }
+        .dark .btn-add:hover { background-color: #475569; color: #fff; }
+        
+        /* Dark Mode Overrides for Floating Panels */
+        .dark .absolute.bottom-4.right-4, 
+        .dark .absolute.top-4.right-4 {
+            background-color: rgba(30, 41, 59, 0.95) !important; /* Slate-800 */
+            border-color: #475569;
+            color: #f1f5f9;
+        }
+        .dark .absolute.bottom-4.right-4 { border-left-color: #fbbf24 !important; } /* Accent color border */
+        
+        /* Text Colors in Panel */
+        .dark h4.text-gray-500 { color: #94a3b8 !important; }
+        .dark .text-gray-700 { color: #e2e8f0 !important; }
+        .dark .text-gray-600 { color: #cbd5e1 !important; }
+        .dark .text-eng-primary { color: #38bdf8 !important; } /* Lighter blue */
+        
+        /* Status Badges */
+        .dark #safety-msg.bg-green-100 { background-color: #064e3b !important; color: #6ee7b7 !important; }
+        .dark #safety-msg.bg-red-100 { background-color: #7f1d1d !important; color: #fca5a5 !important; }
+        
+        /* Warning List Items */
+        .dark #code-warnings .text-green-700 { color: #4ade80 !important; }
+        .dark #code-warnings .text-red-600 { color: #f87171 !important; }
+        .dark #code-warnings .text-amber-600 { color: #fbbf24 !important; }
+        .dark #code-warnings .text-gray-400 { color: #94a3b8 !important; }
+        .dark #code-warnings .border-b { border-color: #334155 !important; }
+        /* --- REPORT PRINTING STYLES --- */
+        #print-staging { display: none; }
+
+        @media print {
+            @page { size: A4; margin: 15mm; }
+            
+            /* Hide UI Elements */
+            body > nav, 
+            body > div.flex { display: none !important; }
+            
+            /* Show Staging Area */
+            #print-staging { 
+                display: block !important; 
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                background: white;
+                color: black;
+                font-family: 'Segoe UI', sans-serif;
+                font-size: 10pt;
+            }
+
+            /* Report Styling */
+            .rpt-header {
+                display: flex; justify-content: space-between; align-items: flex-end;
+                border-bottom: 2px solid #0e7490; padding-bottom: 10px; margin-bottom: 20px;
+            }
+            .rpt-title { color: #0e7490; font-size: 18pt; font-weight: bold; margin: 0; }
+            .rpt-subtitle { font-size: 10pt; color: #555; margin: 2px 0 0 0; }
+            
+            h3 { 
+                color: #1e293b; font-size: 12pt; margin-top: 20px; margin-bottom: 10px; 
+                background: #f1f5f9; padding: 5px 10px; font-weight: bold; border-left: 4px solid #0e7490;
+            }
+            
+            table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 9pt; }
+            th { background-color: #0e7490; color: white; padding: 6px; text-align: left; font-weight: bold; }
+            td { border: 1px solid #cbd5e1; padding: 6px; vertical-align: middle; }
+            tr:nth-child(even) { background-color: #f8fafc; }
+            
+            .pass { color: #15803d; font-weight: bold; }
+            .fail { color: #dc2626; font-weight: bold; }
+            .warn { color: #d97706; font-weight: bold; }
+            
+            .page-break { break-before: page; }
+        }
+    </style>
+</head>
+<!-- REPLACE the <nav> and the opening of the main container div with this: -->
+<body class="bg-gray-100 text-slate-800 h-screen flex flex-col overflow-hidden">
+
+    <nav class="bg-eng-primary text-white shadow-lg z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            
+            <div class="flex items-center gap-3">
+                <button onclick="toggleSidebar()" class="text-white hover:text-eng-accent focus:outline-none">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+                <i class="fa-solid fa-cube text-2xl text-eng-accent"></i>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight" data-i18n="app_title">RC Column 3D Interaction</h1>
+                    <p class="text-xs opacity-80 font-light" data-i18n="app_desc">Biaxial Bending Capacity (Taiwan Code 112)</p>
+                </div>
+            </div>
+
+            <div id="auth-section" class="flex items-center gap-2">
+                <button onclick="toggleHistoryModal()" class="text-white/80 hover:text-white px-2 transition" title="Database">
+                    <i class="fa-solid fa-database"></i>
+                </button>
+
+                <button onclick="toggleLanguage()" class="bg-eng-dark hover:bg-cyan-800 text-white px-3 py-1.5 rounded text-xs font-bold border border-cyan-600 transition flex items-center">
+                    <i class="fa-solid fa-language mr-1"></i> <span id="lang-label">中文</span>
+                </button>
+
+                <button id="login-btn" onclick="openAuthModal()" class="bg-white text-eng-primary px-4 py-1.5 rounded text-sm font-bold shadow hover:bg-gray-100 transition">
+                    <i class="fa-solid fa-user mr-2"></i><span data-i18n="btn_login">Login</span>
+                </button>
+
+                <div id="user-info" class="hidden flex items-center space-x-3">
+                    <span id="user-email" class="text-xs opacity-90 hidden sm:inline font-mono bg-eng-dark px-2 py-1 rounded border border-cyan-600"></span>
+                    <button onclick="auth.signOut()" class="text-sm hover:text-red-300 transition" title="Logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-900 bg-opacity-70 flex items-center justify-center z-50 hidden backdrop-blur-sm">
+        <div class="bg-white rounded-lg shadow-2xl p-8 w-11/12 max-w-sm border-t-4 border-eng-primary">
+            <h2 class="text-2xl font-bold mb-2 text-center text-eng-primary" data-i18n="modal_title">Access Portal</h2>
+            <p class="text-gray-500 mb-4 text-center text-sm" data-i18n="modal_desc">Sign in to sync your data across devices.</p>
+
+            <div class="space-y-3 mb-4">
+                <input type="email" id="auth-email" placeholder="Email" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-eng-primary outline-none">
+                <input type="password" id="auth-password" placeholder="Password" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-eng-primary outline-none">
+            </div>
+
+            <div class="flex gap-2 mb-4">
+                <button id="email-login-btn" class="flex-1 bg-eng-primary text-white py-2 rounded text-sm font-bold hover:bg-blue-800 transition" data-i18n="btn_login_submit">Login</button>
+                <button id="email-register-btn" class="flex-1 bg-white text-eng-primary border border-eng-primary py-2 rounded text-sm font-bold hover:bg-blue-50 transition" data-i18n="btn_register">Register</button>
+            </div>
+
+            <div class="relative flex py-2 items-center">
+                <div class="flex-grow border-t border-gray-300"></div>
+                <span class="flex-shrink mx-4 text-gray-400 text-xs">OR</span>
+                <div class="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <button id="guest-login" class="w-full bg-gray-200 text-gray-700 py-2 rounded mb-3 text-sm font-semibold hover:bg-gray-300 transition shadow-sm" data-i18n="btn_guest">
+                Continue as Guest
+            </button>
+            <p id="auth-error" class="text-xs text-red-500 text-center hidden mt-2"></p>
+        </div>
+    </div>
+
+    <div class="flex flex-1 overflow-hidden relative">
+        
+        <div id="sidebar" class="w-96 bg-white border-r border-gray-200 overflow-y-auto flex-shrink-0 z-40 shadow-md transition-all duration-300 ease-in-out transform translate-x-0">
+            <div class="p-4 space-y-6">
+                <div class="bg-amber-50 border border-amber-200 rounded p-3 space-y-2">
+                    <div class="flex justify-between items-center border-b border-amber-200 pb-1">
+                        <h3 class="text-sm font-bold text-amber-800"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i><span data-i18n="opt_title">Optimizer</span></h3>
+                    </div>
+                    <div class="text-[10px] text-amber-900 mb-2" data-i18n="opt_lock">Check properties to <b>LOCK</b>:</div>
+                    <div class="grid grid-cols-3 gap-2 text-xs">
+                        <label><input type="checkbox" class="opt-lock" value="dim" checked> <span data-i18n="lbl_lock_dim">B & H</span></label>
+                        <label><input type="checkbox" class="opt-lock" value="mat"> <span data-i18n="lbl_lock_mat">Mat.</span></label>
+                        <label><input type="checkbox" class="opt-lock" value="bar"> <span data-i18n="lbl_lock_bar">Rebar</span></label>
+                    </div>
+                    <button onclick="runOptimization()" class="w-full bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-1.5 rounded shadow-sm transition">
+                        <i class="fa-solid fa-bolt mr-1"></i> <span data-i18n="btn_opt">Auto-Design Section</span>
+                    </button>
+                    <div id="opt-status" class="text-[10px] text-center text-gray-500 h-3"></div>
+                </div>
+                
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_geo">1. Section Geometry</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="input-group">
+                            <label data-i18n="lbl_width">Width b (cm)</label>
+                            <input type="number" id="col_b" value="60" min="20" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm focus:ring-2 focus:ring-eng-primary outline-none" oninput="updateApp()">
+                        </div>
+                        <div class="input-group">
+                            <label data-i18n="lbl_depth">Depth h (cm)</label>
+                            <input type="number" id="col_h" value="60" min="20" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm focus:ring-2 focus:ring-eng-primary outline-none" oninput="updateApp()">
+                        </div>
+                    </div>
+                    <div class="input-group mt-2">
+                        <label data-i18n="lbl_cover">Clear Cover (cm)</label>
+                        <input type="number" id="col_cover" value="4.0" min="4.0" max="15.0" step="0.1" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm focus:ring-2 focus:ring-eng-primary outline-none" oninput="updateApp()">
+                    </div>
+                    <div class="input-group mt-2">
+                        <label data-i18n="lbl_lu">Unbraced Length Lu (m)</label>
+                        <input type="number" id="col_lu" value="3.0" min="0.1" step="0.1" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm focus:ring-2 focus:ring-eng-primary outline-none" oninput="updateApp()">
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_mat">2. Materials</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="input-group">
+                            <label data-i18n="lbl_fc">Concrete f'c (kgf/cm²)</label>
+                            <input type="number" id="mat_fc" value="280" min="140" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm text-blue-700" oninput="updateApp()">
+                        </div>
+                        <div class="input-group">
+                            <label data-i18n="lbl_fy">Steel fy (kgf/cm²)</label>
+                            <input type="number" id="mat_fy" value="4200" min="2800" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm text-red-700" oninput="updateApp()">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_rebar">3. Reinforcement</h3>
+                    
+                    <div class="flex gap-2 mb-2 text-xs">
+                        <label class="flex items-center"><input type="radio" name="rebar_mode" value="regular" checked onchange="toggleRebarMode()"> <span class="ml-1" data-i18n="lbl_reg">Regular</span></label>
+                        <label class="flex items-center"><input type="radio" name="rebar_mode" value="custom" onchange="toggleRebarMode()"> <span class="ml-1" data-i18n="lbl_cust">Custom</span></label>
+                    </div>
+
+                    <div id="rebar-regular">
+                        <div class="input-group">
+                            <label data-i18n="lbl_size">Rebar Size (Ab)</label>
+                            <select id="bar_size" class="w-full border border-gray-300 rounded p-1.5 text-sm mb-2" onchange="updateApp()">
+                                <option value="1.27">D13 (1.27 cm²)</option>
+                                <option value="1.98">D16 (1.98 cm²)</option>
+                                <option value="2.87">D19 (2.87 cm²)</option>
+                                <option value="3.87">D22 (3.87 cm²)</option>
+                                <option value="5.07" selected>D25 (5.07 cm²)</option>
+                                <option value="6.42">D29 (6.42 cm²)</option>
+                                <option value="7.94">D32 (7.94 cm²)</option>
+                                <option value="9.57">D36 (9.57 cm²)</option>
+                            </select>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="input-group">
+                                <label data-i18n="lbl_nx">Top/Bot (nx)</label>
+                                <input type="number" id="nx_bars" value="4" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                            </div>
+                            <div class="input-group">
+                                <label data-i18n="lbl_ny">Side (ny)</label>
+                                <input type="number" id="ny_bars" value="4" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="rebar-custom" class="hidden">
+                        <label class="text-xs font-bold text-gray-500 mb-1 block" data-i18n="lbl_cust_layout">Custom Layout (x, y, db)</label>
+                        <button class="w-full bg-eng-secondary text-eng-dark border border-eng-primary text-xs font-bold py-1.5 px-2 rounded mb-2 hover:bg-eng-primary hover:text-white transition" onclick="importRegularToCustom()">
+                            <i class="fa-solid fa-file-import mr-1"></i> <span data-i18n="btn_gen">Generate</span>
+                        </button>
+                        <details class="text-xs mb-2">
+                            <summary class="cursor-pointer text-gray-500 hover:text-eng-primary" data-i18n="sum_paste">Paste Coordinates</summary>
+                            <textarea id="paste_rebar" placeholder="Copy columns:\nx  y  db(cm)" class="w-full h-16 border rounded p-1 text-[10px] font-mono mt-1"></textarea>
+                            <button onclick="parseCustomRebar()" class="w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-2 py-1 rounded mt-1" data-i18n="btn_load_rebar">Load Rebar</button>
+                        </details>
+
+                        <table class="data-table" id="table-rebar">
+                            <thead>
+                                <tr>
+                                    <th data-i18n="th_x">x (cm)</th>
+                                    <th data-i18n="th_y">y (cm)</th>
+                                    <th data-i18n="th_db">db (cm)</th>
+                                    <th style="width: 20px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <button class="btn-add" onclick="addRebarRow()">
+                            <i class="fa-solid fa-plus mr-1"></i> <span data-i18n="btn_add_bar">Add Bar</span>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="space-y-3 bg-gray-50 p-3 rounded border border-gray-200">
+                    <div class="flex justify-between items-center border-b pb-1 border-red-200">
+                        <h3 class="text-sm font-bold text-red-600" data-i18n="sec_loads">4. Factored Loads</h3>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-2 mb-2">
+                        <div class="input-group flex flex-col bg-white p-2 rounded border border-blue-100">
+                            <label class="text-blue-800 text-xs" data-i18n="lbl_vux">Global Vux (tf)</label>
+                            <input type="number" id="global_vux" value="5" class="w-full border border-blue-300 rounded p-1 text-right text-sm font-bold text-blue-700 bg-blue-50" oninput="updateApp()">
+                        </div>
+                        <div class="input-group flex flex-col bg-white p-2 rounded border border-blue-100">
+                            <label class="text-blue-800 text-xs" data-i18n="lbl_vuy">Global Vuy (tf)</label>
+                            <input type="number" id="global_vuy" value="5" class="w-full border border-blue-300 rounded p-1 text-right text-sm font-bold text-blue-700 bg-blue-50" oninput="updateApp()">
+                        </div>
+                    </div>
+
+                    <details class="text-xs mb-2">
+                        <summary class="cursor-pointer text-gray-500 hover:text-eng-primary" data-i18n="sum_paste_load">Batch Paste (Excel)</summary>
+                        <textarea id="paste_loads" placeholder="Copy columns from Excel:\nPu  Mux  Muy" class="w-full h-16 border rounded p-1 text-[10px] font-mono mt-1"></textarea>
+                        <button onclick="parseLoads()" class="w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-2 py-1 rounded mt-1" data-i18n="btn_load_data">Load Data</button>
+                    </details>
+
+                    <div class="mt-2 max-h-40 overflow-y-auto">
+                        <table class="data-table" id="table-loads">
+                            <thead class="sticky top-0 bg-gray-100 z-10 shadow-sm">
+                                <tr>
+                                    <th class="text-red-700" data-i18n="th_pu">Pu (tf)</th>
+                                    <th class="text-red-700" data-i18n="th_mux">Mux (tf-m)</th>
+                                    <th class="text-red-700" data-i18n="th_muy">Muy (tf-m)</th>
+                                    <th style="width: 20px;"></th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <button class="btn-add" onclick="addLoadRow()">
+                        <i class="fa-solid fa-plus mr-1"></i> <span data-i18n="btn_add_case">Add Load Case</span>
+                    </button>
+                </div>
+                
+                <div class="space-y-3">
+                    <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_shear">5. Shear Design (Vu)</h3>
+                    <div class="mb-2 mt-1">
+                        <label class="flex items-center text-xs font-bold text-amber-700 cursor-pointer">
+                            <input type="checkbox" id="seismic_mode" class="mr-2" onchange="updateApp()">
+                            <span data-i18n="lbl_seismic">Seismic (Special Moment Frame)</span>
+                        </label>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="input-group">
+                            <label data-i18n="lbl_tie_db">Tie Diameter db (cm)</label>
+                            <input type="number" id="shear_db" value="1.3" min="1.0" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                        </div>
+                        <div class="input-group">
+                            <label data-i18n="lbl_tie_s">Tie Spacing s (cm)</label>
+                            <input type="number" id="shear_s" value="10" min="3.0" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                        </div>
+                        <div class="input-group">
+                            <label data-i18n="lbl_leg_x"># Legs X-dir</label>
+                            <input type="number" id="shear_nx" value="2" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                        </div>
+                        <div class="input-group">
+                            <label data-i18n="lbl_leg_y"># Legs Y-dir</label>
+                            <input type="number" id="shear_ny" value="2" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="pt-4 border-t border-gray-200 mt-4 space-y-2">
+                    <button id="save-btn" onclick="saveToCloud()" class="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded shadow transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> <span data-i18n="btn_save">Save to Cloud</span>
+                    </button>
+
+                    <button onclick="printReport()" class="w-full bg-slate-700 hover:bg-slate-800 text-white text-sm font-bold py-2 px-4 rounded shadow transition flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-print"></i> <span data-i18n="btn_gen_rpt">Generate Summary Report</span>
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col min-w-0 bg-white relative">
+            
+            <div class="absolute top-4 left-4 z-10 flex gap-2">
+                <button onclick="toggleWireframe()" class="bg-gray-100/80 hover:bg-gray-200/80 text-gray-700 backdrop-blur-sm border border-gray-300 px-3 py-1.5 rounded text-xs font-bold transition">
+                    <i class="fa-solid fa-border-all mr-2"></i><span data-i18n="btn_wireframe">Wireframe</span>
+                </button>
+                <button onclick="toggleDarkMode()" class="bg-gray-100/80 hover:bg-gray-200/80 text-gray-700 backdrop-blur-sm border border-gray-300 px-3 py-1.5 rounded text-xs font-bold transition">
+                    <i id="dark-icon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+
+            <div id="container-3d" class="flex-1 w-full h-full cursor-move"></div>
+
+            <!-- Legend / Overlay -->
+            <div class="absolute bottom-4 right-4 bg-white/95 backdrop-blur p-4 rounded shadow-xl w-64 border-l-4 border-eng-primary ring-1 ring-gray-200">
+                <div class="flex gap-3 mb-3 text-[10px] uppercase font-bold tracking-wider">
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-gray-300 border border-gray-400 mr-1 opacity-50"></span> <span data-i18n="leg_nom">Nominal (Pn)</span></div>
+                    <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-eng-primary mr-1 opacity-80"></span> <span data-i18n="leg_des">Design (ϕPn)</span></div>
+                </div>
+                <hr class="border-gray-200 mb-2">
+                <h4 class="text-xs font-bold text-gray-500 uppercase mb-2" data-i18n="tit_check">Safety Check (D/C Ratio)</h4>
+                
+                <div class="flex justify-between items-baseline mb-1">
+                    <span class="text-sm font-bold text-gray-700" data-i18n="lbl_coord">Coordinates:</span>
+                </div>
+
+                <div class="text-xs font-mono text-gray-600 mb-3 space-y-1">
+                    <div class="flex justify-between"><span>Pu:</span> <span><span id="disp_pu"></span> tf</span></div>
+                    <div class="flex justify-between"><span>Mux:</span> <span><span id="disp_mux"></span> tf-m</span></div>
+                    <div class="flex justify-between"><span>Muy:</span> <span><span id="disp_muy"></span> tf-m</span></div>
+                </div>
+
+                <h4 class="text-xs font-bold text-gray-500 uppercase mb-1" data-i18n="tit_max">Max Design Capacity</h4>
+                <div class="text-[10px] font-mono text-eng-primary mb-3 space-y-1 border-b pb-2">
+                    <div class="flex justify-between"><span>ϕPn(max):</span> <span><span id="max_phi_pn"></span> tf</span></div>
+                    <div class="flex justify-between"><span>ϕMnx(max):</span> <span><span id="max_phi_mnx"></span> tf-m</span></div>
+                    <div class="flex justify-between"><span>ϕMny(max):</span> <span><span id="max_phi_mny"></span> tf-m</span></div>
+                </div>
+
+                <div class="w-full bg-gray-200 rounded-full h-4 mb-1 overflow-hidden relative">
+                    <div id="dc-bar" class="bg-eng-primary h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-gray-500" data-i18n="lbl_ratio">Capacity Ratio</span>
+                    <span id="dc-val" class="text-lg font-bold text-eng-primary">0.00</span>
+                </div>
+                <div id="safety-msg" class="text-center text-xs font-bold mt-2 py-1 rounded bg-green-100 text-green-700">
+                    SAFE
+                </div>
+                <div id="code-warnings" class="text-[10px] font-mono mt-2 space-y-1 text-red-600 font-bold hidden"></div>
+            </div>
+
+            <div class="absolute top-4 right-4 bg-white p-2 rounded shadow-lg border border-gray-200">
+                <canvas id="section-canvas" width="120" height="120"></canvas>
+                <p class="text-[10px] text-center text-gray-400 mt-1 uppercase font-bold" data-i18n="lbl_sec_view">Section View</p>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="print-staging"></div>
+
+    <div id="history-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
+        <div class="bg-white rounded-lg shadow-xl w-96 max-h-[80vh] flex flex-col">
+            <div class="p-3 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
+                <h3 class="font-bold text-gray-700"><i class="fa-solid fa-database mr-2"></i>Saved Designs</h3>
+                <button onclick="toggleHistoryModal()" class="text-gray-400 hover:text-red-500"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="history-list" class="flex-1 overflow-y-auto p-2 space-y-2 bg-gray-50">
+                <div class="text-center text-xs text-gray-400 py-4">No records found.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. GLOBAL VARIABLES ---
+        let scene, camera, renderer, controls;
+        let isDarkMode = false;
+        let pmnMesh;
+        // CHANGED: Use a Group instead of a single Mesh
+        let loadPointsGroup = new THREE.Group(); 
+        
+        // INSERT THIS LINE HERE:
+        let limitGroup = new THREE.Group(); 
+
+        let isWireframe = false;
+        let vizScales = { p: 1, m: 1 };
+        
+        // --- FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyBR10welXYote7BixTaaUvwBcepZo7XyQE",
+            authDomain: "column-app-6d9bd.firebaseapp.com",
+            projectId: "column-app-6d9bd",
+            storageBucket: "column-app-6d9bd.firebasestorage.app",
+            messagingSenderId: "840460637049",
+            appId: "1:840460637049:web:63895a5995d0fbe8fbd5a8",
+            measurementId: "G-DJ5RDVJYW7"
+        };
+                
+        // Initialize Firebase
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        let currentUser = null;
+
+        // --- AUTH EVENT HANDLERS ---
+        // Email Login
+        document.getElementById('email-login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const errorMsg = document.getElementById('auth-error');
+            
+            errorMsg.classList.add('hidden');
+            if (!email || !password) {
+                errorMsg.innerText = "Please enter both email and password.";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                closeAuthModal();
+            } catch (e) {
+                errorMsg.innerText = e.message;
+                errorMsg.classList.remove('hidden');
+            }
+        });
+
+        // Email Register
+        document.getElementById('email-register-btn').addEventListener('click', async () => {
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const errorMsg = document.getElementById('auth-error');
+
+            errorMsg.classList.add('hidden');
+            if (!email || !password) {
+                errorMsg.innerText = "Please enter both email and password.";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+            try {
+                await auth.createUserWithEmailAndPassword(email, password);
+                closeAuthModal();
+            } catch (e) {
+                errorMsg.innerText = e.message;
+                errorMsg.classList.remove('hidden');
+            }
+        });
+
+        // Guest Login
+        document.getElementById('guest-login').addEventListener('click', async () => {
+            try {
+                await auth.signInAnonymously();
+                closeAuthModal();
+            } catch (e) {
+                console.error(e);
+            }
+        });
+
+        // --- AUTH UI HELPERS ---
+        function openAuthModal() {
+            document.getElementById('auth-modal').classList.remove('hidden');
+        }
+
+        function closeAuthModal() {
+            document.getElementById('auth-modal').classList.add('hidden');
+        }
+
+        function handleGoogleAuth() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then(() => closeAuthModal())
+                .catch(e => alert(e.message));
+        }
+
+        // Update the Auth Listener to target the new Navbar elements
+        auth.onAuthStateChanged(user => {
+            currentUser = user;
+            const loginBtn = document.getElementById('login-btn');
+            const userInfo = document.getElementById('user-info');
+            const userEmail = document.getElementById('user-email');
+            
+            if (user) {
+                // Logged In State
+                loginBtn.classList.add('hidden');
+                userInfo.classList.remove('hidden');
+                userEmail.innerText = user.email || "User";
+                loadHistory(); 
+            } else {
+                // Guest State
+                loginBtn.classList.remove('hidden');
+                userInfo.classList.add('hidden');
+                document.getElementById('history-list').innerHTML = '<div class="text-center text-xs text-gray-400 py-4">Please login to view history.</div>';
+            }
+        });
+
+        function handleAuth() {
+            // Simple Google Login for demo (ensure Google Auth is enabled in Firebase Console)
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider).catch(e => alert(e.message));
+        }
+
+        // --- DATABASE FUNCTIONS ---
+        async function saveToCloud() {
+            if (!currentUser) return alert("Please login to save.");
+            
+            // Gather CURRENT State
+            const state = {
+                timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                inputs: {
+                    b: document.getElementById('col_b').value,
+                    h: document.getElementById('col_h').value,
+                    fc: document.getElementById('mat_fc').value,
+                    fy: document.getElementById('mat_fy').value,
+                    pu: document.getElementById('disp_pu').innerText,
+                    dc: document.getElementById('dc-val').innerText,
+                    status: document.getElementById('safety-msg').innerText
+                },
+                fullData: {
+                     // Save all inputs needed to restore
+                     col_b: document.getElementById('col_b').value,
+                     col_h: document.getElementById('col_h').value,
+                     col_cover: document.getElementById('col_cover').value,
+                     mat_fc: document.getElementById('mat_fc').value,
+                     mat_fy: document.getElementById('mat_fy').value,
+                     col_lu: document.getElementById('col_lu').value,
+                     bar_size: document.getElementById('bar_size').value,
+                     nx_bars: document.getElementById('nx_bars').value,
+                     ny_bars: document.getElementById('ny_bars').value,
+                     shear_s: document.getElementById('shear_s').value,
+                     shear_db: document.getElementById('shear_db').value,
+                     shear_nx: document.getElementById('shear_nx').value,
+                     shear_ny: document.getElementById('shear_ny').value
+                }
+            };
+
+            try {
+                await db.collection('users').doc(currentUser.uid).collection('rc_designs').add(state);
+                alert("Design saved to cloud!");
+                loadHistory(); // Refresh list
+            } catch (e) {
+                console.error(e);
+                alert("Save failed.");
+            }
+        }
+
+        function toggleHistoryModal() {
+            const m = document.getElementById('history-modal');
+            m.classList.toggle('hidden');
+        }
+
+        function loadHistory() {
+            if (!currentUser) return;
+            const list = document.getElementById('history-list');
+            list.innerHTML = '<div class="text-center text-xs text-gray-400"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
+            
+            db.collection('users').doc(currentUser.uid).collection('rc_designs')
+              .orderBy('timestamp', 'desc').limit(20)
+              .get().then(snap => {
+                  if (snap.empty) {
+                      list.innerHTML = '<div class="text-center text-xs text-gray-400 py-4">No records found.</div>';
+                      return;
+                  }
+                  
+                  let html = '';
+                  snap.forEach(doc => {
+                      const d = doc.data();
+                      const date = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleDateString() : '?';
+                      const color = d.inputs.status.includes('SAFE') ? 'text-green-600' : 'text-red-600';
+                      
+                      html += `
+                        <div class="bg-white p-2 rounded border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer" onclick='restoreDesign(${JSON.stringify(d.fullData)})'>
+                            <div class="flex justify-between items-center mb-1">
+                                <span class="font-bold text-xs text-gray-700">${d.inputs.b}x${d.inputs.h} cm</span>
+                                <span class="text-[10px] text-gray-400">${date}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-[10px]">
+                                <span class="text-gray-500">Pu: ${d.inputs.pu} tf</span>
+                                <span class="${color} font-bold">D/C: ${d.inputs.dc}</span>
+                            </div>
+                             <div class="flex justify-end mt-1">
+                                <button onclick="deleteDesign('${doc.id}', event)" class="text-[10px] text-red-400 hover:text-red-600"><i class="fa-solid fa-trash"></i></button>
+                            </div>
+                        </div>
+                      `;
+                  });
+                  list.innerHTML = html;
+              });
+        }
+
+        function restoreDesign(data) {
+            if(!data) return;
+            // Restore Values
+            for (const [key, val] of Object.entries(data)) {
+                const el = document.getElementById(key);
+                if (el) el.value = val;
+            }
+            updateApp();
+            toggleHistoryModal();
+        }
+
+        function deleteDesign(id, e) {
+            e.stopPropagation(); // Stop click from triggering restore
+            if(!confirm("Delete this record?")) return;
+            db.collection('users').doc(currentUser.uid).collection('rc_designs').doc(id).delete()
+              .then(() => loadHistory());
+        }
+
+        // --- INTERNATIONALIZATION (i18n) ---
+        let currentLang = 'en'; // Default English
+
+        const translations = {
+            en: {
+                // UI Titles
+                modal_title: "Access Portal",
+                modal_desc: "Sign in to sync your data across devices.",
+                btn_login_submit: "Login",
+                btn_login: "Login",
+                btn_logout: "Logout",
+                btn_register: "Register",
+                btn_guest: "Continue as Guest",
+                app_title: "RC Column 3D Interaction",
+                app_desc: "Biaxial Bending Capacity (Taiwan Code 112)",
+                status_ready: "READY",
+                opt_title: "Optimizer",
+                opt_lock: "Check properties to <b>LOCK</b> (Keep unchanged):",
+                lbl_lock_dim: "B & H", lbl_lock_mat: "Mat.", lbl_lock_bar: "Rebar",
+                btn_opt: "Auto-Design Section",
+                w_reinf_ratio: "✓ Rebar Ratio",
+                w_tie_spacing: "✓ Tie Spacing",
+                rule_gravity: "Gravity (16db, dim)",
+                rule_seismic: "Seismic (d/4, 6db, 15cm)",
+                // UI Elements (Missing in original EN)
+                btn_wireframe: "Wireframe Mode",
+                lbl_sec_view: "Section View",
+                btn_save: "Save to Cloud",
+                btn_saving: "Saving...",
+                btn_saved: "Saved!",
+
+                // Logic/Validation (Missing in original EN)
+                val_mode_regular: "Regular Layout",
+                val_mode_custom: "Custom Config",
+                val_ok: "Compliant",
+
+                // Section 1: Geometry
+                sec_geo: "1. Section Geometry",
+                lbl_width: "Width b (cm)", lbl_depth: "Depth h (cm)",
+                lbl_cover: "Clear Cover (cm)", lbl_lu: "Unbraced Length Lu (m)",
+
+                // Section 2: Materials
+                sec_mat: "2. Materials",
+                lbl_fc: "Concrete f'c (kgf/cm²)", lbl_fy: "Steel fy (kgf/cm²)",
+
+                // Section 3: Rebar
+                sec_rebar: "3. Reinforcement",
+                lbl_reg: "Regular", lbl_cust: "Custom",
+                lbl_size: "Rebar Size (Ab)",
+                lbl_nx: "Top/Bot (nx)", lbl_ny: "Side (ny)",
+                lbl_cust_layout: "Custom Layout (x, y, db)",
+                btn_gen: "Generate from Regular Config",
+                sum_paste: "Paste Coordinates",
+                ph_paste_rebar: "Copy columns:\nx  y  db(cm)",
+                btn_load_rebar: "Load Rebar",
+                th_x: "x (cm)", th_y: "y (cm)", th_db: "db (cm)",
+                btn_add_bar: "Add Bar",
+
+                // Section 4: Loads
+                sec_loads: "4. Factored Loads",
+                lbl_vux: "Global Vux (tf)", lbl_vuy: "Global Vuy (tf)",
+                sum_paste_load: "Batch Paste (Excel)",
+                ph_paste_load: "Copy columns from Excel:\nPu  Mux  Muy",
+                btn_load_data: "Load Data",
+                th_pu: "Pu (tf)", th_mux: "Mux (tf-m)", th_muy: "Muy (tf-m)",
+                btn_add_case: "Add Load Case",
+
+                // Section 5: Shear
+                sec_shear: "5. Shear Design (Vu)",
+                lbl_seismic: "Seismic (Special Moment Frame)",
+                lbl_tie_db: "Tie Diameter db (cm)", lbl_tie_s: "Tie Spacing s (cm)",
+                lbl_leg_x: "# Legs X-dir", lbl_leg_y: "# Legs Y-dir",
+
+                // 3D Legend
+                leg_nom: "Nominal (Pn)", leg_des: "Design (ϕPn)",
+                tit_check: "Safety Check (D/C Ratio)",
+                lbl_coord: "Coordinates:",
+                tit_max: "Max Design Capacity",
+                lbl_ratio: "Capacity Ratio",
+                sts_safe: "SAFE", sts_fail: "FAILURE", sts_shear: "SHEAR FAILURE",
+                
+                // Report
+                rpt_title: "RC Column Analysis Report",
+                rpt_sub: "Biaxial Interaction & Shear Design (Taiwan Code 112)",
+                rpt_sec1: "1. Section Configuration",
+                rpt_sec2: "2. Load Analysis & Interaction",
+                rpt_sec3: "3. Shear Design Check",
+                rpt_sec4: "4. Code Compliance Warnings",
+                rpt_geo_mat: "Geometry & Materials",
+                rpt_dim: "Dimensions", rpt_con: "Concrete (f'c)",
+                rpt_cov: "Clear Cover", rpt_st: "Steel (fy)",
+                rpt_len: "Length (Lu)", rpt_mod: "Mode",
+                rpt_reinf_det: "Reinforcement Details",
+                rpt_main: "Main Bar Size", rpt_area: "Area",
+                rpt_conf: "Config", rpt_bars: "Bars",
+                rpt_tie: "Tie Bar", rpt_tie_sp: "Tie Spacing",
+                rpt_legs: "Shear Legs",
+                rpt_param: "Parameter", rpt_app: "Applied Load (Active)", rpt_lim: "Capacity Limit (Max)", rpt_chk: "Check",
+                rpt_ax: "Axial Force (Pu)", rpt_mx: "Moment X (Mux)", rpt_my: "Moment Y (Muy)",
+                rpt_dc: "D/C Ratio",
+                rpt_stat: "Interaction Status",
+                rpt_dir: "Direction", rpt_dem: "Shear Demand (Vu)", rpt_prov: "Provided Legs", rpt_cap_chk: "Capacity Check",
+                rpt_xdir: "X-Direction", rpt_ydir: "Y-Direction",
+                rpt_legs_w: "legs (along Width)", rpt_legs_d: "legs (along Depth)",
+                rpt_no_warn: "No warnings generated.",
+                rpt_footer: "Generated by RC Column 3D Interaction Tool",
+                btn_gen_rpt: "Generate Summary Report",
+
+                // Warnings
+                w_small_ecc: "⚠️ Small Eccentricity", w_small_ecc_d: "Moments < M_min. Verify accidental torsion.",
+                w_low_rho: "⚠️ Low Rebar Ratio", w_min_1: "(Min 1%)",
+                w_high_rho: "⚠️ High Rebar Ratio", w_max_8: "(Max 8%)",
+                w_high_seis: "⚠️ High Seismic Rho", w_max_4: "(Practical Max 4%)",
+                w_reinf_ok: "✓ Rebar Ratio",
+                w_insuff_ash: "⚠️ Insufficient Ash", w_need_legs: "Need more legs or larger ties.",
+                w_bad_tie: "⚠️ Invalid Tie Spacing", w_max_for: "Max for",
+                w_tie_ok: "✓ Tie Spacing", w_ok: "OK",
+                w_slender: "⚠️ Slender", w_mmag: "Moment Magnification applied.",
+                w_vert_gap: "⚠️ Tight Vertical Spacing", w_agg: "might block aggregate flow.",
+                w_x_cong: "⚠️ X-Legs Congested", w_y_cong: "⚠️ Y-Legs Congested", w_vib: "Hard to vibrate.",
+                w_aspect: "⚠️ High Aspect Ratio", w_wall: "Ratio > 3 classifies as a <b>Wall</b> (ACI 318).",
+
+                // Opt Status
+                opt_run: "Optimizing...", opt_done: "Done! Optimized.", opt_fail: "No better solution found."
+            },
+            zh: {
+                // 1. Auth / Login
+                btn_login: "登入",
+                btn_logout: "登出",
+                modal_title: "存取入口",
+                modal_desc: "登入以同步您的資料。",
+                btn_login_submit: "登入",
+                btn_register: "註冊",
+                btn_guest: "訪客登入",
+
+                // 2. UI Elements
+                btn_wireframe: "線框模式",
+                lbl_sec_view: "斷面視圖",
+                btn_save: "儲存至雲端",
+                btn_saving: "儲存中...",
+                btn_saved: "已儲存!",
+
+                // 3. Report & Logic
+                val_mode_regular: "規則排列",
+                val_mode_custom: "自訂配置",
+                val_ok: "符合",
+                w_reinf_ratio: "✓ 鋼筋比", // For "✓ Rebar Ratio"
+                w_tie_spacing: "✓ 箍筋間距", // For "✓ Tie Spacing"
+                
+                // Specific Logic Terms
+                rule_gravity: "非耐震 (16db, 柱寬)",
+                rule_seismic: "耐震 (d/4, 6db, 15cm)",
+
+                // App Headers (Restored/Merged from original logic to match EN)
+                app_title: "RC 鋼筋混凝土柱 3D 交互作用",
+                app_desc: "雙向彎矩強度分析 (台灣規範 112)",
+                status_ready: "就緒",
+                opt_title: "自動優化",
+                opt_lock: "鎖定屬性 (保持不變):",
+                lbl_lock_dim: "尺寸", lbl_lock_mat: "材料", lbl_lock_bar: "鋼筋",
+                btn_opt: "自動設計斷面",
+
+                sec_geo: "1. 斷面幾何",
+                lbl_width: "寬度 b (cm)", lbl_depth: "深度 h (cm)",
+                lbl_cover: "保護層 (cm)", lbl_lu: "無支撐長度 Lu (m)",
+
+                sec_mat: "2. 材料性質",
+                lbl_fc: "混凝土 f'c (kgf/cm²)", lbl_fy: "鋼筋 fy (kgf/cm²)",
+
+                sec_rebar: "3. 鋼筋配置",
+                lbl_reg: "規則排列", lbl_cust: "自訂座標",
+                lbl_size: "鋼筋號數 (Ab)",
+                lbl_nx: "頂/底支數 (nx)", lbl_ny: "側面支數 (ny)",
+                lbl_cust_layout: "自訂配置 (x, y, db)",
+                btn_gen: "從規則配置生成",
+                sum_paste: "貼上座標",
+                ph_paste_rebar: "複製欄位:\nx  y  db(cm)",
+                btn_load_rebar: "載入鋼筋",
+                th_x: "x (cm)", th_y: "y (cm)", th_db: "db (cm)",
+                btn_add_bar: "新增鋼筋",
+
+                sec_loads: "4. 極限載重 (Factored)",
+                lbl_vux: "全域 Vux (tf)", lbl_vuy: "全域 Vuy (tf)",
+                sum_paste_load: "批次貼上 (Excel)",
+                ph_paste_load: "從 Excel 複製:\nPu  Mux  Muy",
+                btn_load_data: "載入數據",
+                th_pu: "Pu (tf)", th_mux: "Mux (tf-m)", th_muy: "Muy (tf-m)",
+                btn_add_case: "新增載重",
+
+                sec_shear: "5. 剪力設計 (Vu)",
+                lbl_seismic: "耐震設計 (特殊抗彎構架)",
+                lbl_tie_db: "箍筋直徑 db (cm)", lbl_tie_s: "箍筋間距 s (cm)",
+                lbl_leg_x: "X向 肢數 (Legs)", lbl_leg_y: "Y向 肢數 (Legs)",
+
+                leg_nom: "標稱強度 (Pn)", leg_des: "設計強度 (ϕPn)",
+                tit_check: "安全檢核 (D/C Ratio)",
+                lbl_coord: "座標點:",
+                tit_max: "最大設計強度",
+                lbl_ratio: "容量比 (D/C)",
+                sts_safe: "安全 (SAFE)", sts_fail: "破壞 (FAILURE)", sts_shear: "剪力破壞",
+
+                rpt_title: "RC 柱結構分析報告",
+                rpt_sub: "雙向交互作用與剪力設計 (台灣規範 112)",
+                rpt_sec1: "1. 斷面配置",
+                rpt_sec2: "2. 載重分析與交互作用",
+                rpt_sec3: "3. 剪力設計檢核",
+                rpt_sec4: "4. 規範符合性警告",
+                rpt_geo_mat: "幾何與材料",
+                rpt_dim: "尺寸", rpt_con: "混凝土 (f'c)",
+                rpt_cov: "保護層", rpt_st: "鋼筋 (fy)",
+                rpt_len: "長度 (Lu)", rpt_mod: "模式",
+                rpt_reinf_det: "配筋詳圖",
+                rpt_main: "主筋尺寸", rpt_area: "面積",
+                rpt_conf: "排列", rpt_bars: "根",
+                rpt_tie: "箍筋", rpt_tie_sp: "箍筋間距",
+                rpt_legs: "剪力肢數",
+                rpt_param: "參數", rpt_app: "作用載重 (Active)", rpt_lim: "強度極限 (Max)", rpt_chk: "檢核",
+                rpt_ax: "軸力 (Pu)", rpt_mx: "彎矩 X (Mux)", rpt_my: "彎矩 Y (Muy)",
+                rpt_dc: "D/C 比",
+                rpt_stat: "交互作用狀態",
+                rpt_dir: "方向", rpt_dem: "剪力需求 (Vu)", rpt_prov: "提供肢數", rpt_cap_chk: "容量檢核",
+                rpt_xdir: "X-方向", rpt_ydir: "Y-方向",
+                rpt_legs_w: "支 (沿寬度)", rpt_legs_d: "支 (沿深度)",
+                rpt_no_warn: "未產生警告訊息。",
+                rpt_footer: "由 RC Column 3D 工具生成",
+                btn_gen_rpt: "生成摘要報告",
+
+                w_small_ecc: "⚠️ 偏心距過小", w_small_ecc_d: "彎矩 < M_min。請確認意外扭矩。",
+                w_low_rho: "⚠️ 鋼筋比過低", w_min_1: "(最小 1%)",
+                w_high_rho: "⚠️ 鋼筋比過高", w_max_8: "(最大 8%)",
+                w_high_seis: "⚠️ 耐震鋼筋比高", w_max_4: "(建議最大 4%)",
+                w_reinf_ok: "✓ 鋼筋比",
+                w_insuff_ash: "⚠️ Ash 圍束不足", w_need_legs: "需增加肢數或加大箍筋。",
+                w_bad_tie: "⚠️ 箍筋間距無效", w_max_for: "最大值",
+                w_tie_ok: "✓ 箍筋間距", w_ok: "OK",
+                w_slender: "⚠️ 細長柱", w_mmag: "已應用彎矩放大。",
+                w_vert_gap: "⚠️ 垂直間距過密", w_agg: "可能阻礙骨材流動。",
+                w_x_cong: "⚠️ X向肢距過密", w_y_cong: "⚠️ Y向肢距過密", w_vib: "難以震動搗實。",
+                w_aspect: "⚠️ 長寬比過大", w_wall: "比例 > 3 歸類為<b>牆</b> (ACI 318)。",
+
+                opt_run: "優化中...", opt_done: "完成！已優化。", opt_fail: "未找到更好的解。"
+            }
+        };
+
+        function t(key) {
+            return translations[currentLang][key] || key;
+        }
+
+        function t(key) { return translations[currentLang][key] || key; }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'zh' : 'en';
+            // Update Label
+            document.getElementById('lang-label').innerText = currentLang === 'en' ? '中文' : 'EN';
+            
+            // Update UI Elements
+            document.querySelectorAll('[data-i18n]').forEach(el => {
+                const key = el.getAttribute('data-i18n');
+                // Handle button icons + text
+                const icon = el.querySelector('i');
+                if (translations[currentLang][key]) {
+                    el.innerHTML = t(key);
+                }
+            });
+
+            // Update Placeholders
+            const pasteRebar = document.getElementById('paste_rebar');
+            if(pasteRebar) pasteRebar.placeholder = t('ph_paste_rebar');
+            const pasteLoads = document.getElementById('paste_loads');
+            if(pasteLoads) pasteLoads.placeholder = t('ph_paste_load');
+
+            // --- FIX: Trigger RC Column App Update ---
+            updateApp(); 
+            // -----------------------------------------
+            
+            if (!document.getElementById('history-modal').classList.contains('hidden')) loadHistory();
+        }
+
+        function toggleDarkMode() {
+            isDarkMode = !isDarkMode;
+            const html = document.documentElement;
+            const icon = document.getElementById('dark-icon');
+            
+            // Select the buttons in the top-left group
+            const overlayBtns = document.querySelectorAll('.absolute.top-4.left-4 button');
+
+            if (isDarkMode) {
+                html.classList.add('dark');
+                icon.classList.remove('fa-moon');
+                icon.classList.add('fa-sun');
+                
+                // Switch buttons to Dark Mode style
+                overlayBtns.forEach(btn => {
+                    btn.className = "bg-slate-700/80 hover:bg-slate-600 text-white backdrop-blur-sm border border-slate-500/50 px-3 py-1.5 rounded text-xs font-bold transition";
+                });
+            } else {
+                html.classList.remove('dark');
+                icon.classList.remove('fa-sun');
+                icon.classList.add('fa-moon');
+                
+                // Switch buttons to Light Mode style
+                overlayBtns.forEach(btn => {
+                    btn.className = "bg-gray-100/80 hover:bg-gray-200/80 text-gray-900 backdrop-blur-sm border border-gray-300/50 px-3 py-1.5 rounded text-xs font-bold transition";
+                });
+            }
+            
+            // Update 3D Scene Background
+            if (scene) {
+                scene.background = new THREE.Color(isDarkMode ? 0x111827 : 0xffffff);
+                const grid = scene.children.find(c => c.type === 'GridHelper');
+                if(grid) {
+                    scene.remove(grid);
+                    const c1 = isDarkMode ? 0x475569 : 0x94a3b8;
+                    const c2 = isDarkMode ? 0x1e293b : 0xe2e8f0;
+                    const newGrid = new THREE.GridHelper(2000, 50, c1, c2);
+                    newGrid.position.y = 0;
+                    scene.add(newGrid);
+                }
+            }
+            
+            updateApp();
+        }
+        
+        function toggleSidebar() {
+            const sb = document.getElementById('sidebar');
+            if (sb.classList.contains('-translate-x-full')) {
+                sb.classList.remove('-translate-x-full', 'w-0', 'p-0', 'overflow-hidden');
+                sb.classList.add('translate-x-0', 'w-96');
+            } else {
+                sb.classList.add('-translate-x-full', 'w-0', 'p-0', 'overflow-hidden');
+                sb.classList.remove('translate-x-0', 'w-96');
+            }
+            setTimeout(onWindowResize, 350); // Resize 3D canvas after transition
+        }
+        // --- INSERT this function in the script section ---
+        function importRegularToCustom() {
+            // Read Regular Config
+            const b = parseFloat(document.getElementById('col_b').value);
+            const h = parseFloat(document.getElementById('col_h').value);
+            const cover = parseFloat(document.getElementById('col_cover').value) || 4.0;
+            const nx = parseInt(document.getElementById('nx_bars').value);
+            const ny = parseInt(document.getElementById('ny_bars').value);
+            const Ab_bar = parseFloat(document.getElementById('bar_size').value);
+            const db = Math.sqrt(Ab_bar * 4 / Math.PI);
+            
+            const tbody = document.querySelector('#table-rebar tbody');
+            tbody.innerHTML = ''; // Clear table first
+
+            const d_center = cover + 1.27/2; 
+            
+            // Use temp buffer to avoid triggering updateApp 50 times
+            const newRows = [];
+
+            // Top/Bot
+            for(let i=0; i<nx; i++) {
+                const x = -b/2 + d_center + i * (b - 2*d_center) / (nx - 1);
+                newRows.push({x: x, y: h/2 - d_center, db: db});
+                newRows.push({x: x, y: -h/2 + d_center, db: db});
+            }
+            // Sides
+            if (ny > 2) {
+                for(let j=1; j<ny-1; j++) {
+                    const y = h/2 - d_center - j * (h - 2*d_center) / (ny - 1);
+                    newRows.push({x: -b/2 + d_center, y: y, db: db});
+                    newRows.push({x: b/2 - d_center, y: y, db: db});
+                }
+            }
+
+            // Create rows efficiently
+            const clean = (val) => parseFloat(Number(val).toFixed(2));
+            let html = '';
+            newRows.forEach(bar => {
+                html += `<tr>
+                    <td><input type="number" step="0.1" value="${clean(bar.x)}" oninput="updateApp()"></td>
+                    <td><input type="number" step="0.1" value="${clean(bar.y)}" oninput="updateApp()"></td>
+                    <td><input type="number" step="0.01" value="${clean(bar.db)}" oninput="updateApp()"></td>
+                    <td class="text-center"><i class="fa-solid fa-xmark btn-icon" onclick="removeRow(this)"></i></td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+            updateApp();
+        }
+        function parseLoads() {
+            const raw = document.getElementById('paste_loads').value;
+            if(!raw) return;
+            const rows = raw.trim().split(/\r?\n/);
+            const tbody = document.querySelector('#table-loads tbody');
+            tbody.innerHTML = ''; // Clear existing
+            rows.forEach(r => {
+                const cols = r.trim().split(/\t|\s+/); // Split by tab or space
+                if(cols.length >= 3) {
+                    addLoadRow(parseFloat(cols[0]), parseFloat(cols[1]), parseFloat(cols[2]));
+                }
+            });
+            document.getElementById('paste_loads').value = '';
+            updateApp();
+        }
+
+        function parseCustomRebar() {
+            const raw = document.getElementById('paste_rebar').value;
+            if(!raw) return;
+            const rows = raw.trim().split(/\r?\n/);
+            const tbody = document.querySelector('#table-rebar tbody');
+            tbody.innerHTML = '';
+            rows.forEach(r => {
+                const cols = r.trim().split(/\t|\s+/);
+                if(cols.length >= 3) {
+                    addRebarRow(parseFloat(cols[0]), parseFloat(cols[1]), parseFloat(cols[2]));
+                }
+            });
+            document.getElementById('paste_rebar').value = '';
+            updateApp();
+        }
+
+        function toggleRebarMode() {
+            const mode = document.querySelector('input[name="rebar_mode"]:checked').value;
+            if(mode === 'regular') {
+                document.getElementById('rebar-regular').classList.remove('hidden');
+                document.getElementById('rebar-custom').classList.add('hidden');
+            } else {
+                document.getElementById('rebar-regular').classList.add('hidden');
+                document.getElementById('rebar-custom').classList.remove('hidden');
+            }
+            updateApp();
+        }
+
+        // --- Table Management ---
+        function addRebarRow(x=25, y=25, db=2.54) {
+            const tbody = document.querySelector('#table-rebar tbody');
+            const row = document.createElement('tr');
+            
+            // Helper: Clean number for display
+            const clean = (val) => parseFloat(Number(val).toFixed(2));
+
+            row.innerHTML = `
+                <td><input type="number" step="0.1" value="${clean(x)}" oninput="updateApp()"></td>
+                <td><input type="number" step="0.1" value="${clean(y)}" oninput="updateApp()"></td>
+                <td><input type="number" step="0.01" value="${clean(db)}" oninput="updateApp()"></td>
+                <td class="text-center"><i class="fa-solid fa-xmark btn-icon" onclick="removeRow(this)"></i></td>
+            `;
+            tbody.appendChild(row);
+            // Don't call updateApp here if called in a loop, caller handles it.
+            // But for button click, we need it. We'll leave it out here and ensure callers call it, 
+            // OR checks if it is a single add.
+            // Simplest: Call updateApp(). Performance hit is negligible for single clicks.
+            updateApp();
+        }
+
+        // --- REPLACE existing addLoadRow function ---
+        function addLoadRow(Pu=200, Mux=30, Muy=15) {
+            const tbody = document.querySelector('#table-loads tbody');
+            const row = document.createElement('tr');
+            
+            const clean = (val) => parseFloat(Number(val).toFixed(2));
+
+            row.innerHTML = `
+                <td><input type="number" step="1" value="${clean(Pu)}" class="text-red-700 font-bold" oninput="updateApp()"></td>
+                <td><input type="number" step="1" value="${clean(Mux)}" class="text-red-700 font-bold" oninput="updateApp()"></td>
+                <td><input type="number" step="1" value="${clean(Muy)}" class="text-red-700 font-bold" oninput="updateApp()"></td>
+                <td class="text-center"><i class="fa-solid fa-xmark btn-icon" onclick="removeRow(this)"></i></td>
+            `;
+            tbody.appendChild(row);
+            updateApp(); 
+        }
+
+        function removeRow(btn) {
+            btn.closest('tr').remove();
+            updateApp();
+        }
+
+        // Initialize Tables with Default Data
+        function initTables() {
+            addRebarRow(25, 25, 2.54);
+            addRebarRow(-25, 25, 2.54);
+            addRebarRow(25, -25, 2.54);
+            addRebarRow(-25, -25, 2.54);
+            
+            addLoadRow(200, 30, 15, 0);
+        }
+        
+        // --- 2. INITIALIZATION ---
+        function init() {
+            const container = document.getElementById('container-3d');
+            const w = container.clientWidth;
+            const h = container.clientHeight;
+
+            // Scene Setup (WHITE BACKGROUND)
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(isDarkMode ? 0x111827 : 0xffffff);
+            
+            // Grid Helper (Floor) - Dark gray for visibility
+            const gridHelper = new THREE.GridHelper(2000, 50, 0x94a3b8, 0xe2e8f0);
+            gridHelper.position.y = 0; 
+            scene.add(gridHelper);
+
+            // Axes Helper
+            // --- REPLACED: Axes Helper with Arrows ---
+            const origin = new THREE.Vector3(0, 0, 0);
+            const len = 36;
+            const headLen = 24;
+            const headWidth = 12;
+
+            // X Axis Arrow (Red)
+            const arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), origin, 350, 0xdc2626, headLen, headWidth);
+            scene.add(arrowX);
+
+            // Y Axis Arrow (Green) - Taller for Axial
+            const arrowY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), origin, 700, 0x15803d, headLen, headWidth);
+            scene.add(arrowY);
+
+            // Z Axis Arrow (Blue)
+            const arrowZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), origin, 350, 0x1d4ed8, headLen, headWidth);
+            scene.add(arrowZ);
+            scene.add(loadPointsGroup);
+            
+            // INSERT THIS LINE HERE:
+            scene.add(limitGroup);
+
+            // --- MODIFIED: Labels for Axes ---
+            // Adjusted coordinates to sit at the tip of the arrows
+            addLabel("Mnx", 290, 16, 0, "#dc2626"); // Red
+            addLabel("Pn", 16, 670, 0, "#15803d");  // Dark Green
+            addLabel("Mny", 0, 16, 290, "#1d4ed8"); // Dark Blue
+
+            // Camera
+            camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 5000);
+            camera.position.set(1000, 1300, 1000);
+            camera.up.set(0, 1, 0); // Y is up (Axial P)
+
+            // Renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+            renderer.setSize(w, h);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+
+            // Controls
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+
+            // Lighting
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            dirLight.position.set(50, 200, 100);
+            scene.add(dirLight);
+
+            // Resize Listener
+            window.addEventListener('resize', onWindowResize, false);
+
+            // Start Animation Loop
+            animate();
+            
+            // Initial Calculation
+            initTables();
+            updateApp();
+        }
+
+        function onWindowResize() {
+            const container = document.getElementById('container-3d');
+            camera.aspect = container.clientWidth / container.clientHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        function addLabel(text, x, y, z, color) {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = 128; canvas.height = 64;
+            ctx.fillStyle = color;
+            ctx.font = "bold 40px Arial";
+            ctx.textAlign = "center";
+            ctx.fillText(text, 64, 45);
+            
+            const tex = new THREE.CanvasTexture(canvas);
+            const spriteMat = new THREE.SpriteMaterial({ map: tex });
+            const sprite = new THREE.Sprite(spriteMat);
+            sprite.position.set(x, y, z);
+            sprite.scale.set(40, 20, 1);
+            scene.add(sprite);
+        }
+
+        // --- 3. ENGINEERING CALCULATION LOGIC (Taiwan Code 112) ---
+        function calculateInteractionSurface() {
+            // 1. Get Inputs
+            const b = parseFloat(document.getElementById('col_b').value);
+            const h = parseFloat(document.getElementById('col_h').value);
+            const fc = parseFloat(document.getElementById('mat_fc').value);
+            const fy = parseFloat(document.getElementById('mat_fy').value);
+            const cover = parseFloat(document.getElementById('col_cover').value) || 4.0;
+            
+            // 2. Constants
+            const eps_cu = 0.003;       
+            const Es = 2.04 * 1000000;
+            const eps_y = fy / Es;
+            const beta1 = fc > 280 ? Math.max(0.65, 0.85 - 0.05 * (fc - 280) / 70) : 0.85;
+
+            // 3. Generate Rebar
+            let bars = [];
+            const isCustom = document.querySelector('input[name="rebar_mode"]:checked').value === 'custom';
+
+            if (isCustom) {
+                const rows = document.querySelectorAll('#table-rebar tbody tr');
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    const x = parseFloat(inputs[0].value);
+                    const y = parseFloat(inputs[1].value);
+                    const db = parseFloat(inputs[2].value);
+                    if(!isNaN(x) && !isNaN(y) && !isNaN(db) && db > 0) {
+                        const Ab = Math.PI * Math.pow(db/2, 2);
+                        bars.push({ x, y, Ab });
+                    }
+                });
+                if(bars.length === 0) bars.push({x:0, y:0, Ab:0});
+            } else {
+                const Ab_bar = parseFloat(document.getElementById('bar_size').value);
+                const nx = parseInt(document.getElementById('nx_bars').value);
+                const ny = parseInt(document.getElementById('ny_bars').value);
+                const d_center = cover + 1.27/2; 
+                
+                for(let i=0; i<nx; i++) {
+                    const x = -b/2 + d_center + i * (b - 2*d_center) / (nx - 1);
+                    bars.push({ x: x, y: h/2 - d_center, Ab: Ab_bar }); 
+                    bars.push({ x: x, y: -h/2 + d_center, Ab: Ab_bar }); 
+                }
+                if (ny > 2) {
+                    for(let j=1; j<ny-1; j++) {
+                        const y = h/2 - d_center - j * (h - 2*d_center) / (ny - 1);
+                        bars.push({ x: -b/2 + d_center, y: y, Ab: Ab_bar }); 
+                        bars.push({ x: b/2 - d_center, y: y, Ab: Ab_bar }); 
+                    }
+                }
+            }
+
+            // Concrete Fibers (30x30 grid for better angle accuracy)
+            const fibers = [];
+            const nxFib = 30, nyFib = 30; 
+            const dA = (b * h) / (nxFib * nyFib);
+            const dx = b / nxFib, dy = h / nyFib;
+            for(let i=0; i<nxFib; i++) {
+                for(let j=0; j<nyFib; j++) {
+                    fibers.push({
+                        x: -b/2 + (i + 0.5) * dx,
+                        y: -h/2 + (j + 0.5) * dy,
+                        dA: dA
+                    });
+                }
+            }
+
+            const Ag = b * h;
+            let Ast = 0; bars.forEach(b => Ast += b.Ab);
+            const Po_nominal = 0.85 * fc * (Ag - Ast) + fy * Ast;
+
+            // 4. Calculate 3D Interaction Surface (True Rotation)
+            const curves = [];
+            const numAngles = 72; // 5-degree steps
+            
+            // Generate c/d ratios
+            const c_ratios = [2.0, 1.2, 1.0];
+            for(let r=0.9; r>=0.1; r-=0.05) c_ratios.push(r);
+            c_ratios.push(0.001);
+
+            const corners = [ {x: b/2, y: h/2}, {x: b/2, y: -h/2}, {x: -b/2, y: h/2}, {x: -b/2, y: -h/2} ];
+
+            for (let i = 0; i < numAngles; i++) {
+                const theta = (i / numAngles) * Math.PI * 2;
+                const cosT = Math.cos(theta);
+                const sinT = Math.sin(theta);
+                const curvePoints = [];
+
+                let d_max_concrete = -Infinity; 
+                corners.forEach(p => {
+                    const d = p.x * cosT + p.y * sinT;
+                    if(d > d_max_concrete) d_max_concrete = d;
+                });
+
+                c_ratios.forEach(ratio => {
+                    const c = d_max_concrete * 2 * ratio; 
+                    if (c <= 0.001) return; 
+
+                    const dist_NA_ref = d_max_concrete - c; 
+                    let Pn = 0, Mnx = 0, Mny = 0, max_strain_t = 0;
+                    const dist_limit_comp = d_max_concrete - beta1 * c;
+
+                    // Concrete Integration
+                    fibers.forEach(fib => {
+                        const proj = fib.x * cosT + fib.y * sinT;
+                        if (proj > dist_limit_comp) {
+                            const force = 0.85 * fc * fib.dA;
+                            Pn += force;
+                            Mnx += force * fib.y; 
+                            Mny += force * fib.x; 
+                        }
+                    });
+
+                    // Steel Integration
+                    bars.forEach(bar => {
+                        const proj = bar.x * cosT + bar.y * sinT;
+                        const dist_from_NA = proj - dist_NA_ref;
+                        const strain = eps_cu * dist_from_NA / c;
+                        
+                        if (-strain > max_strain_t) max_strain_t = -strain;
+
+                        let fs = strain * Es;
+                        if (fs > fy) fs = fy;
+                        if (fs < -fy) fs = -fy;
+
+                        const force = fs * bar.Ab;
+                        Pn += force;
+                        Mnx += force * bar.y;
+                        Mny += force * bar.x;
+                    });
+
+                    if (Pn > -Ast * fy * 1.5) {
+                        let phi = 0.65;
+                        if (max_strain_t <= eps_y) phi = 0.65;
+                        else if (max_strain_t >= 0.005) phi = 0.90;
+                        else phi = 0.65 + 0.25 * (max_strain_t - eps_y) / (0.005 - eps_y);
+
+                        curvePoints.push({
+                            Pn: Pn, Mnx: Mnx, Mny: Mny, phi: phi,
+                            phiPn: phi * Pn, phiMnx: phi * Mnx, phiMny: phi * Mny
+                        });
+                    }
+                });
+
+                const Pnt = -Ast * fy;
+                curvePoints.push({ Pn: Pnt, Mnx: 0, Mny: 0, phi: 0.9, phiPn: 0.9*Pnt, phiMnx: 0, phiMny: 0 });
+                curvePoints.sort((a,b) => b.Pn - a.Pn);
+                curves.push(curvePoints);
+            }
+
+            return { curves, Po: Po_nominal };
+        }
+        
+        let nominalMesh; // Variable to hold the second mesh
+
+        function updateApp() {
+            // --- 0. Enforce Min/Max Limits (Strict Clamping) ---
+            const clamp = (id, min, max) => {
+                const el = document.getElementById(id);
+                let val = parseFloat(el.value);
+                if (isNaN(val)) val = min;
+                if (val < min) val = min;
+                if (max !== undefined && val > max) val = max;
+                // Update UI if changed (optional, but good for feedback)
+                // el.value = val; 
+                return val;
+            };
+
+            // Section Geometry
+            const b_clamped = clamp('col_b', 20);
+            const h_clamped = clamp('col_h', 20);
+            const cover_clamped = clamp('col_cover', 4.0, 15.0);
+            const lu_clamped = clamp('col_lu', 0.1);
+
+            // Materials
+            const fc_clamped = clamp('mat_fc', 140);
+            const fy_clamped = clamp('mat_fy', 2800);
+
+            // Rebar (Min Check Only here, Max geometry check happens in capInput below)
+            let nx_clamped = clamp('nx_bars', 2);
+            let ny_clamped = clamp('ny_bars', 2);
+
+            // Shear Design
+            const shear_db_clamped = clamp('shear_db', 1.0);
+            const shear_s_clamped = clamp('shear_s', 3.0);
+            
+            // Shear Legs Dynamic Max
+            // # Legs X-dir (vertical legs in section) cannot exceed # bars along Top/Bot (nx)
+            // # Legs Y-dir (horizontal legs in section) cannot exceed # bars along Side (ny)
+            const shear_nx_clamped = clamp('shear_nx', 2, nx_clamped);
+            const shear_ny_clamped = clamp('shear_ny', 2, ny_clamped);
+
+            // Write clamped shear values back to DOM to ensure calculations use valid data
+            // (Since existing code reads from DOM later in this function)
+            document.getElementById('shear_nx').value = shear_nx_clamped;
+            document.getElementById('shear_ny').value = shear_ny_clamped;
+            // Also write others that strictly affect safety
+            document.getElementById('col_cover').value = cover_clamped;
+
+            // --- 1. Cap Inputs (Regular Mode) to prevent physical overlap ---
+            const nxInput = document.getElementById('nx_bars');
+            const nyInput = document.getElementById('ny_bars');
+            const b_val = parseFloat(document.getElementById('col_b').value);
+            const h_val = parseFloat(document.getElementById('col_h').value);
+            const cv_val = parseFloat(document.getElementById('col_cover').value) || 4.0;
+            const ab_val = parseFloat(document.getElementById('bar_size').value);
+            const db_val = Math.sqrt(ab_val * 4 / Math.PI);
+            
+            const capInput = (inp, dim) => {
+                const minS = Math.max(1.5 * db_val, 4.0);
+                const tie = 1.27; 
+                const available = dim - 2*cv_val - 2*tie;
+                const maxN = Math.floor((available + minS) / (db_val + minS));
+                if(parseInt(inp.value) > maxN) inp.value = Math.max(2, maxN);
+            };
+            
+            const isCustom = document.querySelector('input[name="rebar_mode"]:checked').value === 'custom';
+            if(!isCustom) {
+                capInput(nxInput, b_val);
+                capInput(nyInput, h_val);
+            }
+
+            drawSection2D();
+            const data = calculateInteractionSurface();
+            
+            // Re-read clean inputs
+            const b = parseFloat(document.getElementById('col_b').value);
+            const h = parseFloat(document.getElementById('col_h').value);
+            const fc = parseFloat(document.getElementById('mat_fc').value);
+            const fy = parseFloat(document.getElementById('mat_fy').value);
+            const cover = parseFloat(document.getElementById('col_cover').value);
+
+            // --- 1. GLOBAL BOUNDS ---
+            let maxP_nominal = -Infinity, minP_nominal = Infinity;
+            let maxMnx = 0, maxMny = 0;
+
+            data.curves.forEach(curve => {
+                if(curve.length > 0) {
+                    if (curve[0].Pn > maxP_nominal) maxP_nominal = curve[0].Pn;
+                    if (curve[curve.length-1].Pn < minP_nominal) minP_nominal = curve[curve.length-1].Pn;
+                    curve.forEach(pt => {
+                        if(Math.abs(pt.Mnx) > maxMnx) maxMnx = Math.abs(pt.Mnx);
+                        if(Math.abs(pt.Mny) > maxMny) maxMny = Math.abs(pt.Mny);
+                    });
+                }
+            });
+
+            // Visual Scales
+            const maxM_global = Math.max(maxMnx, maxMny);
+            const TARGET_HEIGHT = 800; 
+            const TARGET_RADIUS = 320;
+            vizScales.p = maxP_nominal !== minP_nominal ? TARGET_HEIGHT / (maxP_nominal - minP_nominal) : 1;
+            vizScales.m = maxM_global > 0 ? TARGET_RADIUS / maxM_global : 1;
+
+            const phi_compression = 0.65;
+            const P_limit_design = 0.80 * phi_compression * data.Po; 
+            // --- Mesh Generation Function (Restored) ---
+            function createMesh(isDesignCurve, matColor, opacity, isWire) {
+                const levels = 80; 
+                const numAngles = data.curves.length; 
+                const vertices = [];
+                const indices = [];
+
+                let curMaxP;
+                if(isDesignCurve) curMaxP = P_limit_design;
+                else curMaxP = maxP_nominal;
+                
+                const stepP = (curMaxP - minP_nominal) / levels;
+
+                for(let i=0; i<=levels; i++) {
+                    const P_target = curMaxP - i * stepP;
+                    
+                    for(let j=0; j<numAngles; j++) {
+                        const curve = data.curves[j];
+                        let pt = { Mnx: 0, Mny: 0 }; 
+
+                        for(let k=0; k<curve.length-1; k++) {
+                            const p1 = isDesignCurve ? curve[k].phiPn : curve[k].Pn;
+                            const p2 = isDesignCurve ? curve[k+1].phiPn : curve[k+1].Pn;
+                            
+                            if ((P_target <= p1 && P_target >= p2) || (P_target >= p1 && P_target <= p2)) {
+                                if (Math.abs(p1 - p2) < 0.001) {
+                                    pt = curve[k];
+                                } else {
+                                    const r = (P_target - p1) / (p2 - p1);
+                                    const mnx1 = isDesignCurve ? curve[k].phiMnx : curve[k].Mnx;
+                                    const mnx2 = isDesignCurve ? curve[k+1].phiMnx : curve[k+1].Mnx;
+                                    const mny1 = isDesignCurve ? curve[k].phiMny : curve[k].Mny;
+                                    const mny2 = isDesignCurve ? curve[k+1].phiMny : curve[k+1].Mny;
+                                    
+                                    pt = {
+                                        Mnx: mnx1 + r * (mnx2 - mnx1),
+                                        Mny: mny1 + r * (mny2 - mny1)
+                                    };
+                                }
+                                break;
+                            }
+                        }
+                        
+                        const x = pt.Mnx * vizScales.m;
+                        const z = pt.Mny * vizScales.m;
+                        const y = (P_target - minP_nominal) * vizScales.p;
+
+                        vertices.push(x, y, z);
+                    }
+                }
+
+                // Indices
+                for(let i=0; i<levels; i++) {
+                    for(let j=0; j<numAngles; j++) {
+                        const nextJ = (j + 1) % numAngles;
+                        const row1 = i * numAngles;
+                        const row2 = (i + 1) * numAngles;
+                        indices.push(row1 + j, row2 + j, row1 + nextJ);
+                        indices.push(row1 + nextJ, row2 + j, row2 + nextJ);
+                    }
+                }
+                
+                // Cap Top
+                if (isDesignCurve) {
+                    const topY = (curMaxP - minP_nominal) * vizScales.p;
+                    const centerIndex = vertices.length / 3;
+                    vertices.push(0, topY, 0); 
+                    for(let j=0; j<numAngles; j++) {
+                        indices.push(centerIndex, j, (j + 1) % numAngles);
+                    }
+                }
+
+                const geometry = new THREE.BufferGeometry();
+                geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
+                geometry.setIndex(indices);
+                geometry.computeVertexNormals();
+
+                const mat = new THREE.MeshPhongMaterial({
+                    color: matColor,
+                    transparent: true, opacity: opacity,
+                    side: THREE.DoubleSide, shininess: 100, specular: 0x222222,
+                    wireframe: isWireframe || isWire, depthWrite: !isWire && opacity > 0.5 
+                });
+
+                const mesh = new THREE.Mesh(geometry, mat);
+                mesh.position.y = -(0 - minP_nominal) * vizScales.p;
+                return mesh;
+            }
+            
+            // Re-render Meshes
+            if(nominalMesh) scene.remove(nominalMesh);
+            
+            // Adjust mesh color for visibility
+            const meshCol = isDarkMode ? 0xcbd5e1 : 0x94a3b8; 
+            const wireCol = isDarkMode ? 0x94a3b8 : 0x64748b;
+
+            nominalMesh = createMesh(false, meshCol, 0.15, false); // Use new color var
+            const wireGeo = new THREE.WireframeGeometry(nominalMesh.geometry);
+            const wireMat = new THREE.LineBasicMaterial({ color: wireCol, transparent: true, opacity: 0.1 });
+            const wireObj = new THREE.LineSegments(wireGeo, wireMat);
+            nominalMesh.add(wireObj);
+            scene.add(nominalMesh);
+
+            if(pmnMesh) scene.remove(pmnMesh);
+            pmnMesh = createMesh(true, 0x06b6d4, 0.6, false);
+            scene.add(pmnMesh);
+
+            // --- LOAD CHECK ---
+            loadPointsGroup.clear();
+            const ptGeo = new THREE.SphereGeometry(9, 24, 24); 
+            const loadRows = document.querySelectorAll('#table-loads tbody tr');
+            
+            // Get Global Shear Inputs (BIAXIAL)
+            const Vux_global = parseFloat(document.getElementById('global_vux').value) || 0;
+            const Vuy_global = parseFloat(document.getElementById('global_vuy').value) || 0;
+            
+            // Detailing Inputs
+            const s_tie = parseFloat(document.getElementById('shear_s').value);
+            const db_tie = parseFloat(document.getElementById('shear_db').value);
+            const Av = Math.PI * Math.pow(db_tie/2, 2);
+            const nx_legs = parseFloat(document.getElementById('shear_nx').value);
+            const ny_legs = parseFloat(document.getElementById('shear_ny').value);
+            const isSeismic = document.getElementById('seismic_mode').checked;
+
+            let maxDemand = 0;
+            let criticalCase = { Pu: 0, Mux: 0, Muy: 0, Vu: 0 };
+            let shearFailure = false;
+
+            loadRows.forEach(row => {
+                const inputs = row.querySelectorAll('input');
+                const Pu = parseFloat(inputs[0].value) || 0;
+                let Mux = parseFloat(inputs[1].value) || 0;
+                let Muy = parseFloat(inputs[2].value) || 0;
+                // Get row specific shear if columns exist, otherwise global
+                const Vux = inputs.length > 3 ? parseFloat(inputs[3].value) : Vux_global;
+                const Vuy = inputs.length > 4 ? parseFloat(inputs[4].value) : Vuy_global;
+
+                // --- P-Delta Magnification ---
+                const Lu_m = parseFloat(document.getElementById('col_lu').value) || 0;
+                if(Lu_m > 0 && Pu > 0) {
+                    const Lu_cm = Lu_m * 100;
+                    const Ec = 15000 * Math.sqrt(fc);
+                    const k = 1.0; 
+                    const rx = 0.3 * h;
+                    if( (k*Lu_cm/rx) > 22 ) {
+                        const Igx = b * Math.pow(h,3) / 12;
+                        const Pcx = (Math.PI**2 * 0.4 * Ec * Igx) / (k*Lu_cm)**2;
+                        if(Pu*1000 < 0.75*Pcx) Mux *= Math.max(1.0, 1.0 / (1.0 - (Pu*1000)/(0.75*Pcx)));
+                    }
+                    const ry = 0.3 * b;
+                    if( (k*Lu_cm/ry) > 22 ) {
+                        const Igy = h * Math.pow(b,3) / 12;
+                        const Pcy = (Math.PI**2 * 0.4 * Ec * Igy) / (k*Lu_cm)**2;
+                        if(Pu*1000 < 0.75*Pcy) Muy *= Math.max(1.0, 1.0 / (1.0 - (Pu*1000)/(0.75*Pcy)));
+                    }
+                }
+
+                // --- P-M Check ---
+                let capM_radial = 0;
+                let loadM_radial = Math.sqrt(Mux*Mux + Muy*Muy);
+                let loadAngle = Math.atan2(Muy, Mux); 
+                if(loadAngle < 0) loadAngle += 2*Math.PI;
+
+                const numAngles = data.curves.length;
+                const stepAngle = (2*Math.PI) / numAngles;
+                const idx = Math.round(loadAngle / stepAngle) % numAngles;
+                const targetCurve = data.curves[idx];
+
+                if (Pu > P_limit_design || Pu < minP_nominal) {
+                    capM_radial = 0;
+                } else {
+                    for(let k=0; k<targetCurve.length-1; k++) {
+                        const p1 = targetCurve[k].phiPn;
+                        const p2 = targetCurve[k+1].phiPn;
+                        if ((Pu <= p1 && Pu >= p2) || (Pu >= p1 && Pu <= p2)) {
+                            const r = (Pu - p1)/(p2 - p1);
+                            const m1 = Math.sqrt(targetCurve[k].phiMnx**2 + targetCurve[k].phiMny**2);
+                            const m2 = Math.sqrt(targetCurve[k+1].phiMnx**2 + targetCurve[k+1].phiMny**2);
+                            capM_radial = m1 + r*(m2 - m1);
+                            break;
+                        }
+                    }
+                }
+
+                let demand = (Pu > P_limit_design || Pu < minP_nominal) ? 9.99 : (capM_radial > 0.1 ? loadM_radial / capM_radial : 0);
+
+                // --- Biaxial Shear Check ---
+                const Ag = b * h;
+                const Pu_kg = Pu * 1000;
+                
+                const calcPhiVn = (bw, d_depth, legs) => {
+                    let Vc_stress = 0.53 * Math.sqrt(fc) + (Pu_kg / (6 * Ag));
+                    if (isSeismic && Pu_kg < (Ag * fc) / 20) Vc_stress = 0;
+                    if (Vc_stress < 0) Vc_stress = 0;
+
+                    const Vc = Vc_stress * bw * d_depth / 1000;
+                    const Vs = (legs * Av * fy * d_depth) / s_tie / 1000;
+                    const Vs_max = 2.12 * Math.sqrt(fc) * bw * d_depth / 1000;
+                    return 0.75 * (Vc + Math.min(Vs, Vs_max));
+                };
+
+                const d_x = h - cover - 1.27; 
+                const phiVnx = calcPhiVn(b, d_x, ny_legs); // Legs across width b resist X shear
+                const d_y = b - cover - 1.27;
+                const phiVny = calcPhiVn(h, d_y, nx_legs); // Legs across depth h resist Y shear
+
+                const DCR_vux = Math.abs(Vux) / phiVnx;
+                const DCR_vuy = Math.abs(Vuy) / phiVny;
+
+                if (DCR_vux > 1.0 || DCR_vuy > 1.0) {
+                    demand = Math.max(demand, 9.99);
+                    shearFailure = true;
+                } else {
+                    demand = Math.max(demand, DCR_vux, DCR_vuy);
+                }
+
+                if (demand > maxDemand) {
+                    maxDemand = demand;
+                    criticalCase = { Pu, Mux, Muy, Vu: Math.max(Math.abs(Vux), Math.abs(Vuy)) };
+                }
+
+                const isPointSafe = demand <= 1.0;
+                const ptMat = new THREE.MeshStandardMaterial({ 
+                    color: isPointSafe ? 0xbf9000 : 0xff0000, 
+                    emissive: isPointSafe ? 0xbf9000 : 0xff0000, 
+                    emissiveIntensity: 0.6 
+                });
+                const ptMesh = new THREE.Mesh(ptGeo, ptMat);
+                ptMesh.position.set(Mux * vizScales.m, Pu * vizScales.p, Muy * vizScales.m);
+                loadPointsGroup.add(ptMesh);
+            });
+
+            // UI Updates
+            let globalMaxPhiMnx = 0, globalMaxPhiMny = 0;
+            data.curves.forEach(c => {
+                c.forEach(pt => {
+                    if (Math.abs(pt.phiMnx) > globalMaxPhiMnx) globalMaxPhiMnx = Math.abs(pt.phiMnx);
+                    if (Math.abs(pt.phiMny) > globalMaxPhiMny) globalMaxPhiMny = Math.abs(pt.phiMny);
+                });
+            });
+
+            document.getElementById('max_phi_pn').innerText = P_limit_design.toFixed(1);
+            document.getElementById('max_phi_mnx').innerText = globalMaxPhiMnx.toFixed(1);
+            document.getElementById('max_phi_mny').innerText = globalMaxPhiMny.toFixed(1);
+
+            document.getElementById('disp_pu').innerText = criticalCase.Pu.toFixed(1);
+            document.getElementById('disp_mux').innerText = criticalCase.Mux.toFixed(1);
+            document.getElementById('disp_muy').innerText = criticalCase.Muy.toFixed(1);
+            document.getElementById('dc-val').innerText = maxDemand.toFixed(2);
+            
+            const isSafe = maxDemand <= 1.0;
+            const bar = document.getElementById('dc-bar');
+            bar.style.width = Math.min(maxDemand * 100, 100) + "%";
+            bar.className = isSafe ? "h-4 rounded-full transition-all duration-500 bg-green-500" : "h-4 rounded-full transition-all duration-500 bg-red-500";
+            
+            const badge = document.getElementById('safety-msg');
+            if (shearFailure) {
+                badge.innerText = t('sts_shear'); // Uses "剪力破壞"
+                badge.className = "text-center text-xs font-bold mt-2 py-1 rounded bg-red-100 text-red-700";
+            } else {
+                badge.innerText = isSafe ? t('sts_safe') : t('sts_fail'); // Uses "安全 (SAFE)" or "破壞 (FAILURE)"
+                badge.className = isSafe ? "text-center text-xs font-bold mt-2 py-1 rounded bg-green-100 text-green-700" : "text-center text-xs font-bold mt-2 py-1 rounded bg-red-100 text-red-700";
+            }
+
+            draw3DLimits(data, P_limit_design, globalMaxPhiMnx, globalMaxPhiMny, criticalCase);
+            checkSpacingAndWarnings(b, h, cover, isCustom, data.rebarWarnings); 
+        }
+        
+        function checkSpacingAndWarnings(b, h, cover, isCustom, customWarnings = []) {
+            const warningsDiv = document.getElementById('code-warnings');
+            warningsDiv.innerHTML = "";
+            warningsDiv.classList.remove('hidden');
+            
+            if (isCustom && customWarnings && customWarnings.length > 0) {
+                 customWarnings.forEach(msg => {
+                    warningsDiv.innerHTML += `<div class="text-amber-700 font-bold border-b pb-1 mb-1 border-amber-300 bg-amber-50 p-1 rounded">⚠️ ${msg}</div>`;
+                 });
+            }
+
+            // Aspect Ratio Check
+            const ratio = Math.max(b, h) / Math.min(b, h);
+            if (ratio > 3.0) {
+                 warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">${t('w_aspect')} (1:${ratio.toFixed(1)})<br><span class="text-[9px]">${t('w_wall')}</span></div>`;
+            }
+
+            const isSeismic = document.getElementById('seismic_mode').checked;
+
+            // Minimum Eccentricity
+            const pu_val = parseFloat(document.getElementById('disp_pu').innerText) || 0;
+            const mux_val = parseFloat(document.getElementById('disp_mux').innerText) || 0;
+            const muy_val = parseFloat(document.getElementById('disp_muy').innerText) || 0;
+            
+            if (pu_val > 0) {
+                const e_min_x = (1.5 + 0.03 * h) / 100; 
+                const e_min_y = (1.5 + 0.03 * b) / 100;
+                const M_min_x = pu_val * e_min_x;
+                const M_min_y = pu_val * e_min_y;
+
+                if (Math.abs(mux_val) < M_min_x && Math.abs(muy_val) < M_min_y && (Math.abs(mux_val)+Math.abs(muy_val)) > 0.001) {
+                    warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">${t('w_small_ecc')}<br><span class="text-[9px]">${t('w_small_ecc_d')}</span></div>`;
+                }
+            }
+
+            // Rebar Ratio
+            let Ast_total = 0;
+            if (isCustom) {
+                const rows = document.querySelectorAll('#table-rebar tbody tr');
+                rows.forEach(row => {
+                   const inputs = row.querySelectorAll('input');
+                   const db = parseFloat(inputs[2].value);
+                   if(!isNaN(db)) Ast_total += Math.PI * Math.pow(db/2, 2);
+                });
+            } else {
+                const ab_val = parseFloat(document.getElementById('bar_size').value);
+                const nx = parseInt(document.getElementById('nx_bars').value);
+                const ny = parseInt(document.getElementById('ny_bars').value);
+                const count = (2 * nx) + Math.max(0, 2 * (ny - 2));
+                Ast_total = count * ab_val;
+            }
+            
+            const Ag = b * h;
+            const rho = Ast_total / Ag;
+            const rho_pct = (rho * 100).toFixed(2);
+            
+            if (rho < 0.01) {
+                warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">${t('w_low_rho')}: <b>${rho_pct}%</b> <span class="text-[9px]">${t('w_min_1')}</span></div>`;
+            } else if (rho > 0.08) {
+                warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">${t('w_high_rho')}: <b>${rho_pct}%</b> <span class="text-[9px]">${t('w_max_8')}</span></div>`;
+            } else if (rho > 0.04 && isSeismic) {
+                 warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">${t('w_high_seis')}: <b>${rho_pct}%</b> <span class="text-[9px]">${t('w_max_4')}</span></div>`;
+            } else {
+                 warningsDiv.innerHTML += `<div class="text-green-700 border-b pb-1 mb-1">${t('w_reinf_ratio')}: <b>${rho_pct}%</b></div>`;
+            }
+
+            // Tie Spacing & Ash
+            const s_tie = parseFloat(document.getElementById('shear_s').value);
+            const db_tie = parseFloat(document.getElementById('shear_db').value);
+            const leastDim = Math.min(b, h);
+            
+            let maxS = 0;
+            let rule = "";
+
+            if (isSeismic) {
+                const ab_val_main = parseFloat(document.getElementById('bar_size').value); // Approx maxDb for regular
+                const maxDb = Math.sqrt(ab_val_main * 4 / Math.PI); // Simplified logic
+                const limit1 = leastDim / 4;
+                const limit2 = 6 * maxDb;
+                maxS = Math.min(limit1, limit2, 15.0);
+                rule = t('rule_seismic');
+                
+                // Ash Check
+                const bc_x = b - 2*cover;
+                const bc_y = h - 2*cover;
+                const Ach = bc_x * bc_y;
+                const Ag_col = b * h;
+                const fyt = parseFloat(document.getElementById('mat_fy').value);
+                const fc = parseFloat(document.getElementById('mat_fc').value);
+                
+                const Av_bar = Math.PI * Math.pow(db_tie/2, 2);
+                const Ash_prov_x = parseFloat(document.getElementById('shear_ny').value) * Av_bar; 
+                const Ash_prov_y = parseFloat(document.getElementById('shear_nx').value) * Av_bar;
+                
+                const factor1 = 0.3 * (s_tie * bc_x * fc / fyt) * ((Ag_col / Ach) - 1);
+                const factor2 = 0.09 * (s_tie * bc_x * fc / fyt);
+                const Ash_req_x = Math.max(factor1, factor2);
+                
+                const factor1_y = 0.3 * (s_tie * bc_y * fc / fyt) * ((Ag_col / Ach) - 1);
+                const factor2_y = 0.09 * (s_tie * bc_y * fc / fyt);
+                const Ash_req_y = Math.max(factor1_y, factor2_y);
+
+                if (Ash_prov_x < Ash_req_x || Ash_prov_y < Ash_req_y) {
+                     warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">${t('w_insuff_ash')}<br><span class="text-[9px]">${t('w_need_legs')}</span></div>`;
+                }
+
+            } else {
+                const ab_val_main = parseFloat(document.getElementById('bar_size').value);
+                const maxDb = Math.sqrt(ab_val_main * 4 / Math.PI);
+                const limit1 = 16 * maxDb;
+                const limit2 = 48 * db_tie;
+                maxS = Math.min(limit1, limit2, leastDim);
+                rule = t('rule_gravity');
+            }
+
+            if (s_tie > maxS) {
+                warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">${t('w_bad_tie')}: <b>${s_tie} cm</b><br><span class="text-[9px]">${t('w_max_for')} ${rule}: <b>${maxS.toFixed(1)} cm</b></span></div>`;
+            } else {
+                warningsDiv.innerHTML += `<div class="text-green-700 border-b pb-1 mb-1">${t('w_tie_spacing')}: ${s_tie} cm<br><span class="text-[9px] text-gray-400">(${rule} ${t('val_ok')})</span></div>`;
+            }
+
+            if (s_tie < 7.5) {
+                 warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">${t('w_vert_gap')}<br><span class="text-[9px]"><b>${s_tie} cm</b> ${t('w_agg')}</span></div>`;
+            }
+
+            const nLegsX = parseFloat(document.getElementById('shear_nx').value);
+            const nLegsY = parseFloat(document.getElementById('shear_ny').value);
+            const core_width = b - 2*cover; 
+            const space_between_legs_x = nLegsX > 1 ? core_width / (nLegsX - 1) : core_width;
+            const core_depth = h - 2*cover;
+            const space_between_legs_y = nLegsY > 1 ? core_depth / (nLegsY - 1) : core_depth;
+            const MIN_LEG_SPACE = 7.5; 
+
+            if (nLegsX > 2 && space_between_legs_x < MIN_LEG_SPACE) {
+                warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">${t('w_x_cong')}<br><span class="text-[9px]">Gap: <b>${space_between_legs_x.toFixed(1)} cm</b>. ${t('w_vib')}</span></div>`;
+            }
+            if (nLegsY > 2 && space_between_legs_y < MIN_LEG_SPACE) {
+                warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">${t('w_y_cong')}<br><span class="text-[9px]">Gap: <b>${space_between_legs_y.toFixed(1)} cm</b>. ${t('w_vib')}</span></div>`;
+            }
+
+            const Lu = parseFloat(document.getElementById('col_lu').value) || 0;
+            if (Lu > 0) {
+                const r = 0.3 * h / 100; 
+                const kLu_r = (1.0 * Lu) / r;
+                if (kLu_r > 22) {
+                     warningsDiv.innerHTML += `<div class="text-amber-600 font-bold border-b pb-1 mb-1">${t('w_slender')} (kL/r=${kLu_r.toFixed(0)})</div><div class="text-[9px] text-amber-700 leading-tight">${t('w_mmag')}</div>`;
+                }
+            }
+            
+            if (warningsDiv.innerHTML === "") warningsDiv.classList.add('hidden');
+        }
+
+        function capRebarInput(inputElem, width, cover, db) {
+            const minS = Math.max(1.5 * db, 4.0);
+            const tie = 1.27;
+            const available = width - 2*cover - 2*tie;
+            // Width = n*db + (n-1)*minS
+            // Width = n(db + minS) - minS
+            // n = (Width + minS) / (db + minS)
+            const maxN = Math.floor((available + minS) / (db + minS));
+            
+            if(parseInt(inputElem.value) > maxN) {
+                inputElem.value = Math.max(2, maxN);
+            }
+        }
+
+        // --- 5. 2D SECTION DRAWER ---
+        function drawSection2D() {
+            const canvas = document.getElementById('section-canvas');
+            const ctx = canvas.getContext('2d');
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            const col_b = parseFloat(document.getElementById('col_b').value);
+            const col_depth = parseFloat(document.getElementById('col_h').value);
+            const cover = parseFloat(document.getElementById('col_cover').value) || 4.0;
+
+            ctx.clearRect(0, 0, w, h);
+            
+            // Scaling
+            const maxDim = Math.max(col_b, col_depth);
+            const padding = 20; 
+            const scale = (Math.min(w, h) - padding) / maxDim;
+            
+            const drawW = col_b * scale;
+            const drawH = col_depth * scale;
+            const ox = (w - drawW)/2;
+            const oy = (h - drawH)/2;
+
+            // 1. Draw Concrete Section
+            // Dynamic Colors based on mode
+            const bgCol = isDarkMode ? '#1e293b' : '#f0f9ff'; // Slate-800 vs Azure-50
+            const borderCol = isDarkMode ? '#94a3b8' : '#475569'; // Slate-400 vs Slate-600
+            
+            ctx.fillStyle = bgCol; 
+            ctx.fillRect(ox, oy, drawW, drawH);
+            ctx.strokeStyle = borderCol; 
+            ctx.lineWidth = 2;
+            ctx.strokeRect(ox, oy, drawW, drawH);
+
+            // 2. Draw Ties / Stirrups
+            const tieColor = isDarkMode ? '#f87171' : '#b91c1c'; // Lighter red for dark mode
+            const tieWidth = 1.5;
+            const coverPx = cover * scale;
+            
+            // Tie Dimensions
+            const tLeft = ox + coverPx;
+            const tTop = oy + coverPx;
+            const tW = drawW - 2*coverPx;
+            const tH = drawH - 2*coverPx;
+
+            ctx.strokeStyle = tieColor;
+            ctx.lineWidth = tieWidth;
+            ctx.lineJoin = 'round';
+
+            // --- A. Outer Hoop ---
+            ctx.beginPath();
+            ctx.rect(tLeft, tTop, tW, tH);
+            ctx.stroke();
+
+            // Hook Visuals (135 deg hooks at top-left corner for outer hoop)
+            const hookLen = 8; 
+            ctx.beginPath();
+            ctx.moveTo(tLeft + 2, tTop + 2); ctx.lineTo(tLeft + hookLen, tTop + hookLen); // Inward
+            ctx.moveTo(tLeft + 2, tTop + 2); ctx.lineTo(tLeft + 2, tTop + hookLen + 2); // Tail
+            ctx.stroke();
+
+            // --- B. Inner Crossties (Regular Mode Only) ---
+            const isCustom = document.querySelector('input[name="rebar_mode"]:checked').value === 'custom';
+            
+            if (!isCustom) {
+                const nx_bars = parseInt(document.getElementById('nx_bars').value);
+                const ny_bars = parseInt(document.getElementById('ny_bars').value);
+                
+                // Read Shear Legs (clamped to at least 2)
+                const nLegsX = Math.max(2, parseInt(document.getElementById('shear_nx').value)); // Vertical Legs
+                const nLegsY = Math.max(2, parseInt(document.getElementById('shear_ny').value)); // Horizontal Legs
+
+                ctx.beginPath();
+
+                // Draw Vertical Inner Legs (distributed along Width)
+                // We map leg indices (0 to nLegsX-1) to bar indices (0 to nx_bars-1)
+                if (nLegsX > 2 && nx_bars > 2) {
+                    for (let i = 1; i < nLegsX - 1; i++) {
+                        // Find closest bar index
+                        const barIdx = Math.round(i * (nx_bars - 1) / (nLegsX - 1));
+                        // Calc X position of that bar
+                        // Note: Rebar logic uses d_center = cover + db/2. Here we approximate to cover for the visual tie line.
+                        const xPos = tLeft + (barIdx * tW / (nx_bars - 1));
+                        
+                        // Draw vertical line
+                        ctx.moveTo(xPos, tTop);
+                        ctx.lineTo(xPos, tTop + tH);
+                        
+                        // Draw small hooks at ends (135 degree visual)
+                        ctx.moveTo(xPos, tTop); ctx.lineTo(xPos + 3, tTop + 6);
+                        ctx.moveTo(xPos, tTop + tH); ctx.lineTo(xPos - 3, tTop + tH - 6);
+                    }
+                }
+
+                // Draw Horizontal Inner Legs (distributed along Depth)
+                if (nLegsY > 2 && ny_bars > 2) {
+                    for (let i = 1; i < nLegsY - 1; i++) {
+                        const barIdx = Math.round(i * (ny_bars - 1) / (nLegsY - 1));
+                        const yPos = tTop + (barIdx * tH / (ny_bars - 1));
+                        
+                        // Draw horizontal line
+                        ctx.moveTo(tLeft, yPos);
+                        ctx.lineTo(tLeft + tW, yPos);
+
+                        // Draw small hooks
+                        ctx.moveTo(tLeft, yPos); ctx.lineTo(tLeft + 6, yPos + 3);
+                        ctx.moveTo(tLeft + tW, yPos); ctx.lineTo(tLeft + tW - 6, yPos - 3);
+                    }
+                }
+                ctx.stroke();
+            }
+
+            // 3. Draw Rebar Dots
+            ctx.fillStyle = '#dc2626'; // Bright Red
+            
+            // Helper to draw dot
+            function dot(rx, ry, area) {
+                const px = ox + (col_b/2 + rx) * scale;
+                const py = oy + (col_depth/2 - ry) * scale; 
+                const rad = Math.sqrt(area/Math.PI) * scale; 
+                ctx.beginPath();
+                ctx.arc(px, py, Math.max(rad, 1.5), 0, 2*Math.PI);
+                ctx.fill();
+            }
+
+            if(isCustom) {
+                const rows = document.querySelectorAll('#table-rebar tbody tr');
+                rows.forEach(row => {
+                    const inputs = row.querySelectorAll('input');
+                    const x = parseFloat(inputs[0].value) || 0;
+                    const y = parseFloat(inputs[1].value) || 0;
+                    const db = parseFloat(inputs[2].value) || 0;
+                    const area = Math.PI * Math.pow(db/2, 2);
+                    if(area > 0) dot(x, y, area);
+                });
+            } else {
+                const Ab_bar = parseFloat(document.getElementById('bar_size').value);
+                const nx = parseInt(document.getElementById('nx_bars').value);
+                const ny = parseInt(document.getElementById('ny_bars').value);
+                const d_center = cover + 1.27/2; 
+                
+                // Top/Bot
+                for(let i=0; i<nx; i++) {
+                    const x = -col_b/2 + d_center + i * (col_b - 2*d_center) / (nx - 1);
+                    dot(x, col_depth/2 - d_center, Ab_bar); 
+                    dot(x, -col_depth/2 + d_center, Ab_bar); 
+                }
+                // Sides
+                if (ny > 2) {
+                    for(let j=1; j<ny-1; j++) {
+                        const y = col_depth/2 - d_center - j * (col_depth - 2*d_center) / (ny - 1);
+                        dot(-col_b/2 + d_center, y, Ab_bar); 
+                        dot(col_b/2 - d_center, y, Ab_bar); 
+                    }
+                }
+            }
+
+            // 4. Draw Axes Labels
+            ctx.font = "bold 10px Arial";
+            ctx.fillStyle = "#64748b";
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+
+            // X Axis Arrow
+            ctx.beginPath();
+            ctx.moveTo(ox + drawW/2, oy + drawH/2);
+            ctx.lineTo(ox + drawW/2 + 25, oy + drawH/2);
+            ctx.strokeStyle = "#dc2626"; // Red
+            ctx.stroke();
+            ctx.fillText("X", ox + drawW/2 + 32, oy + drawH/2);
+
+            // Y Axis Arrow
+            ctx.beginPath();
+            ctx.moveTo(ox + drawW/2, oy + drawH/2);
+            ctx.lineTo(ox + drawW/2, oy + drawH/2 - 25);
+            ctx.strokeStyle = "#1d4ed8"; // Blue
+            ctx.stroke();
+            ctx.fillText("Y", ox + drawW/2, oy + drawH/2 - 32);
+        }
+        
+        function toggleWireframe() {
+            isWireframe = !isWireframe;
+            if(pmnMesh) pmnMesh.material.wireframe = isWireframe;
+        }
+
+        // Start
+        init();
+        scene.add(limitGroup);
+
+        function draw3DLimits(data, maxPn, maxMnx, maxMny) {
+            limitGroup.clear();
+            
+            // Get Min P from the end of the first curve (all converge to pure tension)
+            const minP = data.curves[0][data.curves[0].length-1].phiPn;
+            
+            const yTop = (maxPn - minP) * vizScales.p;
+            const yBot = 0; 
+
+            // Compression Plane (Green)
+            const planeGeo = new THREE.PlaneGeometry(maxMnx * 2.2 * vizScales.m, maxMny * 2.2 * vizScales.m);
+            const planeTop = new THREE.Mesh(planeGeo, new THREE.MeshBasicMaterial({ color: 0x15803d, transparent: true, opacity: 0.15, side: THREE.DoubleSide }));
+            planeTop.rotation.x = -Math.PI / 2;
+            planeTop.position.set(0, yTop, 0);
+            limitGroup.add(planeTop);
+            addLabel3D(`ϕPn_max: ${maxPn.toFixed(1)}`, 0, yTop + 30, 0, "#15803d");
+
+            // Tension Plane (Red)
+            const planeBot = new THREE.Mesh(planeGeo, new THREE.MeshBasicMaterial({ color: 0xdc2626, transparent: true, opacity: 0.15, side: THREE.DoubleSide }));
+            planeBot.rotation.x = -Math.PI / 2;
+            planeBot.position.set(0, yBot, 0); 
+            limitGroup.add(planeBot);
+            addLabel3D(`ϕPn_min: ${minP.toFixed(1)}`, 0, yBot - 30, 0, "#dc2626");
+
+            // Moment Markers
+            const midY = yTop * 0.45;
+            const offset = 40; 
+
+            // X-Axis (Mnx)
+            const xDist = maxMnx * vizScales.m;
+            addLabel3D(`+ϕMnx: ${maxMnx.toFixed(1)}`, xDist + offset, midY, 0, "#dc2626");
+            addLabel3D(`-ϕMnx: ${maxMnx.toFixed(1)}`, -(xDist + offset), midY, 0, "#dc2626");
+
+            // Z-Axis (Mny)
+            const zDist = maxMny * vizScales.m;
+            addLabel3D(`+ϕMny: ${maxMny.toFixed(1)}`, 0, midY, zDist + offset, "#1d4ed8");
+            addLabel3D(`-ϕMny: ${maxMny.toFixed(1)}`, 0, midY, -(zDist + offset), "#1d4ed8");
+        }
+
+        function addLabel3D(text, x, y, z, colorStr) {
+            // Re-uses existing sprite logic or simplify
+            // For simplicity, just adding a small sprite at the corner of the plane
+            // ... implementation uses existing addLabel logic ...
+        }
+
+        // --- OPTIMIZATION LOGIC ---
+        async function runOptimization() {
+            const btn = document.querySelector('button[onclick="runOptimization()"]');
+            const status = document.getElementById('opt-status');
+            btn.disabled = true;
+            status.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${t('opt_run')}`;
+
+            // Get Locks
+            const locks = Array.from(document.querySelectorAll('.opt-lock:checked')).map(cb => cb.value);
+            const lockDim = locks.includes('dim');
+            const lockBar = locks.includes('bar');
+
+            let bestCost = Infinity;
+            let bestConfig = {};
+            
+            // Initial State
+            const initB = parseFloat(document.getElementById('col_b').value);
+            const initH = parseFloat(document.getElementById('col_h').value);
+            const initNx = parseInt(document.getElementById('nx_bars').value);
+            
+            // Simple Hill Climbing / Random Walk
+            for(let i=0; i<50; i++) {
+                // Mutate
+                if(!lockDim) {
+                    // Try changing dims by 5cm increments
+                    const newB = Math.max(30, initB + (Math.floor(Math.random()*5)-2)*5);
+                    const newH = Math.max(30, initH + (Math.floor(Math.random()*5)-2)*5);
+                    document.getElementById('col_b').value = newB;
+                    document.getElementById('col_h').value = newH;
+                }
+                if(!lockBar) {
+                    // Try changing bars
+                    const newNx = Math.max(2, Math.min(8, initNx + (Math.floor(Math.random()*3)-1)));
+                    document.getElementById('nx_bars').value = newNx;
+                    document.getElementById('ny_bars').value = newNx; // Keep symmetry for simplicity
+                }
+
+                // Calculate
+                updateApp();
+                
+                // Read Results
+                const maxDC = parseFloat(document.getElementById('dc-val').innerText);
+                const b = parseFloat(document.getElementById('col_b').value);
+                const h = parseFloat(document.getElementById('col_h').value);
+                const nx = parseInt(document.getElementById('nx_bars').value);
+                
+                // Cost Function: Area + Penalty for D/C > 0.95
+                let cost = b * h;
+                if (maxDC > 0.95) cost *= 1000; // Penalty
+                
+                if (cost < bestCost && maxDC <= 0.95) {
+                    bestCost = cost;
+                    bestConfig = { b, h, nx };
+                }
+                
+                await new Promise(r => setTimeout(r, 10)); // Visual delay
+            }
+
+            // Set Best
+            if(bestConfig.b) {
+                document.getElementById('col_b').value = bestConfig.b;
+                document.getElementById('col_h').value = bestConfig.h;
+                document.getElementById('nx_bars').value = bestConfig.nx;
+                document.getElementById('ny_bars').value = bestConfig.nx;
+                updateApp();
+                status.innerText = t('opt_done');
+                status.className = "text-[10px] text-center text-green-600 font-bold h-3";
+            } else {
+                // Revert
+                document.getElementById('col_b').value = initB;
+                document.getElementById('col_h').value = initH;
+                document.getElementById('nx_bars').value = initNx;
+                updateApp();
+                status.innerText = t('opt_fail');
+                status.className = "text-[10px] text-center text-red-500 h-3";
+            }
+            btn.disabled = false;
+        }
+        // --- REPORT GENERATION ---
+        window.printReport = function() {
+            // 1. Gather Data
+            const getVal = (id) => document.getElementById(id).value;
+            const getText = (id) => document.getElementById(id).innerText;
+            
+            // Inputs
+            const I = {
+                b: getVal('col_b'), h: getVal('col_h'), cover: getVal('col_cover'),
+                fc: getVal('mat_fc'), fy: getVal('mat_fy'),
+                lu: getVal('col_lu'),
+                bar: getVal('bar_size'), nx: getVal('nx_bars'), ny: getVal('ny_bars'),
+                mode: document.querySelector('input[name="rebar_mode"]:checked').value,
+                
+                // Loads
+                Pu: getVal('global_vux') ? getText('disp_pu') : "-", 
+                Mux: getText('disp_mux'), Muy: getText('disp_muy'),
+                
+                // Shear
+                vux: document.getElementById('global_vux').value, 
+                vuy: document.getElementById('global_vuy').value,
+                s_tie: getVal('shear_s'), db_tie: getVal('shear_db'),
+                legs_x: getVal('shear_nx'), legs_y: getVal('shear_ny')
+            };
+
+            // Results
+            const R = {
+                dc: getText('dc-val'),
+                status: getText('safety-msg'),
+                phiPn: getText('max_phi_pn'),
+                phiMnx: getText('max_phi_mnx'),
+                phiMny: getText('max_phi_mny'),
+                warnings: document.getElementById('code-warnings').innerHTML
+            };
+
+            // 2. Capture Section Image
+            const canvas = document.getElementById('section-canvas');
+            const imgData = canvas.toDataURL("image/png");
+
+            // 3. Build HTML Report
+            const dateStr = new Date().toLocaleDateString();
+            
+            let html = `
+                <div class="rpt-header">
+                    <div>
+                        <h1 class="rpt-title">${t('rpt_title')}</h1>
+                        <p class="rpt-subtitle">${t('rpt_sub')}</p>
+                    </div>
+                    <div>${dateStr}</div>
+                </div>
+
+                <h3>${t('rpt_sec1')}</h3>
+                <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px;">
+                    <div style="flex: 0 0 150px; border: 1px solid #ccc; padding: 10px; text-align: center;">
+                        <img src="${imgData}" style="width: 100%; height: auto;">
+                        <p style="font-size: 8pt; color: #666; margin-top: 5px;">Section View</p>
+                    </div>
+                    <div style="flex: 1;">
+                        <table>
+                            <tr><th colspan="4">${t('rpt_geo_mat')}</th></tr>
+                            <tr>
+                                <td width="25%"><strong>${t('rpt_dim')}</strong></td>
+                                <td width="25%">${I.b} x ${I.h} cm</td>
+                                <td width="25%"><strong>${t('rpt_con')}</strong></td>
+                                <td width="25%">${I.fc} kgf/cm²</td>
+                            </tr>
+                            <tr>
+                                <td><strong>${t('rpt_cov')}</strong></td>
+                                <td>${I.cover} cm</td>
+                                <td><strong>${t('rpt_st')}</strong></td>
+                                <td>${I.fy} kgf/cm²</td>
+                            </tr>
+                            <tr>
+                                <td><strong>${t('rpt_len')}</strong></td>
+                                <td>${I.lu} m</td>
+                                <td><strong>${t('rpt_mod')}</strong></td>
+                                <td>${I.mode.toUpperCase()}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <table>
+                    <tr><th colspan="4">${t('rpt_reinf_det')}</th></tr>
+                    <tr>
+                        <td><strong>${t('rpt_main')}</strong></td>
+                        <td>${t('rpt_area')}: ${I.bar} cm²</td>
+                        <td><strong>${t('rpt_conf')}</strong></td>
+                        <td>${I.nx} x ${I.ny} ${t('rpt_bars')}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>${t('rpt_tie')}</strong></td>
+                        <td>D${(parseFloat(I.db_tie)*10).toFixed(0)} (d=${I.db_tie}cm)</td>
+                        <td><strong>${t('rpt_tie_sp')}</strong></td>
+                        <td>@ ${I.s_tie} cm</td>
+                    </tr>
+                     <tr>
+                        <td><strong>${t('rpt_legs')}</strong></td>
+                        <td colspan="3">X: ${I.legs_x} ${t('rpt_legs_d')} / Y: ${I.legs_y} ${t('rpt_legs_w')}</td>
+                    </tr>
+                </table>
+
+                <h3>${t('rpt_sec2')}</h3>
+                <table>
+                    <tr>
+                        <th>${t('rpt_param')}</th>
+                        <th>${t('rpt_app')}</th>
+                        <th>${t('rpt_lim')}</th>
+                        <th>${t('rpt_chk')}</th>
+                    </tr>
+                    <tr>
+                        <td><strong>${t('rpt_ax')}</strong></td>
+                        <td>${I.Pu} tf</td>
+                        <td>ϕPn(max) = ${R.phiPn} tf</td>
+                        <td rowspan="3" style="text-align:center; font-size:12pt;">
+                            <strong>${t('rpt_dc')}</strong><br>
+                            <span style="font-size: 16pt; color: ${parseFloat(R.dc) > 1 ? '#dc2626' : '#15803d'}">${R.dc}</span>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><strong>${t('rpt_mx')}</strong></td>
+                        <td>${I.Mux} tf-m</td>
+                        <td>ϕMnx(max) = ${R.phiMnx} tf-m</td>
+                    </tr>
+                    <tr>
+                        <td><strong>${t('rpt_my')}</strong></td>
+                        <td>${I.Muy} tf-m</td>
+                        <td>ϕMny(max) = ${R.phiMny} tf-m</td>
+                    </tr>
+                </table>
+                <div style="background: ${parseFloat(R.dc) > 1 ? '#fee2e2' : '#dcfce7'}; padding: 10px; border-radius: 4px; text-align: center; font-weight: bold; color: ${parseFloat(R.dc) > 1 ? '#991b1b' : '#166534'}; margin-bottom: 20px;">
+                    ${t('rpt_stat')}: ${R.status}
+                </div>
+
+                <h3>${t('rpt_sec3')}</h3>
+                <table>
+                    <tr>
+                        <th>${t('rpt_dir')}</th>
+                        <th>${t('rpt_dem')}</th>
+                        <th>${t('rpt_prov')}</th>
+                        <th>${t('rpt_cap_chk')}</th>
+                    </tr>
+                    <tr>
+                        <td><strong>${t('rpt_xdir')}</strong></td>
+                        <td>${I.vux} tf</td>
+                        <td>${I.legs_y} ${t('rpt_legs_w')}</td> <td>-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>${t('rpt_ydir')}</strong></td>
+                        <td>${I.vuy} tf</td>
+                         <td>${I.legs_x} ${t('rpt_legs_d')}</td>
+                        <td>-</td>
+                    </tr>
+                </table>
+
+                <h3>${t('rpt_sec4')}</h3>
+                <div style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px;">
+                    ${R.warnings || `<p style="color:#64748b; font-style:italic;">${t('rpt_no_warn')}</p>`}
+                </div>
+
+                <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 5px; font-size: 8pt; text-align: center; color: #888;">
+                    ${t('rpt_footer')} | ${new Date().getFullYear()}
+                </div>
+            `;
+
+            // 4. Inject and Print
+            const staging = document.getElementById('print-staging');
+            staging.innerHTML = html;
+            
+            // Allow images to render
+            setTimeout(() => {
+                window.print();
+            }, 500);
+        }
+    </script>
+</body>
