@@ -2164,21 +2164,51 @@
                 const Ag_col = b * h;
                 const fyt = parseFloat(document.getElementById('mat_fy').value);
                 const fc = parseFloat(document.getElementById('mat_fc').value);
-                
                 const Av_bar = Math.PI * Math.pow(db_tie/2, 2);
-                const Ash_prov_x = parseFloat(document.getElementById('shear_ny').value) * Av_bar; 
-                const Ash_prov_y = parseFloat(document.getElementById('shear_nx').value) * Av_bar;
-                
-                const factor1 = 0.3 * (s_tie * bc_x * fc / fyt) * ((Ag_col / Ach) - 1);
-                const factor2 = 0.09 * (s_tie * bc_x * fc / fyt);
-                const Ash_req_x = Math.max(factor1, factor2);
-                
-                const factor1_y = 0.3 * (s_tie * bc_y * fc / fyt) * ((Ag_col / Ach) - 1);
-                const factor2_y = 0.09 * (s_tie * bc_y * fc / fyt);
-                const Ash_req_y = Math.max(factor1_y, factor2_y);
 
-                if (Ash_prov_x < Ash_req_x || Ash_prov_y < Ash_req_y) {
-                     warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">${t('w_insuff_ash')}<br><span class="text-[9px]">${t('w_need_legs')}</span></div>`;
+                if (shape === 'circ') {
+                    // --- CIRCULAR: Volumetric Ratio Check (ρs) ---
+                    const D = b;
+                    const d_core = D - 2 * cover;
+                    const Ach = Math.PI * Math.pow(d_core/2, 2);
+                    const Ag_col = Math.PI * Math.pow(D/2, 2);
+
+                    // Provided Volumetric Ratio: ρs = 4 * Asp / (dc * s)
+                    const rho_s_prov = (4 * Av_bar) / (d_core * s_tie);
+
+                    // Required Ratio (Taiwan 112 / ACI 318)
+                    // 1. 0.45 * ((Ag/Ach) - 1) * (fc/fyt)
+                    // 2. 0.12 * (fc/fyt)
+                    const req1 = 0.45 * ((Ag_col / Ach) - 1) * (fc / fyt);
+                    const req2 = 0.12 * (fc / fyt);
+                    const rho_s_req = Math.max(req1, req2);
+
+                    if (rho_s_prov < rho_s_req) {
+                         const def_pct = ((rho_s_req - rho_s_prov)/rho_s_req * 100).toFixed(0);
+                         warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">⚠️ Low Spiral Ratio ρs<br><span class="text-[9px]">Prov: ${(rho_s_prov*100).toFixed(2)}% < Req: ${(rho_s_req*100).toFixed(2)}%</span></div>`;
+                    }
+
+                } else {
+                    // --- RECTANGULAR: Ash Check (Existing Logic) ---
+                    const bc_x = b - 2*cover;
+                    const bc_y = h - 2*cover;
+                    const Ach = bc_x * bc_y;
+                    const Ag_col = b * h;
+                    
+                    const Ash_prov_x = parseFloat(document.getElementById('shear_ny').value) * Av_bar; 
+                    const Ash_prov_y = parseFloat(document.getElementById('shear_nx').value) * Av_bar;
+                    
+                    const factor1 = 0.3 * (s_tie * bc_x * fc / fyt) * ((Ag_col / Ach) - 1);
+                    const factor2 = 0.09 * (s_tie * bc_x * fc / fyt);
+                    const Ash_req_x = Math.max(factor1, factor2);
+                    
+                    const factor1_y = 0.3 * (s_tie * bc_y * fc / fyt) * ((Ag_col / Ach) - 1);
+                    const factor2_y = 0.09 * (s_tie * bc_y * fc / fyt);
+                    const Ash_req_y = Math.max(factor1_y, factor2_y);
+
+                    if (Ash_prov_x < Ash_req_x || Ash_prov_y < Ash_req_y) {
+                         warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">${t('w_insuff_ash')}<br><span class="text-[9px]">${t('w_need_legs')}</span></div>`;
+                    }
                 }
 
             } else {
@@ -2300,8 +2330,10 @@
             // Visual offset for tie
             const tLeft = ox + (cover * scale);
             const tTop = oy + (cover * scale);
-            const tW = drawW - 2*(cover * scale);
-            const tH = drawH - 2*(cover * scale);
+            
+            // MODIFIED: Clamp values to 0 to prevent negative radius crash
+            const tW = Math.max(0, drawW - 2*(cover * scale));
+            const tH = Math.max(0, drawH - 2*(cover * scale));
 
             ctx.strokeStyle = tieColor;
             ctx.lineWidth = 1.5;
@@ -2390,7 +2422,10 @@
                     const n_legs = parseInt(document.getElementById('shear_legs_circ').value) || 2;
                     
                     const d_cen_draw = cover + db_tie + (db_main / 2);
-                    const r_draw = ((col_b/2) - d_cen_draw) * scale;
+                    
+                    // MODIFIED: Clamp radius to 0 to prevent negative values
+                    const r_draw = Math.max(0, ((col_b/2) - d_cen_draw) * scale);
+                    
                     const cx = ox + drawW/2;
                     const cy = oy + drawH/2;
                     
@@ -2671,23 +2706,26 @@
             
             // Inputs
             const I = {
-                // ADD: Capture Shape and Circular Legs
                 shape: getVal('col_shape'),
                 legs_circ: getVal('shear_legs_circ'),
 
                 b: getVal('col_b'), h: getVal('col_h'), cover: getVal('col_cover'),
                 fc: getVal('mat_fc'), fy: getVal('mat_fy'),
                 lu: getVal('col_lu'),
+                
+                // REVISED: Robust Bar Capture
                 bar: getVal('bar_size'), 
                 bar_text: document.getElementById('bar_size').options[document.getElementById('bar_size').selectedIndex].text,
                 nx: getVal('nx_bars'), ny: getVal('ny_bars'), n_circ: getVal('n_circ_bars'),
+                
                 mode: document.querySelector('input[name="rebar_mode"]:checked').value,
+                
+                // Count custom bars if needed
+                custom_count: document.querySelectorAll('#table-rebar tbody tr').length,
 
-                // Loads
+                // ... (rest of loads and shear inputs) ...
                 Pu: getVal('global_vux') ? getText('disp_pu') : "-", 
                 Mux: getText('disp_mux'), Muy: getText('disp_muy'),
-                
-                // Shear
                 vux: document.getElementById('global_vux').value, 
                 vuy: document.getElementById('global_vuy').value,
                 s_tie: getVal('shear_s'), db_tie: getVal('shear_db'),
@@ -2754,10 +2792,15 @@
                 dimDisplay = `${I.b} x ${I.h} cm`;
             }
             let confDisplay = "";
-            if (I.shape === 'circ') {
-                confDisplay = `${I.n_circ} ${t('rpt_bars')}`; // e.g. "8 Bars"
+            if (I.mode === 'custom') {
+                confDisplay = `${t('lbl_cust')} (${I.custom_count} ${t('rpt_bars')})`;
             } else {
-                confDisplay = `${I.nx} x ${I.ny} ${t('rpt_bars')}`; // e.g. "4 x 4 Bars"
+                if (I.shape === 'circ') {
+                    // Fallback to "0" if undefined to prevent "undefined Bars"
+                    confDisplay = `${I.n_circ || 0} ${t('rpt_bars')}`; 
+                } else {
+                    confDisplay = `${I.nx} x ${I.ny} ${t('rpt_bars')}`;
+                }
             }
             // 4. Build HTML Report
             let html = `
