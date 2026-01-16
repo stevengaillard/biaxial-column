@@ -217,22 +217,36 @@
         </div>
     </div>
 
+    <!-- Main Content Container (Flex Row: Sidebar Left, 3D Right) -->
     <div class="flex flex-1 overflow-hidden relative">
         
+        <!-- Sidebar -->
         <div id="sidebar" class="w-96 bg-white border-r border-gray-200 overflow-y-auto flex-shrink-0 z-40 shadow-md transition-all duration-300 ease-in-out transform translate-x-0">
             <div class="p-4 space-y-6">
+                <!-- 1. Section Geometry -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_geo">1. Section Geometry</h3>
+                    
+                    <!-- Shape Selector -->
+                    <div class="mb-2">
+                        <label class="text-xs font-bold text-gray-500 block mb-1" data-i18n="lbl_shape">Section Shape</label>
+                        <select id="col_shape" class="w-full border border-gray-300 rounded p-1.5 text-sm" onchange="toggleShapeInputs()">
+                            <option value="rect" data-i18n="opt_rect">Rectangular</option>
+                            <option value="circ" data-i18n="opt_circ">Circular</option>
+                        </select>
+                    </div>
+
                     <div class="grid grid-cols-2 gap-3">
                         <div class="input-group">
-                            <label data-i18n="lbl_width">Width b (cm)</label>
+                            <label id="lbl_dim1" data-i18n="lbl_width">Width b (cm)</label>
                             <input type="number" id="col_b" value="60" min="20" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm focus:ring-2 focus:ring-eng-primary outline-none" oninput="updateApp()">
                         </div>
-                        <div class="input-group">
+                        <div id="div_dim2" class="input-group">
                             <label data-i18n="lbl_depth">Depth h (cm)</label>
                             <input type="number" id="col_h" value="60" min="20" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm focus:ring-2 focus:ring-eng-primary outline-none" oninput="updateApp()">
                         </div>
                     </div>
+
                     <div class="input-group mt-2">
                         <label data-i18n="lbl_cover">Clear Cover (cm)</label>
                         <input type="number" id="col_cover" value="4.0" min="4.0" max="15.0" step="0.1" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm focus:ring-2 focus:ring-eng-primary outline-none" oninput="updateApp()">
@@ -243,6 +257,7 @@
                     </div>
                 </div>
 
+                <!-- 2. Materials -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_mat">2. Materials</h3>
                     <div class="grid grid-cols-2 gap-3">
@@ -257,6 +272,7 @@
                     </div>
                 </div>
 
+                <!-- 3. Reinforcement -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_rebar">3. Reinforcement</h3>
                     
@@ -280,13 +296,17 @@
                             </select>
                         </div>
                         <div class="grid grid-cols-2 gap-3">
-                            <div class="input-group">
+                            <div class="input-group" id="lbl_nx_container">
                                 <label data-i18n="lbl_nx">Top/Bot (nx)</label>
                                 <input type="number" id="nx_bars" value="4" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
                             </div>
-                            <div class="input-group">
+                            <div class="input-group" id="lbl_ny_container">
                                 <label data-i18n="lbl_ny">Side (ny)</label>
                                 <input type="number" id="ny_bars" value="4" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                            </div>
+                            <div class="input-group hidden col-span-2" id="lbl_ntotal_container">
+                                <label data-i18n="lbl_n_total">Total Bars (n)</label>
+                                <input type="number" id="n_circ_bars" value="8" min="4" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
                             </div>
                         </div>
                     </div>
@@ -319,6 +339,7 @@
                     </div>
                 </div>
 
+                <!-- 4. Loads -->
                 <div class="space-y-3 bg-gray-50 p-3 rounded border border-gray-200">
                     <div class="flex justify-between items-center border-b pb-1 border-red-200">
                         <h3 class="text-sm font-bold text-red-600" data-i18n="sec_loads">4. Factored Loads</h3>
@@ -359,6 +380,7 @@
                     </button>
                 </div>
                 
+                <!-- 5. Shear -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_shear">5. Shear Design (Vu)</h3>
                     <div class="mb-2 mt-1">
@@ -368,23 +390,29 @@
                         </label>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
-                        <div class="input-group">
-                            <label data-i18n="lbl_tie_db">Tie Diameter db (cm)</label>
-                            <input type="number" id="shear_db" value="1.3" min="1.0" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                            <div class="input-group">
+                                <label data-i18n="lbl_tie_db">Tie Diameter db (cm)</label>
+                                <input type="number" id="shear_db" value="1.3" min="1.0" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                            </div>
+                            <div class="input-group">
+                                <label data-i18n="lbl_tie_s">Tie Spacing s (cm)</label>
+                                <input type="number" id="shear_s" value="10" min="3.0" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                            </div>
+                            
+                            <div class="input-group shear-rect">
+                                <label data-i18n="lbl_leg_x"># Legs X-dir</label>
+                                <input type="number" id="shear_nx" value="2" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                            </div>
+                            <div class="input-group shear-rect">
+                                <label data-i18n="lbl_leg_y"># Legs Y-dir</label>
+                                <input type="number" id="shear_ny" value="2" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                            </div>
+
+                            <div class="input-group shear-circ hidden col-span-2">
+                                <label data-i18n="lbl_legs_circ">Shear Legs (Total)</label>
+                                <input type="number" id="shear_legs_circ" value="2" min="2" step="1" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
+                            </div>
                         </div>
-                        <div class="input-group">
-                            <label data-i18n="lbl_tie_s">Tie Spacing s (cm)</label>
-                            <input type="number" id="shear_s" value="10" min="3.0" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
-                        </div>
-                        <div class="input-group">
-                            <label data-i18n="lbl_leg_x"># Legs X-dir</label>
-                            <input type="number" id="shear_nx" value="2" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
-                        </div>
-                        <div class="input-group">
-                            <label data-i18n="lbl_leg_y"># Legs Y-dir</label>
-                            <input type="number" id="shear_ny" value="2" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
-                        </div>
-                    </div>
                 </div>
                 
                 <div class="pt-4 border-t border-gray-200 mt-4 space-y-2">
@@ -400,7 +428,17 @@
             </div>
         </div>
 
+        <!-- 3D Visualization Area -->
         <div class="flex-1 flex flex-col min-w-0 bg-white relative">
+            <div class="absolute top-4 left-4 z-10 flex gap-2">
+                <button onclick="toggleWireframe()" class="bg-gray-100/80 hover:bg-gray-200/80 text-gray-700 backdrop-blur-sm border border-gray-300 px-3 py-1.5 rounded text-xs font-bold transition">
+                    <i class="fa-solid fa-border-all mr-2"></i><span data-i18n="btn_wireframe">Wireframe</span>
+                </button>
+                <button onclick="toggleDarkMode()" class="bg-gray-100/80 hover:bg-gray-200/80 text-gray-700 backdrop-blur-sm border border-gray-300 px-3 py-1.5 rounded text-xs font-bold transition">
+                    <i id="dark-icon" class="fa-solid fa-moon"></i>
+                </button>
+            </div>
+
             <div id="container-3d" class="flex-1 w-full h-full cursor-move"></div>
 
             <!-- Legend / Overlay -->
@@ -608,20 +646,29 @@
                     status: document.getElementById('safety-msg').innerText
                 },
                 fullData: {
-                     // Save all inputs needed to restore
-                     col_b: document.getElementById('col_b').value,
-                     col_h: document.getElementById('col_h').value,
-                     col_cover: document.getElementById('col_cover').value,
-                     mat_fc: document.getElementById('mat_fc').value,
-                     mat_fy: document.getElementById('mat_fy').value,
-                     col_lu: document.getElementById('col_lu').value,
-                     bar_size: document.getElementById('bar_size').value,
-                     nx_bars: document.getElementById('nx_bars').value,
-                     ny_bars: document.getElementById('ny_bars').value,
-                     shear_s: document.getElementById('shear_s').value,
-                     shear_db: document.getElementById('shear_db').value,
-                     shear_nx: document.getElementById('shear_nx').value,
-                     shear_ny: document.getElementById('shear_ny').value
+                      // ... existing inputs ...
+                      col_b: document.getElementById('col_b').value,
+                      col_h: document.getElementById('col_h').value,
+                      col_shape: document.getElementById('col_shape').value, // Added: Save Shape (Rect/Circ)
+                      col_cover: document.getElementById('col_cover').value,
+                      mat_fc: document.getElementById('mat_fc').value,
+                      mat_fy: document.getElementById('mat_fy').value,
+                      col_lu: document.getElementById('col_lu').value,
+                      bar_size: document.getElementById('bar_size').value,
+                      
+                      // Rectangular Inputs
+                      nx_bars: document.getElementById('nx_bars').value,
+                      ny_bars: document.getElementById('ny_bars').value,
+                      
+                      // ADD: Circular Main Bars "n" and "n ties" (legs)
+                      n_circ_bars: document.getElementById('n_circ_bars').value,
+                      shear_legs_circ: document.getElementById('shear_legs_circ').value,
+
+                      // Shear Inputs
+                      shear_s: document.getElementById('shear_s').value,
+                      shear_db: document.getElementById('shear_db').value,
+                      shear_nx: document.getElementById('shear_nx').value,
+                      shear_ny: document.getElementById('shear_ny').value
                 }
             };
 
@@ -633,6 +680,41 @@
                 console.error(e);
                 alert("Save failed.");
             }
+        }
+
+        function toggleShapeInputs() {
+            const shape = document.getElementById('col_shape').value;
+            const dim2 = document.getElementById('div_dim2');
+            const lbl1 = document.getElementById('lbl_dim1');
+            
+            // Toggle Shear Inputs
+            const rectShear = document.querySelectorAll('.shear-rect');
+            const circShear = document.querySelector('.shear-circ');
+
+            if (shape === 'circ') {
+                dim2.classList.add('hidden');
+                lbl1.innerText = currentLang === 'zh' ? "直徑 D (cm)" : "Diameter D (cm)";
+                
+                document.getElementById('lbl_nx_container').classList.add('hidden');
+                document.getElementById('lbl_ny_container').classList.add('hidden');
+                document.getElementById('lbl_ntotal_container').classList.remove('hidden');
+
+                // Shear Inputs
+                rectShear.forEach(el => el.classList.add('hidden'));
+                circShear.classList.remove('hidden');
+            } else {
+                dim2.classList.remove('hidden');
+                lbl1.innerText = t('lbl_width');
+                
+                document.getElementById('lbl_nx_container').classList.remove('hidden');
+                document.getElementById('lbl_ny_container').classList.remove('hidden');
+                document.getElementById('lbl_ntotal_container').classList.add('hidden');
+
+                // Shear Inputs
+                rectShear.forEach(el => el.classList.remove('hidden'));
+                circShear.classList.add('hidden');
+            }
+            updateApp();
         }
 
         function toggleHistoryModal() {
@@ -703,6 +785,10 @@
         const translations = {
             en: {
                 // UI Titles
+                lbl_shape: "Section Shape",
+                opt_rect: "Rectangular",
+                opt_circ: "Circular",
+                lbl_n_total: "Total Bars (n)",
                 modal_title: "Access Portal",
                 modal_desc: "Sign in to sync your data across devices.",
                 btn_login_submit: "Login",
@@ -769,6 +855,8 @@
                 lbl_seismic: "Seismic (Special Moment Frame)",
                 lbl_tie_db: "Tie Diameter db (cm)", lbl_tie_s: "Tie Spacing s (cm)",
                 lbl_leg_x: "# Legs X-dir", lbl_leg_y: "# Legs Y-dir",
+                lbl_legs_circ: "Shear Legs (Total)",
+                rpt_res: "Resultant",
 
                 // 3D Legend
                 leg_nom: "Nominal (Pn)", leg_des: "Design (ϕPn)",
@@ -823,6 +911,10 @@
                 opt_run: "Optimizing...", opt_done: "Done! Optimized.", opt_fail: "No better solution found."
             },
             zh: {
+                lbl_shape: "斷面形狀",
+                opt_rect: "矩形",
+                opt_circ: "圓形",
+                lbl_n_total: "總支數 (n)",
                 // 1. Auth / Login
                 btn_login: "登入",
                 btn_logout: "登出",
@@ -890,6 +982,8 @@
                 lbl_seismic: "耐震設計 (特殊抗彎構架)",
                 lbl_tie_db: "箍筋直徑 db (cm)", lbl_tie_s: "箍筋間距 s (cm)",
                 lbl_leg_x: "X向 肢數 (Legs)", lbl_leg_y: "Y向 肢數 (Legs)",
+                lbl_legs_circ: "剪力肢數 (總數)",
+                rpt_res: "合力 (Resultant)",
 
                 leg_nom: "標稱強度 (Pn)", leg_des: "設計強度 (ϕPn)",
                 tit_check: "安全檢核 (D/C Ratio)",
@@ -1031,37 +1125,58 @@
             }
             setTimeout(onWindowResize, 350); // Resize 3D canvas after transition
         }
-        // --- INSERT this function in the script section ---
+        
         function importRegularToCustom() {
-            // Read Regular Config
+            // Read Common Inputs
+            const shape = document.getElementById('col_shape').value;
             const b = parseFloat(document.getElementById('col_b').value);
             const h = parseFloat(document.getElementById('col_h').value);
             const cover = parseFloat(document.getElementById('col_cover').value) || 4.0;
-            const nx = parseInt(document.getElementById('nx_bars').value);
-            const ny = parseInt(document.getElementById('ny_bars').value);
+            
+            // Rebar params
             const Ab_bar = parseFloat(document.getElementById('bar_size').value);
             const db = Math.sqrt(Ab_bar * 4 / Math.PI);
+            const db_tie = parseFloat(document.getElementById('shear_db').value) || 1.3;
+            
+            // Accurate center distance (matches calculation logic)
+            const d_center = cover + db_tie + (db / 2); 
             
             const tbody = document.querySelector('#table-rebar tbody');
             tbody.innerHTML = ''; // Clear table first
-
-            const d_center = cover + 1.27/2; 
             
-            // Use temp buffer to avoid triggering updateApp 50 times
             const newRows = [];
 
-            // Top/Bot
-            for(let i=0; i<nx; i++) {
-                const x = -b/2 + d_center + i * (b - 2*d_center) / (nx - 1);
-                newRows.push({x: x, y: h/2 - d_center, db: db});
-                newRows.push({x: x, y: -h/2 + d_center, db: db});
-            }
-            // Sides
-            if (ny > 2) {
-                for(let j=1; j<ny-1; j++) {
-                    const y = h/2 - d_center - j * (h - 2*d_center) / (ny - 1);
-                    newRows.push({x: -b/2 + d_center, y: y, db: db});
-                    newRows.push({x: b/2 - d_center, y: y, db: db});
+            if (shape === 'circ') {
+                // --- CIRCULAR LOGIC ---
+                const n_circ = parseInt(document.getElementById('n_circ_bars').value);
+                // b is used as Diameter
+                const radius = (b / 2) - d_center;
+                
+                for(let i=0; i<n_circ; i++) {
+                    // Start at 90 degrees (Top) and distribute clockwise
+                    const theta = (Math.PI / 2) - (i * 2 * Math.PI / n_circ);
+                    const x = radius * Math.cos(theta);
+                    const y = radius * Math.sin(theta);
+                    newRows.push({x: x, y: y, db: db});
+                }
+            } else {
+                // --- RECTANGULAR LOGIC ---
+                const nx = parseInt(document.getElementById('nx_bars').value);
+                const ny = parseInt(document.getElementById('ny_bars').value);
+                
+                // Top/Bot
+                for(let i=0; i<nx; i++) {
+                    const x = -b/2 + d_center + i * (b - 2*d_center) / (nx - 1);
+                    newRows.push({x: x, y: h/2 - d_center, db: db});
+                    newRows.push({x: x, y: -h/2 + d_center, db: db});
+                }
+                // Sides
+                if (ny > 2) {
+                    for(let j=1; j<ny-1; j++) {
+                        const y = h/2 - d_center - j * (h - 2*d_center) / (ny - 1);
+                        newRows.push({x: -b/2 + d_center, y: y, db: db});
+                        newRows.push({x: b/2 - d_center, y: y, db: db});
+                    }
                 }
             }
 
@@ -1293,7 +1408,8 @@
             const fc = parseFloat(document.getElementById('mat_fc').value);
             const fy = parseFloat(document.getElementById('mat_fy').value);
             const cover = parseFloat(document.getElementById('col_cover').value) || 4.0;
-            
+            const shape = document.getElementById('col_shape').value;
+
             // 2. Constants
             const eps_cu = 0.003;       
             const Es = 2.04 * 1000000;
@@ -1303,6 +1419,16 @@
             // 3. Generate Rebar
             let bars = [];
             const isCustom = document.querySelector('input[name="rebar_mode"]:checked').value === 'custom';
+            const rebarWarnings = [];
+
+            // --- FIX: Accurate Dimensions based on Code Definition ---
+            // Clear Cover is distance from concrete surface to outer edge of Tie/Stirrup
+            const Ab_bar = parseFloat(document.getElementById('bar_size').value);
+            const db_main = Math.sqrt(Ab_bar * 4 / Math.PI); // Main Bar Diameter
+            const db_tie = parseFloat(document.getElementById('shear_db').value); // Tie Bar Diameter
+            
+            // Distance to center of Main Bar = Cover + Tie Diameter + (Main Diameter / 2)
+            const d_center = cover + db_tie + (db_main / 2);
 
             if (isCustom) {
                 const rows = document.querySelectorAll('#table-rebar tbody tr');
@@ -1313,46 +1439,115 @@
                     const db = parseFloat(inputs[2].value);
                     if(!isNaN(x) && !isNaN(y) && !isNaN(db) && db > 0) {
                         const Ab = Math.PI * Math.pow(db/2, 2);
-                        bars.push({ x, y, Ab });
+                        bars.push({ x, y, Ab, db });
                     }
                 });
-                if(bars.length === 0) bars.push({x:0, y:0, Ab:0});
+                if(bars.length === 0) bars.push({x:0, y:0, Ab:0, db:0});
             } else {
-                const Ab_bar = parseFloat(document.getElementById('bar_size').value);
-                const nx = parseInt(document.getElementById('nx_bars').value);
-                const ny = parseInt(document.getElementById('ny_bars').value);
-                const d_center = cover + 1.27/2; 
-                
-                for(let i=0; i<nx; i++) {
-                    const x = -b/2 + d_center + i * (b - 2*d_center) / (nx - 1);
-                    bars.push({ x: x, y: h/2 - d_center, Ab: Ab_bar }); 
-                    bars.push({ x: x, y: -h/2 + d_center, Ab: Ab_bar }); 
-                }
-                if (ny > 2) {
-                    for(let j=1; j<ny-1; j++) {
-                        const y = h/2 - d_center - j * (h - 2*d_center) / (ny - 1);
-                        bars.push({ x: -b/2 + d_center, y: y, Ab: Ab_bar }); 
-                        bars.push({ x: b/2 - d_center, y: y, Ab: Ab_bar }); 
+                if (shape === 'rect') {
+                    const nx = parseInt(document.getElementById('nx_bars').value);
+                    const ny = parseInt(document.getElementById('ny_bars').value);
+                    
+                    // Top & Bottom Rows
+                    for(let i=0; i<nx; i++) {
+                        const x = -b/2 + d_center + i * (b - 2*d_center) / (nx - 1);
+                        bars.push({ x: x, y: h/2 - d_center, Ab: Ab_bar, db: db_main }); 
+                        bars.push({ x: x, y: -h/2 + d_center, Ab: Ab_bar, db: db_main }); 
+                    }
+                    // Side Rows (excluding corners)
+                    if (ny > 2) {
+                        for(let j=1; j<ny-1; j++) {
+                            const y = h/2 - d_center - j * (h - 2*d_center) / (ny - 1);
+                            bars.push({ x: -b/2 + d_center, y: y, Ab: Ab_bar, db: db_main }); 
+                            bars.push({ x: b/2 - d_center, y: y, Ab: Ab_bar, db: db_main }); 
+                        }
+                    }
+                } else {
+                    // --- CIRCULAR COLUMN LOGIC ---
+                    // b acts as Diameter D
+                    const D = b; 
+                    const n_circ = parseInt(document.getElementById('n_circ_bars').value);
+                    
+                    // Placement Radius = (Diameter/2) - Clear Cover - Tie - (Main/2)
+                    const radius_bar = (D/2) - d_center;
+                    
+                    if (n_circ >= 3) {
+                        const dTheta = (2 * Math.PI) / n_circ;
+                        // Start at top (12 o'clock) for standard engineering drawing view
+                        let currentAngle = Math.PI / 2; 
+                        
+                        for(let i=0; i<n_circ; i++) {
+                            const x = radius_bar * Math.cos(currentAngle);
+                            const y = radius_bar * Math.sin(currentAngle);
+                            bars.push({ x: x, y: y, Ab: Ab_bar, db: db_main });
+                            currentAngle -= dTheta; // Distribute bars clockwise
+                        }
                     }
                 }
             }
 
-            // Concrete Fibers (30x30 grid for better angle accuracy)
+            // --- WARNING: Check if bars are outside concrete ---
+            let outsideCount = 0;
+            bars.forEach(bar => {
+                let isOut = false;
+                const barOuterRadius = bar.db / 2;
+
+                if (shape === 'rect') {
+                    // Check X and Y bounds
+                    if (Math.abs(bar.x) + barOuterRadius > b/2 || Math.abs(bar.y) + barOuterRadius > h/2) {
+                        isOut = true;
+                    }
+                } else {
+                    // Check Radial bound
+                    const distFromCenter = Math.sqrt(bar.x*bar.x + bar.y*bar.y);
+                    if (distFromCenter + barOuterRadius > b/2) {
+                        isOut = true;
+                    }
+                }
+                
+                if (isOut) outsideCount++;
+            });
+
+            if (outsideCount > 0) {
+                rebarWarnings.push(`⚠️ <b>SECTION ERROR:</b> ${outsideCount} rebar(s) extend OUTSIDE the concrete boundary! Increase dimensions or reduce cover.`);
+            }
+
+            // Concrete Fibers Generation
             const fibers = [];
-            const nxFib = 30, nyFib = 30; 
-            const dA = (b * h) / (nxFib * nyFib);
-            const dx = b / nxFib, dy = h / nyFib;
-            for(let i=0; i<nxFib; i++) {
-                for(let j=0; j<nyFib; j++) {
-                    fibers.push({
-                        x: -b/2 + (i + 0.5) * dx,
-                        y: -h/2 + (j + 0.5) * dy,
-                        dA: dA
-                    });
+            const nxFib = 40, nyFib = 40; 
+            
+            if (shape === 'rect') {
+                const dA = (b * h) / (nxFib * nyFib);
+                const dx = b / nxFib, dy = h / nyFib;
+                for(let i=0; i<nxFib; i++) {
+                    for(let j=0; j<nyFib; j++) {
+                        fibers.push({
+                            x: -b/2 + (i + 0.5) * dx,
+                            y: -h/2 + (j + 0.5) * dy,
+                            dA: dA
+                        });
+                    }
+                }
+            } else {
+                // Circular Fibers (Polar coordinates usually better, but grid with check is easier)
+                const D = b; 
+                const R = D/2;
+                const dA = (D * D) / (nxFib * nyFib); // Bounding box area div
+                const dx = D / nxFib, dy = D / nyFib;
+                
+                for(let i=0; i<nxFib; i++) {
+                    for(let j=0; j<nyFib; j++) {
+                        const x = -R + (i + 0.5) * dx;
+                        const y = -R + (j + 0.5) * dy;
+                        // Check if inside circle
+                        if (x*x + y*y <= R*R) {
+                            fibers.push({ x, y, dA });
+                        }
+                    }
                 }
             }
 
-            const Ag = b * h;
+            const Ag = shape === 'rect' ? b * h : (Math.PI * Math.pow(b/2, 2));
             let Ast = 0; bars.forEach(b => Ast += b.Ab);
             const Po_nominal = 0.85 * fc * (Ag - Ast) + fy * Ast;
 
@@ -1374,10 +1569,19 @@
                 const curvePoints = [];
 
                 let d_max_concrete = -Infinity; 
-                corners.forEach(p => {
-                    const d = p.x * cosT + p.y * sinT;
-                    if(d > d_max_concrete) d_max_concrete = d;
-                });
+                
+                // REVISED: Correctly handle Circular vs Rectangular extreme fiber
+                if (shape === 'circ') {
+                    // For a circle, the distance to the extreme compression fiber 
+                    // is always the radius (b/2), regardless of rotation angle.
+                    d_max_concrete = b / 2;
+                } else {
+                    // For rectangle, we check the projected distance of the 4 corners
+                    corners.forEach(p => {
+                        const d = p.x * cosT + p.y * sinT;
+                        if(d > d_max_concrete) d_max_concrete = d;
+                    });
+                }
 
                 c_ratios.forEach(ratio => {
                     const c = d_max_concrete * 2 * ratio; 
@@ -1435,21 +1639,22 @@
                 curves.push(curvePoints);
             }
 
-            return { curves, Po: Po_nominal };
+            return { curves, Po: Po_nominal, rebarWarnings };
         }
         
         let nominalMesh; // Variable to hold the second mesh
 
         function updateApp() {
             // --- 0. Enforce Min/Max Limits (Strict Clamping) ---
+            // ADD: Read shape first
+            const shape = document.getElementById('col_shape').value;
+
             const clamp = (id, min, max) => {
                 const el = document.getElementById(id);
                 let val = parseFloat(el.value);
                 if (isNaN(val)) val = min;
                 if (val < min) val = min;
                 if (max !== undefined && val > max) val = max;
-                // Update UI if changed (optional, but good for feedback)
-                // el.value = val; 
                 return val;
             };
 
@@ -1463,7 +1668,7 @@
             const fc_clamped = clamp('mat_fc', 140);
             const fy_clamped = clamp('mat_fy', 2800);
 
-            // Rebar (Min Check Only here, Max geometry check happens in capInput below)
+            // Rebar
             let nx_clamped = clamp('nx_bars', 2);
             let ny_clamped = clamp('ny_bars', 2);
 
@@ -1472,16 +1677,24 @@
             const shear_s_clamped = clamp('shear_s', 3.0);
             
             // Shear Legs Dynamic Max
-            // # Legs X-dir (vertical legs in section) cannot exceed # bars along Top/Bot (nx)
-            // # Legs Y-dir (horizontal legs in section) cannot exceed # bars along Side (ny)
-            const shear_nx_clamped = clamp('shear_nx', 2, nx_clamped);
-            const shear_ny_clamped = clamp('shear_ny', 2, ny_clamped);
+            let max_legs_x = nx_clamped;
+            let max_legs_y = ny_clamped;
+            let shear_circ_clamped = 2; // Default
 
-            // Write clamped shear values back to DOM to ensure calculations use valid data
-            // (Since existing code reads from DOM later in this function)
-            document.getElementById('shear_nx').value = shear_nx_clamped;
-            document.getElementById('shear_ny').value = shear_ny_clamped;
-            // Also write others that strictly affect safety
+            if (shape === 'circ') {
+                 // For circular, total legs usually = 2 (hoop) or more if cross ties
+                 const n_total = parseFloat(document.getElementById('n_circ_bars').value) || 8;
+                 // Clamp Circular Legs (Max = 2 * n_total for safety, though usually just 2 or 4)
+                 const max_allowed = 2 + Math.ceil(n_total / 2);
+                 shear_circ_clamped = clamp('shear_legs_circ', 2, max_allowed);
+                 document.getElementById('shear_legs_circ').value = shear_circ_clamped;
+            } else {
+                 const shear_nx_clamped = clamp('shear_nx', 2, max_legs_x);
+                 const shear_ny_clamped = clamp('shear_ny', 2, max_legs_y);
+                 document.getElementById('shear_nx').value = shear_nx_clamped;
+                 document.getElementById('shear_ny').value = shear_ny_clamped;
+            }
+            
             document.getElementById('col_cover').value = cover_clamped;
 
             // --- 1. Cap Inputs (Regular Mode) to prevent physical overlap ---
@@ -1516,7 +1729,6 @@
             const fc = parseFloat(document.getElementById('mat_fc').value);
             const fy = parseFloat(document.getElementById('mat_fy').value);
             const cover = parseFloat(document.getElementById('col_cover').value);
-
             // --- 1. GLOBAL BOUNDS ---
             let maxP_nominal = -Infinity, minP_nominal = Infinity;
             let maxMnx = 0, maxMny = 0;
@@ -1661,8 +1873,12 @@
             const s_tie = parseFloat(document.getElementById('shear_s').value);
             const db_tie = parseFloat(document.getElementById('shear_db').value);
             const Av = Math.PI * Math.pow(db_tie/2, 2);
+
+            // Get Legs based on Shape
             const nx_legs = parseFloat(document.getElementById('shear_nx').value);
             const ny_legs = parseFloat(document.getElementById('shear_ny').value);
+            const circ_legs = parseFloat(document.getElementById('shear_legs_circ').value); // Read new input
+            
             const isSeismic = document.getElementById('seismic_mode').checked;
 
             let maxDemand = 0;
@@ -1728,7 +1944,7 @@
                 let demand = (Pu > P_limit_design || Pu < minP_nominal) ? 9.99 : (capM_radial > 0.1 ? loadM_radial / capM_radial : 0);
 
                 // --- Biaxial Shear Check ---
-                const Ag = b * h;
+                const Ag = (shape === 'rect') ? (b * h) : (Math.PI * Math.pow(b/2, 2));
                 const Pu_kg = Pu * 1000;
                 
                 const calcPhiVn = (bw, d_depth, legs) => {
@@ -1737,24 +1953,42 @@
                     if (Vc_stress < 0) Vc_stress = 0;
 
                     const Vc = Vc_stress * bw * d_depth / 1000;
-                    const Vs = (legs * Av * fy * d_depth) / s_tie / 1000;
+                    const Av_tie = Math.PI * Math.pow(db_tie/2, 2);
+                    const Vs = (legs * Av_tie * fy * d_depth) / s_tie / 1000;
                     const Vs_max = 2.12 * Math.sqrt(fc) * bw * d_depth / 1000;
+                    
                     return 0.75 * (Vc + Math.min(Vs, Vs_max));
                 };
 
-                const d_x = h - cover - 1.27; 
-                const phiVnx = calcPhiVn(b, d_x, ny_legs); // Legs across width b resist X shear
-                const d_y = b - cover - 1.27;
-                const phiVny = calcPhiVn(h, d_y, nx_legs); // Legs across depth h resist Y shear
+                let DCR_shear = 0;
 
-                const DCR_vux = Math.abs(Vux) / phiVnx;
-                const DCR_vuy = Math.abs(Vuy) / phiVny;
+                if (shape === 'rect') {
+                    // Rectangular Logic
+                    const d_x = h - cover - db_tie - (Math.sqrt(parseFloat(document.getElementById('bar_size').value)*4/Math.PI)/2); 
+                    const phiVnx = calcPhiVn(b, d_x, ny_legs); 
+                    
+                    const d_y = b - cover - db_tie - (Math.sqrt(parseFloat(document.getElementById('bar_size').value)*4/Math.PI)/2);
+                    const phiVny = calcPhiVn(h, d_y, nx_legs);
 
-                if (DCR_vux > 1.0 || DCR_vuy > 1.0) {
+                    const DCR_vux = Math.abs(Vux) / phiVnx;
+                    const DCR_vuy = Math.abs(Vuy) / phiVny;
+                    DCR_shear = Math.max(DCR_vux, DCR_vuy);
+                } else {
+                    // Circular Logic
+                    const D = b; 
+                    const d_eff = 0.8 * D;
+                    const Vu_resultant = Math.sqrt(Vux**2 + Vuy**2);
+                    
+                    // Use the specific Circular Legs input
+                    const phiVn_circ = calcPhiVn(D, d_eff, circ_legs);
+                    DCR_shear = Vu_resultant / phiVn_circ;
+                }
+
+                if (DCR_shear > 1.0) {
                     demand = Math.max(demand, 9.99);
                     shearFailure = true;
                 } else {
-                    demand = Math.max(demand, DCR_vux, DCR_vuy);
+                    demand = Math.max(demand, DCR_shear);
                 }
 
                 if (demand > maxDemand) {
@@ -1806,14 +2040,31 @@
             }
 
             draw3DLimits(data, P_limit_design, globalMaxPhiMnx, globalMaxPhiMny, criticalCase);
-            checkSpacingAndWarnings(b, h, cover, isCustom, data.rebarWarnings); 
+            checkSpacingAndWarnings(b, h, cover, isCustom, data.rebarWarnings);
         }
         
         function checkSpacingAndWarnings(b, h, cover, isCustom, customWarnings = []) {
             const warningsDiv = document.getElementById('code-warnings');
             warningsDiv.innerHTML = "";
             warningsDiv.classList.remove('hidden');
+            const shape = document.getElementById('col_shape').value;
             
+            if (shape === 'circ') {
+                // Check if circular rebar fits
+                // Approx perimeter check: n * (db + space) < PI * (D - 2*cover - 2*tie - db)
+                const n_circ = parseInt(document.getElementById('n_circ_bars').value);
+                const db_main = Math.sqrt(parseFloat(document.getElementById('bar_size').value) * 4 / Math.PI);
+                const db_tie = parseFloat(document.getElementById('shear_db').value);
+                
+                const core_dia = b - 2*cover - 2*db_tie - db_main;
+                const perimeter = Math.PI * core_dia;
+                const required_perim = n_circ * (db_main + 4.0); // Assuming min 4cm spacing
+                
+                if (perimeter < required_perim) {
+                     warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">⚠️ Circular Spacing Tight<br><span class="text-[9px]">Check aggregate flow</span></div>`;
+                }
+            }
+
             if (isCustom && customWarnings && customWarnings.length > 0) {
                  customWarnings.forEach(msg => {
                     warningsDiv.innerHTML += `<div class="text-amber-700 font-bold border-b pb-1 mb-1 border-amber-300 bg-amber-50 p-1 rounded">⚠️ ${msg}</div>`;
@@ -1855,13 +2106,28 @@
                 });
             } else {
                 const ab_val = parseFloat(document.getElementById('bar_size').value);
-                const nx = parseInt(document.getElementById('nx_bars').value);
-                const ny = parseInt(document.getElementById('ny_bars').value);
-                const count = (2 * nx) + Math.max(0, 2 * (ny - 2));
-                Ast_total = count * ab_val;
+                
+                if (shape === 'circ') {
+                    // Circular Regular Logic
+                    const n_circ = parseInt(document.getElementById('n_circ_bars').value) || 0;
+                    Ast_total = n_circ * ab_val;
+                } else {
+                    // Rectangular Regular Logic
+                    const nx = parseInt(document.getElementById('nx_bars').value);
+                    const ny = parseInt(document.getElementById('ny_bars').value);
+                    const count = (2 * nx) + Math.max(0, 2 * (ny - 2));
+                    Ast_total = count * ab_val;
+                }
             }
             
-            const Ag = b * h;
+            // Calculate Gross Area based on Shape
+            let Ag;
+            if (shape === 'circ') {
+                Ag = Math.PI * Math.pow(b / 2, 2);
+            } else {
+                Ag = b * h;
+            }
+
             const rho = Ast_total / Ag;
             const rho_pct = (rho * 100).toFixed(2);
             
@@ -1982,9 +2248,18 @@
             const w = canvas.width;
             const h = canvas.height;
             
+            // ADD: Read shape first
+            const shape = document.getElementById('col_shape').value;
             const col_b = parseFloat(document.getElementById('col_b').value);
-            const col_depth = parseFloat(document.getElementById('col_h').value);
+            // MODIFIED: If circular, use Width (Diameter) as Depth for drawing scale
+            const col_depth = shape === 'circ' ? col_b : parseFloat(document.getElementById('col_h').value);
             const cover = parseFloat(document.getElementById('col_cover').value) || 4.0;
+
+            // --- ADD THESE LINES TO FIX THE ERROR ---
+            const Ab_bar = parseFloat(document.getElementById('bar_size').value);
+            const db_main = Math.sqrt(Ab_bar * 4 / Math.PI);
+            const db_tie = parseFloat(document.getElementById('shear_db').value);
+            // ----------------------------------------
 
             ctx.clearRect(0, 0, w, h);
             
@@ -2004,84 +2279,163 @@
             const borderCol = isDarkMode ? '#94a3b8' : '#475569'; // Slate-400 vs Slate-600
             
             ctx.fillStyle = bgCol; 
-            ctx.fillRect(ox, oy, drawW, drawH);
             ctx.strokeStyle = borderCol; 
             ctx.lineWidth = 2;
-            ctx.strokeRect(ox, oy, drawW, drawH);
+
+            if (shape === 'rect') {
+                ctx.fillRect(ox, oy, drawW, drawH);
+                ctx.strokeRect(ox, oy, drawW, drawH);
+            } else {
+                // Draw Circle
+                ctx.beginPath();
+                ctx.arc(ox + drawW/2, oy + drawW/2, drawW/2, 0, 2*Math.PI);
+                ctx.fill();
+                ctx.stroke();
+            }
 
             // 2. Draw Ties / Stirrups
-            const tieColor = isDarkMode ? '#f87171' : '#b91c1c'; // Lighter red for dark mode
+            const tieColor = isDarkMode ? '#f87171' : '#b91c1c';
             const tieWidth = 1.5;
-            const coverPx = cover * scale;
             
-            // Tie Dimensions
-            const tLeft = ox + coverPx;
-            const tTop = oy + coverPx;
-            const tW = drawW - 2*coverPx;
-            const tH = drawH - 2*coverPx;
+            // Visual offset for tie
+            const tLeft = ox + (cover * scale);
+            const tTop = oy + (cover * scale);
+            const tW = drawW - 2*(cover * scale);
+            const tH = drawH - 2*(cover * scale);
 
             ctx.strokeStyle = tieColor;
-            ctx.lineWidth = tieWidth;
+            ctx.lineWidth = 1.5;
             ctx.lineJoin = 'round';
 
             // --- A. Outer Hoop ---
             ctx.beginPath();
-            ctx.rect(tLeft, tTop, tW, tH);
+            if (shape === 'rect') {
+                ctx.rect(tLeft, tTop, tW, tH);
+            } else {
+                ctx.arc(ox + drawW/2, oy + drawH/2, tW/2, 0, 2*Math.PI);
+            }
             ctx.stroke();
 
-            // Hook Visuals (135 deg hooks at top-left corner for outer hoop)
-            const hookLen = 8; 
-            ctx.beginPath();
-            ctx.moveTo(tLeft + 2, tTop + 2); ctx.lineTo(tLeft + hookLen, tTop + hookLen); // Inward
-            ctx.moveTo(tLeft + 2, tTop + 2); ctx.lineTo(tLeft + 2, tTop + hookLen + 2); // Tail
-            ctx.stroke();
+            // --- Hook Visuals ---
+            // Fix: Position hooks on the perimeter for circles, corner for rects
+            const hookLen = 8;
+            let hx, hy;
+            
+            if (shape === 'rect') {
+                hx = tLeft; 
+                hy = tTop;
+                
+                ctx.beginPath();
+                ctx.moveTo(hx + 2, hy + 2); ctx.lineTo(hx + hookLen, hy + hookLen);
+                ctx.moveTo(hx + 2, hy + 2); ctx.lineTo(hx + 2, hy + hookLen + 2);
+                ctx.stroke();
+            } else {
+                // Circular: Hook at 135 degrees (Top-Left quadrant visually)
+                const cx = ox + drawW/2;
+                const cy = oy + drawH/2;
+                const r = tW / 2;
+                
+                // 225 degrees (5*PI/4) puts it at Top-Left in Canvas coords (Y is down? No, 0 is right, PI/2 is down)
+                const angDraw = 5 * Math.PI / 4;
+                
+                hx = cx + r * Math.cos(angDraw);
+                hy = cy + r * Math.sin(angDraw);
 
-            // --- B. Inner Crossties (Regular Mode Only) ---
+                ctx.beginPath();
+                // Draw simple "inward" hook lines
+                ctx.moveTo(hx, hy); ctx.lineTo(hx + hookLen, hy + hookLen/2);
+                ctx.moveTo(hx, hy); ctx.lineTo(hx + hookLen/2, hy + hookLen);
+                ctx.stroke();
+            }
+
+            // --- B. Inner Crossties ---
             const isCustom = document.querySelector('input[name="rebar_mode"]:checked').value === 'custom';
             
             if (!isCustom) {
-                const nx_bars = parseInt(document.getElementById('nx_bars').value);
-                const ny_bars = parseInt(document.getElementById('ny_bars').value);
-                
-                // Read Shear Legs (clamped to at least 2)
-                const nLegsX = Math.max(2, parseInt(document.getElementById('shear_nx').value)); // Vertical Legs
-                const nLegsY = Math.max(2, parseInt(document.getElementById('shear_ny').value)); // Horizontal Legs
-
                 ctx.beginPath();
+                
+                if (shape === 'rect') {
+                    // --- RECTANGULAR TIES ---
+                    const nx_bars = parseInt(document.getElementById('nx_bars').value);
+                    const ny_bars = parseInt(document.getElementById('ny_bars').value);
+                    const nLegsX = Math.max(2, parseInt(document.getElementById('shear_nx').value));
+                    const nLegsY = Math.max(2, parseInt(document.getElementById('shear_ny').value));
 
-                // Draw Vertical Inner Legs (distributed along Width)
-                // We map leg indices (0 to nLegsX-1) to bar indices (0 to nx_bars-1)
-                if (nLegsX > 2 && nx_bars > 2) {
-                    for (let i = 1; i < nLegsX - 1; i++) {
-                        // Find closest bar index
-                        const barIdx = Math.round(i * (nx_bars - 1) / (nLegsX - 1));
-                        // Calc X position of that bar
-                        // Note: Rebar logic uses d_center = cover + db/2. Here we approximate to cover for the visual tie line.
-                        const xPos = tLeft + (barIdx * tW / (nx_bars - 1));
-                        
-                        // Draw vertical line
-                        ctx.moveTo(xPos, tTop);
-                        ctx.lineTo(xPos, tTop + tH);
-                        
-                        // Draw small hooks at ends (135 degree visual)
-                        ctx.moveTo(xPos, tTop); ctx.lineTo(xPos + 3, tTop + 6);
-                        ctx.moveTo(xPos, tTop + tH); ctx.lineTo(xPos - 3, tTop + tH - 6);
+                    // Draw Vertical Inner Legs
+                    if (nLegsX > 2 && nx_bars > 2) {
+                        for (let i = 1; i < nLegsX - 1; i++) {
+                            const barIdx = Math.round(i * (nx_bars - 1) / (nLegsX - 1));
+                            const xPos = tLeft + (barIdx * tW / (nx_bars - 1));
+                            ctx.moveTo(xPos, tTop); ctx.lineTo(xPos, tTop + tH);
+                            // Hooks
+                            ctx.moveTo(xPos, tTop); ctx.lineTo(xPos + 3, tTop + 6);
+                            ctx.moveTo(xPos, tTop + tH); ctx.lineTo(xPos - 3, tTop + tH - 6);
+                        }
                     }
-                }
+                    // Draw Horizontal Inner Legs
+                    if (nLegsY > 2 && ny_bars > 2) {
+                        for (let i = 1; i < nLegsY - 1; i++) {
+                            const barIdx = Math.round(i * (ny_bars - 1) / (nLegsY - 1));
+                            const yPos = tTop + (barIdx * tH / (ny_bars - 1));
+                            ctx.moveTo(tLeft, yPos); ctx.lineTo(tLeft + tW, yPos);
+                            // Hooks
+                            ctx.moveTo(tLeft, yPos); ctx.lineTo(tLeft + 6, yPos + 3);
+                            ctx.moveTo(tLeft + tW, yPos); ctx.lineTo(tLeft + tW - 6, yPos - 3);
+                        }
+                    }
+                } else {
+                    // --- CIRCULAR TIES (Revised for Total Legs) ---
+                    const n_circ = parseInt(document.getElementById('n_circ_bars').value);
+                    // Use Total Legs Input
+                    const n_legs = parseInt(document.getElementById('shear_legs_circ').value) || 2;
+                    
+                    const d_cen_draw = cover + db_tie + (db_main / 2);
+                    const r_draw = ((col_b/2) - d_cen_draw) * scale;
+                    const cx = ox + drawW/2;
+                    const cy = oy + drawH/2;
+                    
+                    const barPos = [];
+                    for(let i=0; i<n_circ; i++) {
+                        // Match angles with calculation logic (-PI/2 for top start)
+                        const theta = (2 * Math.PI * i) / n_circ - (Math.PI / 2);
+                        // FIX: Use minus (-) for sin(theta) to match the dot() function's coordinate system
+                        barPos.push({ x: cx + r_draw * Math.cos(theta), y: cy - r_draw * Math.sin(theta) });
+                    }
 
-                // Draw Horizontal Inner Legs (distributed along Depth)
-                if (nLegsY > 2 && ny_bars > 2) {
-                    for (let i = 1; i < nLegsY - 1; i++) {
-                        const barIdx = Math.round(i * (ny_bars - 1) / (nLegsY - 1));
-                        const yPos = tTop + (barIdx * tH / (ny_bars - 1));
+                    // Logic: Hoop = 2 legs. We draw extra lines for (n_legs - 2).
+                    const num_ties = Math.max(0, n_legs - 2);
+                    const offset = Math.floor(n_circ / 2);
+
+                    for(let k=0; k<num_ties; k++) {
+                        const idx = k % n_circ;
+                        const p1 = barPos[idx];
+                        const p2 = barPos[(idx + offset) % n_circ];
                         
-                        // Draw horizontal line
-                        ctx.moveTo(tLeft, yPos);
-                        ctx.lineTo(tLeft + tW, yPos);
+                        ctx.moveTo(p1.x, p1.y);
+                        ctx.lineTo(p2.x, p2.y);
 
-                        // Draw small hooks
-                        ctx.moveTo(tLeft, yPos); ctx.lineTo(tLeft + 6, yPos + 3);
-                        ctx.moveTo(tLeft + tW, yPos); ctx.lineTo(tLeft + tW - 6, yPos - 3);
+                        // REVISED: Hooks for Even Numbered Circular Rebar
+                        if (n_circ % 2 === 0) {
+                            const dx = p2.x - p1.x;
+                            const dy = p2.y - p1.y;
+                            const ang = Math.atan2(dy, dx);
+                            const hLen = 10; 
+
+                            // Hook at p1: Bend 45 deg (0.25 PI) inward relative to tie
+                            // This ensures the hook stays inside the circular core
+                            ctx.moveTo(p1.x, p1.y);
+                            ctx.lineTo(p1.x + hLen * Math.cos(ang + Math.PI * 0.25), p1.y + hLen * Math.sin(ang + Math.PI * 0.25));
+
+                            // Hook at p2: Bend 45 deg inward relative to incoming direction
+                            // Using (ang2 - 0.25 PI) creates a symmetrical bracket shape \_______/
+                            const ang2 = Math.atan2(-dy, -dx);
+                            ctx.moveTo(p2.x, p2.y);
+                            ctx.lineTo(p2.x + hLen * Math.cos(ang2 - Math.PI * 0.25), p2.y + hLen * Math.sin(ang2 - Math.PI * 0.25));
+                        } else {
+                            // Fallback for odd numbers
+                            ctx.fillRect(p1.x - 1.5, p1.y - 1.5, 3, 3);
+                            ctx.fillRect(p2.x - 1.5, p2.y - 1.5, 3, 3);
+                        }
                     }
                 }
                 ctx.stroke();
@@ -2090,7 +2444,10 @@
             // 3. Draw Rebar Dots
             ctx.fillStyle = '#dc2626'; // Bright Red
             
-            // Helper to draw dot
+            // Array to store calculated screen coordinates of bars for snapping ties later
+            let barCoordinates = []; 
+
+            // Helper to draw dot and store coordinate
             function dot(rx, ry, area) {
                 const px = ox + (col_b/2 + rx) * scale;
                 const py = oy + (col_depth/2 - ry) * scale; 
@@ -2098,6 +2455,9 @@
                 ctx.beginPath();
                 ctx.arc(px, py, Math.max(rad, 1.5), 0, 2*Math.PI);
                 ctx.fill();
+                
+                // Store for tie connections
+                barCoordinates.push({x: px, y: py});
             }
 
             if(isCustom) {
@@ -2111,23 +2471,39 @@
                     if(area > 0) dot(x, y, area);
                 });
             } else {
-                const Ab_bar = parseFloat(document.getElementById('bar_size').value);
-                const nx = parseInt(document.getElementById('nx_bars').value);
-                const ny = parseInt(document.getElementById('ny_bars').value);
-                const d_center = cover + 1.27/2; 
-                
-                // Top/Bot
-                for(let i=0; i<nx; i++) {
-                    const x = -col_b/2 + d_center + i * (col_b - 2*d_center) / (nx - 1);
-                    dot(x, col_depth/2 - d_center, Ab_bar); 
-                    dot(x, -col_depth/2 + d_center, Ab_bar); 
-                }
-                // Sides
-                if (ny > 2) {
-                    for(let j=1; j<ny-1; j++) {
-                        const y = col_depth/2 - d_center - j * (col_depth - 2*d_center) / (ny - 1);
-                        dot(-col_b/2 + d_center, y, Ab_bar); 
-                        dot(col_b/2 - d_center, y, Ab_bar); 
+                // Calculate precise d_center for drawing
+                const d_center = cover + db_tie + (db_main / 2);
+                const shape = document.getElementById('col_shape').value;
+
+                if (shape === 'rect') {
+                    const nx = parseInt(document.getElementById('nx_bars').value);
+                    const ny = parseInt(document.getElementById('ny_bars').value);
+                    
+                    // Top/Bot
+                    for(let i=0; i<nx; i++) {
+                        const x = -col_b/2 + d_center + i * (col_b - 2*d_center) / (nx - 1);
+                        dot(x, col_depth/2 - d_center, Ab_bar); 
+                        dot(x, -col_depth/2 + d_center, Ab_bar); 
+                    }
+                    // Sides
+                    if (ny > 2) {
+                        for(let j=1; j<ny-1; j++) {
+                            const y = col_depth/2 - d_center - j * (col_depth - 2*d_center) / (ny - 1);
+                            dot(-col_b/2 + d_center, y, Ab_bar); 
+                            dot(col_b/2 - d_center, y, Ab_bar); 
+                        }
+                    }
+                } else {
+                    // Circular Drawing Logic
+                    const n_circ = parseInt(document.getElementById('n_circ_bars').value);
+                    const radius_bar = (col_b/2) - d_center;
+                    
+                    for(let i=0; i<n_circ; i++) {
+                        // Match angles with calculation logic (-PI/2 for top start)
+                        const theta = (2 * Math.PI * i) / n_circ - (Math.PI / 2);
+                        const x = radius_bar * Math.cos(theta);
+                        const y = radius_bar * Math.sin(theta);
+                        dot(x, y, Ab_bar);
                     }
                 }
             }
@@ -2295,12 +2671,18 @@
             
             // Inputs
             const I = {
+                // ADD: Capture Shape and Circular Legs
+                shape: getVal('col_shape'),
+                legs_circ: getVal('shear_legs_circ'),
+
                 b: getVal('col_b'), h: getVal('col_h'), cover: getVal('col_cover'),
                 fc: getVal('mat_fc'), fy: getVal('mat_fy'),
                 lu: getVal('col_lu'),
-                bar: getVal('bar_size'), nx: getVal('nx_bars'), ny: getVal('ny_bars'),
+                bar: getVal('bar_size'), 
+                bar_text: document.getElementById('bar_size').options[document.getElementById('bar_size').selectedIndex].text,
+                nx: getVal('nx_bars'), ny: getVal('ny_bars'), n_circ: getVal('n_circ_bars'),
                 mode: document.querySelector('input[name="rebar_mode"]:checked').value,
-                
+
                 // Loads
                 Pu: getVal('global_vux') ? getText('disp_pu') : "-", 
                 Mux: getText('disp_mux'), Muy: getText('disp_muy'),
@@ -2312,7 +2694,7 @@
                 legs_x: getVal('shear_nx'), legs_y: getVal('shear_ny')
             };
 
-            // Results
+            // ... (Results object R remains same) ...
             const R = {
                 dc: getText('dc-val'),
                 status: getText('safety-msg'),
@@ -2326,9 +2708,58 @@
             const canvas = document.getElementById('section-canvas');
             const imgData = canvas.toDataURL("image/png");
 
-            // 3. Build HTML Report
+            // 3. Prepare Dynamic HTML content
             const dateStr = new Date().toLocaleDateString();
-            
+
+            // LOGIC: Determine Reinforcement Text based on Shape
+            let legsDisplayHTML = "";
+            if (I.shape === 'circ') {
+                legsDisplayHTML = `${I.legs_circ} (${t('lbl_legs_circ')})`;
+            } else {
+                legsDisplayHTML = `X: ${I.legs_x} ${t('rpt_legs_d')} / Y: ${I.legs_y} ${t('rpt_legs_w')}`;
+            }
+
+            // LOGIC: Determine Shear Table Rows based on Shape
+            let shearTableRows = "";
+            if (I.shape === 'circ') {
+                const vu_res = Math.sqrt(parseFloat(I.vux)**2 + parseFloat(I.vuy)**2).toFixed(2);
+                shearTableRows = `
+                    <tr>
+                        <td><strong>${t('rpt_res')}</strong></td>
+                        <td>${vu_res} tf</td>
+                        <td>${I.legs_circ} (${t('lbl_legs_circ')})</td>
+                        <td>-</td>
+                    </tr>
+                `;
+            } else {
+                shearTableRows = `
+                    <tr>
+                        <td><strong>${t('rpt_xdir')}</strong></td>
+                        <td>${I.vux} tf</td>
+                        <td>${I.legs_y} ${t('rpt_legs_w')}</td> <td>-</td>
+                    </tr>
+                    <tr>
+                        <td><strong>${t('rpt_ydir')}</strong></td>
+                        <td>${I.vuy} tf</td>
+                         <td>${I.legs_x} ${t('rpt_legs_d')}</td>
+                        <td>-</td>
+                    </tr>
+                `;
+            }
+            // LOGIC: Determine Dimension Text
+            let dimDisplay = "";
+            if (I.shape === 'circ') {
+                dimDisplay = `D = ${I.b} cm`;
+            } else {
+                dimDisplay = `${I.b} x ${I.h} cm`;
+            }
+            let confDisplay = "";
+            if (I.shape === 'circ') {
+                confDisplay = `${I.n_circ} ${t('rpt_bars')}`; // e.g. "8 Bars"
+            } else {
+                confDisplay = `${I.nx} x ${I.ny} ${t('rpt_bars')}`; // e.g. "4 x 4 Bars"
+            }
+            // 4. Build HTML Report
             let html = `
                 <div class="rpt-header">
                     <div>
@@ -2349,7 +2780,7 @@
                             <tr><th colspan="4">${t('rpt_geo_mat')}</th></tr>
                             <tr>
                                 <td width="25%"><strong>${t('rpt_dim')}</strong></td>
-                                <td width="25%">${I.b} x ${I.h} cm</td>
+                                <td width="25%">${dimDisplay}</td>
                                 <td width="25%"><strong>${t('rpt_con')}</strong></td>
                                 <td width="25%">${I.fc} kgf/cm²</td>
                             </tr>
@@ -2373,9 +2804,9 @@
                     <tr><th colspan="4">${t('rpt_reinf_det')}</th></tr>
                     <tr>
                         <td><strong>${t('rpt_main')}</strong></td>
-                        <td>${t('rpt_area')}: ${I.bar} cm²</td>
+                        <td>${I.bar_text}</td>
                         <td><strong>${t('rpt_conf')}</strong></td>
-                        <td>${I.nx} x ${I.ny} ${t('rpt_bars')}</td>
+                        <td>${confDisplay}</td>
                     </tr>
                     <tr>
                         <td><strong>${t('rpt_tie')}</strong></td>
@@ -2383,9 +2814,9 @@
                         <td><strong>${t('rpt_tie_sp')}</strong></td>
                         <td>@ ${I.s_tie} cm</td>
                     </tr>
-                     <tr>
+                      <tr>
                         <td><strong>${t('rpt_legs')}</strong></td>
-                        <td colspan="3">X: ${I.legs_x} ${t('rpt_legs_d')} / Y: ${I.legs_y} ${t('rpt_legs_w')}</td>
+                        <td colspan="3">${legsDisplayHTML}</td>
                     </tr>
                 </table>
 
@@ -2429,17 +2860,7 @@
                         <th>${t('rpt_prov')}</th>
                         <th>${t('rpt_cap_chk')}</th>
                     </tr>
-                    <tr>
-                        <td><strong>${t('rpt_xdir')}</strong></td>
-                        <td>${I.vux} tf</td>
-                        <td>${I.legs_y} ${t('rpt_legs_w')}</td> <td>-</td>
-                    </tr>
-                    <tr>
-                        <td><strong>${t('rpt_ydir')}</strong></td>
-                        <td>${I.vuy} tf</td>
-                         <td>${I.legs_x} ${t('rpt_legs_d')}</td>
-                        <td>-</td>
-                    </tr>
+                    ${shearTableRows}
                 </table>
 
                 <h3>${t('rpt_sec4')}</h3>
@@ -2452,11 +2873,10 @@
                 </div>
             `;
 
-            // 4. Inject and Print
+            // 5. Inject and Print
             const staging = document.getElementById('print-staging');
             staging.innerHTML = html;
             
-            // Allow images to render
             setTimeout(() => {
                 window.print();
             }, 500);
