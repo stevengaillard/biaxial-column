@@ -297,11 +297,11 @@
                         </div>
                         <div class="grid grid-cols-2 gap-3">
                             <div class="input-group" id="lbl_nz_container">
-                                <label data-i18n="lbl_nz">Top/Bot (nz)</label>
+                                <label data-i18n="lbl_nz">Top/Bot (ny)</label>
                                 <input type="number" id="nz_bars" value="4" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
                             </div>
                             <div class="input-group" id="lbl_nx_container">
-                                <label data-i18n="lbl_nx">Side (nx)</label>
+                                <label data-i18n="lbl_nx">Side (nz)</label>
                                 <input type="number" id="nx_bars" value="4" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
                             </div>
                             <div class="input-group hidden col-span-2" id="lbl_ntotal_container">
@@ -312,21 +312,21 @@
                     </div>
 
                     <div id="rebar-custom" class="hidden">
-                        <label class="text-xs font-bold text-gray-500 mb-1 block" data-i18n="lbl_cust_layout">Custom Layout (z, x, db)</label>
+                        <label class="text-xs font-bold text-gray-500 mb-1 block" data-i18n="lbl_cust_layout">Custom Layout (y, z, db)</label>
                         <button class="w-full bg-eng-secondary text-eng-dark border border-eng-primary text-xs font-bold py-1.5 px-2 rounded mb-2 hover:bg-eng-primary hover:text-white transition" onclick="importRegularToCustom()">
                             <i class="fa-solid fa-file-import mr-1"></i> <span data-i18n="btn_gen">Generate</span>
                         </button>
                         <details class="text-xs mb-2">
                             <summary class="cursor-pointer text-gray-500 hover:text-eng-primary" data-i18n="sum_paste">Paste Coordinates</summary>
-                            <textarea id="paste_rebar" placeholder="Copy columns:\nz  y  db(cm)" class="w-full h-16 border rounded p-1 text-[10px] font-mono mt-1"></textarea>
+                            <textarea id="paste_rebar" placeholder="Copy columns: z  y  db(cm)" class="w-full h-16 border rounded p-1 text-[10px] font-mono mt-1"></textarea>
                             <button onclick="parseCustomRebar()" class="w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-2 py-1 rounded mt-1" data-i18n="btn_load_rebar">Load Rebar</button>
                         </details>
 
                         <table class="data-table" id="table-rebar">
                             <thead>
                                 <tr>
-                                    <th data-i18n="th_x">z (cm)</th>
-                                    <th data-i18n="th_y">x (cm)</th>
+                                    <th data-i18n="th_x">y (cm)</th>
+                                    <th data-i18n="th_y">z (cm)</th>
                                     <th data-i18n="th_db">db (cm)</th>
                                     <th style="width: 20px;"></th>
                                 </tr>
@@ -347,18 +347,18 @@
                     
                     <div class="grid grid-cols-2 gap-2 mb-2">
                         <div class="input-group flex flex-col bg-white p-2 rounded border border-blue-100">
-                            <label class="text-blue-800 text-xs" data-i18n="lbl_vux">Global Vuz (tf)</label>
+                            <label class="text-blue-800 text-xs" data-i18n="lbl_vux">Global Vuy (tf)</label>
                             <input type="number" id="global_vux" value="5" class="w-full border border-blue-300 rounded p-1 text-right text-sm font-bold text-blue-700 bg-blue-50" oninput="updateApp()">
                         </div>
                         <div class="input-group flex flex-col bg-white p-2 rounded border border-blue-100">
-                            <label class="text-blue-800 text-xs" data-i18n="lbl_vuy">Global Vux (tf)</label>
+                            <label class="text-blue-800 text-xs" data-i18n="lbl_vuy">Global Vuz (tf)</label>
                             <input type="number" id="global_vuy" value="5" class="w-full border border-blue-300 rounded p-1 text-right text-sm font-bold text-blue-700 bg-blue-50" oninput="updateApp()">
                         </div>
                     </div>
 
                     <details class="text-xs mb-2">
                         <summary class="cursor-pointer text-gray-500 hover:text-eng-primary" data-i18n="sum_paste_load">Batch Paste (Excel)</summary>
-                        <textarea id="paste_loads" placeholder="Copy columns from Excel:\nPu  Muz  Mux" class="w-full h-16 border rounded p-1 text-[10px] font-mono mt-1"></textarea>
+                        <textarea id="paste_loads" placeholder="Copy columns from Excel: Pu  Muy  Muz" class="w-full h-16 border rounded p-1 text-[10px] font-mono mt-1"></textarea>
                         <button onclick="parseLoads()" class="w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-2 py-1 rounded mt-1" data-i18n="btn_load_data">Load Data</button>
                     </details>
 
@@ -367,8 +367,8 @@
                             <thead class="sticky top-0 bg-gray-100 z-10 shadow-sm">
                                 <tr>
                                     <th class="text-red-700" data-i18n="th_pu">Pu (tf)</th>
-                                    <th class="text-red-700" data-i18n="th_mux">Muz (tf-m)</th>
-                                    <th class="text-red-700" data-i18n="th_muy">Mux (tf-m)</th>
+                                    <th class="text-red-700" data-i18n="th_mux">Muy (tf-m)</th>
+                                    <th class="text-red-700" data-i18n="th_muy">Muz (tf-m)</th>
                                     <th style="width: 20px;"></th>
                                 </tr>
                             </thead>
@@ -446,19 +446,11 @@
 
         <!-- 3D Visualization Area -->
         <div class="flex-1 flex flex-col min-w-0 bg-white relative">
-            <div class="absolute top-4 left-4 z-10 flex gap-2">
-                <button onclick="toggleWireframe()" class="bg-gray-100/80 hover:bg-gray-200/80 text-gray-700 backdrop-blur-sm border border-gray-300 px-3 py-1.5 rounded text-xs font-bold transition">
-                    <i class="fa-solid fa-border-all mr-2"></i><span data-i18n="btn_wireframe">Wireframe</span>
-                </button>
-                <button onclick="toggleDarkMode()" class="bg-gray-100/80 hover:bg-gray-200/80 text-gray-700 backdrop-blur-sm border border-gray-300 px-3 py-1.5 rounded text-xs font-bold transition">
-                    <i id="dark-icon" class="fa-solid fa-moon"></i>
-                </button>
-            </div>
 
             <div id="container-3d" class="flex-1 w-full h-full cursor-move"></div>
 
             <!-- Legend / Overlay -->
-            <div class="absolute bottom-4 right-4 bg-white/95 backdrop-blur p-4 rounded shadow-xl w-64 border-l-4 border-eng-primary ring-1 ring-gray-200">
+            <div id="ui-legend" class="absolute bottom-4 right-4 bg-white/95 backdrop-blur p-5 rounded shadow-xl w-80 border-l-4 border-eng-primary ring-1 ring-gray-200">
                 <div class="flex gap-3 mb-3 text-[10px] uppercase font-bold tracking-wider">
                     <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-gray-300 border border-gray-400 mr-1 opacity-50"></span> <span data-i18n="leg_nom">Nominal (Pn)</span></div>
                     <div class="flex items-center"><span class="w-3 h-3 rounded-full bg-eng-primary mr-1 opacity-80"></span> <span data-i18n="leg_des">Design (ϕPn)</span></div>
@@ -472,15 +464,15 @@
 
                 <div class="text-xs font-mono text-gray-600 mb-3 space-y-1">
                     <div class="flex justify-between"><span>Pu:</span> <span><span id="disp_pu"></span> tf</span></div>
-                    <div class="flex justify-between"><span>Muz:</span> <span><span id="disp_mux"></span> tf-m</span></div>
-                    <div class="flex justify-between"><span>Mux:</span> <span><span id="disp_muy"></span> tf-m</span></div>
+                    <div class="flex justify-between"><span>Muy:</span> <span><span id="disp_mux"></span> tf-m</span></div>
+                    <div class="flex justify-between"><span>Muz:</span> <span><span id="disp_muy"></span> tf-m</span></div>
                 </div>
 
                 <h4 class="text-xs font-bold text-gray-500 uppercase mb-1" data-i18n="tit_max">Max Design Capacity</h4>
                 <div class="text-[10px] font-mono text-eng-primary mb-3 space-y-1 border-b pb-2">
                     <div class="flex justify-between"><span>ϕPn(max):</span> <span><span id="max_phi_pn"></span> tf</span></div>
-                    <div class="flex justify-between"><span>ϕMnz(max):</span> <span><span id="max_phi_mnz"></span> tf-m</span></div>
-                    <div class="flex justify-between"><span>ϕMnx(max):</span> <span><span id="max_phi_mnx"></span> tf-m</span></div>
+                    <div class="flex justify-between"><span>ϕMny(max):</span> <span><span id="max_phi_mnz"></span> tf-m</span></div>
+                    <div class="flex justify-between"><span>ϕMnz(max):</span> <span><span id="max_phi_mnx"></span> tf-m</span></div>
                 </div>
 
                 <div class="w-full bg-gray-200 rounded-full h-4 mb-1 overflow-hidden relative">
@@ -496,7 +488,7 @@
                 <div id="code-warnings" class="text-[10px] font-mono mt-2 space-y-1 text-red-600 font-bold hidden"></div>
             </div>
 
-            <div class="absolute top-4 right-4 bg-white p-2 rounded shadow-lg border border-gray-200">
+            <div id="ui-section" class="absolute top-4 right-4 bg-white p-3 rounded shadow-lg border border-gray-200">
                 <canvas id="section-canvas" width="120" height="120"></canvas>
                 <p class="text-[10px] text-center text-gray-400 mt-1 uppercase font-bold" data-i18n="lbl_sec_view">Section View</p>
             </div>
@@ -848,22 +840,22 @@
                 sec_rebar: "3. Reinforcement",
                 lbl_reg: "Regular", lbl_cust: "Custom",
                 lbl_size: "Rebar Size (Ab)",
-                lbl_nz: "Top/Bot (nz)", lbl_nx: "Side (nx)",
-                lbl_cust_layout: "Custom Layout (z, x, db)",
+                lbl_nz: "Top/Bot (ny)", lbl_nx: "Side (nz)",
+                lbl_cust_layout: "Custom Layout (y, z, db)",
                 btn_gen: "Generate from Regular Config",
                 sum_paste: "Paste Coordinates",
                 ph_paste_rebar: "Copy columns:\nz  y  db(cm)",
                 btn_load_rebar: "Load Rebar",
-                th_x: "z (cm)", th_y: "x (cm)", th_db: "db (cm)",
+                th_x: "y (cm)", th_y: "z (cm)", th_db: "db (cm)",
                 btn_add_bar: "Add Bar",
 
                 // Section 4: Loads
                 sec_loads: "4. Factored Loads",
-                lbl_vux: "Global Vuz (tf)", lbl_vuy: "Global Vux (tf)",
+                lbl_vux: "Global Vuy (tf)", lbl_vuy: "Global Vuz (tf)",
                 sum_paste_load: "Batch Paste (Excel)",
-                ph_paste_load: "Copy columns from Excel:\nPu  Muz  Mux",
+                ph_paste_load: "Copy columns from Excel:\nPu  Muy  Muz",
                 btn_load_data: "Load Data",
-                th_pu: "Pu (tf)", th_mux: "Muz (tf-m)", th_muy: "Mux (tf-m)",
+                th_pu: "Pu (tf)", th_mux: "Muy (tf-m)", th_muy: "Muz (tf-m)",
                 btn_add_case: "Add Load Case",
 
                 // Section 5: Shear
@@ -881,7 +873,7 @@
                 rpt_case: "Load Case",
                 rpt_angle: "Load Angle",
                 lbl_tie_db: "Tie Diameter db (cm)", lbl_tie_s: "Tie Spacing s (cm)",
-                lbl_leg_x: "# Legs Z-dir", lbl_leg_y: "# Legs X-dir",
+                lbl_leg_x: "# Legs Y-dir", lbl_leg_y: "# Legs Z-dir",
                 lbl_legs_circ: "Shear Legs (Total)",
                 rpt_res: "Resultant",
 
@@ -910,11 +902,11 @@
                 rpt_tie: "Tie Bar", rpt_tie_sp: "Tie Spacing",
                 rpt_legs: "Shear Legs",
                 rpt_param: "Parameter", rpt_app: "Applied Load (Active)", rpt_lim: "Capacity Limit (Max)", rpt_chk: "Check",
-                rpt_ax: "Axial Force (Pu)", rpt_mx: "Moment Z (Muz)", rpt_my: "Moment X (Mux)",
+                rpt_ax: "Axial Force (Pu)", rpt_mx: "Moment Y (Muy)", rpt_my: "Moment Z (Muz)",
                 rpt_dc: "D/C Ratio",
                 rpt_stat: "Interaction Status",
                 rpt_dir: "Direction", rpt_dem: "Shear Demand (Vu)", rpt_prov: "Provided Legs", rpt_cap_chk: "Capacity Check",
-                rpt_xdir: "Z-Direction", rpt_ydir: "X-Direction",
+                rpt_xdir: "Y-Direction", rpt_ydir: "Z-Direction",
                 rpt_legs_w: "legs (along Width)", rpt_legs_d: "legs (along Depth)",
                 rpt_no_warn: "No warnings generated.",
                 rpt_footer: "Generated by RC Column 3D Interaction Tool",
@@ -988,21 +980,21 @@
                 sec_rebar: "3. 鋼筋配置",
                 lbl_reg: "規則排列", lbl_cust: "自訂座標",
                 lbl_size: "鋼筋號數 (Ab)",
-                lbl_nz: "頂/底支數 (nz)", lbl_nx: "側面支數 (nx)",
-                lbl_cust_layout: "自訂配置 (z, x, db)",
+                lbl_nz: "頂/底支數 (ny)", lbl_nx: "側面支數 (nz)",
+                lbl_cust_layout: "自訂配置 (y, z, db)",
                 btn_gen: "從規則配置生成",
                 sum_paste: "貼上座標",
                 ph_paste_rebar: "複製欄位:\nz  y  db(cm)",
                 btn_load_rebar: "載入鋼筋",
-                th_x: "z (cm)", th_y: "x (cm)", th_db: "db (cm)",
+                th_x: "y (cm)", th_y: "z (cm)", th_db: "db (cm)",
                 btn_add_bar: "新增鋼筋",
 
                 sec_loads: "4. 極限載重 (Factored)",
-                lbl_vux: "全域 Vuz (tf)", lbl_vuy: "全域 Vux (tf)",
+                lbl_vux: "全域 Vuy (tf)", lbl_vuy: "全域 Vuz (tf)",
                 sum_paste_load: "批次貼上 (Excel)",
-                ph_paste_load: "從 Excel 複製:\nPu  Muz  Mux",
+                ph_paste_load: "從 Excel 複製:\nPu  Muy  Muz",
                 btn_load_data: "載入數據",
-                th_pu: "Pu (tf)", th_mux: "Muz (tf-m)", th_muy: "Mux (tf-m)",
+                th_pu: "Pu (tf)", th_mux: "Muy (tf-m)", th_muy: "Muz (tf-m)",
                 btn_add_case: "新增載重",
 
                 sec_shear: "5. 剪力設計 (Vu)",
@@ -1019,7 +1011,7 @@
                 rpt_case: "載重案例",
                 rpt_angle: "載重角度",
                 lbl_tie_db: "箍筋直徑 db (cm)", lbl_tie_s: "箍筋間距 s (cm)",
-                lbl_leg_x: "Z向 肢數 (Legs)", lbl_leg_y: "X向 肢數 (Legs)",
+                lbl_leg_x: "Y向 肢數 (Legs)", lbl_leg_y: "Z向 肢數 (Legs)",
                 lbl_legs_circ: "剪力肢數 (總數)",
                 rpt_res: "合力 (Resultant)",
 
@@ -1046,11 +1038,11 @@
                 rpt_tie: "箍筋", rpt_tie_sp: "箍筋間距",
                 rpt_legs: "剪力肢數",
                 rpt_param: "參數", rpt_app: "作用載重 (Active)", rpt_lim: "強度極限 (Max)", rpt_chk: "檢核",
-                rpt_ax: "軸力 (Pu)", rpt_mx: "彎矩 Z (Muz)", rpt_my: "彎矩 X (Mux)",
+                rpt_ax: "軸力 (Pu)", rpt_mx: "彎矩 Y (Muy)", rpt_my: "彎矩 Z (Muz)",
                 rpt_dc: "D/C 比",
                 rpt_stat: "交互作用狀態",
                 rpt_dir: "方向", rpt_dem: "剪力需求 (Vu)", rpt_prov: "提供肢數", rpt_cap_chk: "容量檢核",
-                rpt_xdir: "Z-方向", rpt_ydir: "X-方向",
+                rpt_xdir: "Y-方向", rpt_ydir: "Z-方向",
                 rpt_legs_w: "支 (沿寬度)", rpt_legs_d: "支 (沿深度)",
                 rpt_no_warn: "未產生警告訊息。",
                 rpt_footer: "由 RC Column 3D 工具生成",
@@ -1329,7 +1321,107 @@
             
             addLoadRow(200, 30, 15, 0);
         }
-        
+        // --- UI SCALING LOGIC ---
+        function makeUIResizable(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+
+            // 1. Force Transform Origin to Top-Left for predictable scaling
+            el.style.transformOrigin = "0 0";
+
+            // 2. Create Handle (Bottom-Right) if not exists
+            if (el.querySelector('.resize-handle')) return;
+
+            const handle = document.createElement('div');
+            handle.className = 'resize-handle absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize z-50 flex items-center justify-center bg-gray-200/50 hover:bg-eng-accent/80 rounded-tl-lg transition-colors';
+            handle.innerHTML = '<i class="fa-solid fa-expand text-[8px] text-gray-600"></i>';
+            el.appendChild(handle);
+            
+            const getScale = () => {
+                const match = el.style.transform.match(/scale\(([^)]+)\)/);
+                return match ? parseFloat(match[1]) : 1;
+            };
+
+            handle.addEventListener('mousedown', function(e) {
+                e.preventDefault();
+                e.stopPropagation(); // Prevent drag event
+                
+                const startX = e.clientX;
+                const startScale = getScale();
+                const startWidth = el.offsetWidth;
+                
+                const onMove = (em) => {
+                    em.preventDefault();
+                    em.stopPropagation();
+                    const dx = em.clientX - startX;
+                    const newScale = Math.max(0.5, (startWidth * startScale + dx) / startWidth);
+                    el.style.transform = `scale(${newScale})`;
+                };
+
+                const onUp = () => {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                };
+
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            });
+        }
+
+        function makeUIDraggable(elementId) {
+            const el = document.getElementById(elementId);
+            if (!el) return;
+
+            el.style.cursor = 'move';
+
+            el.addEventListener('mousedown', function(e) {
+                // Ignore inputs, buttons, and the resize handle
+                if (['INPUT', 'SELECT', 'BUTTON', 'TEXTAREA'].includes(e.target.tagName) || e.target.closest('.resize-handle')) {
+                    return;
+                }
+                
+                e.preventDefault();
+
+                // Correctly initialize Absolute Position relative to PARENT container
+                const computed = window.getComputedStyle(el);
+                if (computed.right !== 'auto' || computed.bottom !== 'auto') {
+                    // Capture current position relative to offset parent
+                    const currentLeft = el.offsetLeft;
+                    const currentTop = el.offsetTop;
+                    
+                    // Switch to explicit left/top positioning
+                    el.style.right = 'auto';
+                    el.style.bottom = 'auto';
+                    el.style.left = currentLeft + 'px';
+                    el.style.top = currentTop + 'px';
+                }
+
+                const startX = e.clientX;
+                const startY = e.clientY;
+                const startLeft = parseFloat(el.style.left) || 0;
+                const startTop = parseFloat(el.style.top) || 0;
+                
+                // Bring to front
+                el.style.zIndex = 1000;
+
+                const onMove = (em) => {
+                    em.preventDefault();
+                    const dx = em.clientX - startX;
+                    const dy = em.clientY - startY;
+                    el.style.left = (startLeft + dx) + 'px';
+                    el.style.top = (startTop + dy) + 'px';
+                };
+
+                const onUp = () => {
+                    document.removeEventListener('mousemove', onMove);
+                    document.removeEventListener('mouseup', onUp);
+                    el.style.zIndex = '';
+                };
+
+                document.addEventListener('mousemove', onMove);
+                document.addEventListener('mouseup', onUp);
+            });
+        }
         // --- 2. INITIALIZATION ---
         function init() {
             const container = document.getElementById('container-3d');
@@ -1370,9 +1462,9 @@
 
             // --- MODIFIED: Labels for Axes ---
             // Adjusted coordinates to sit at the tip of the arrows
-            addLabel("Mnz", 290, 16, 0, "#dc2626"); // Red
+            addLabel("Mny", 290, 16, 0, "#dc2626"); // Red
             addLabel("Pn", 16, 670, 0, "#15803d");  // Dark Green
-            addLabel("Mnx", 0, 16, 290, "#1d4ed8"); // Dark Blue
+            addLabel("Mnz", 0, 16, 290, "#1d4ed8"); // Dark Blue
 
             // Camera
             camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 5000);
@@ -1405,6 +1497,14 @@
             // Initial Calculation
             initTables();
             updateApp();
+            updateApp();
+
+            // Initialize Draggable & Resizable UI
+            makeUIResizable('ui-section');
+            makeUIDraggable('ui-section');
+
+            makeUIResizable('ui-legend');
+            makeUIDraggable('ui-legend');
         }
 
         function onWindowResize() {
@@ -1659,6 +1759,7 @@
                         Mnx += force * bar.x;
                     });
 
+                    // Check limiting tension (in kgf)
                     if (Pn > -Ast * fy * 1.5) {
                         let phi = phi_compression_base;
                         if (max_strain_t <= eps_y) {
@@ -1666,24 +1767,35 @@
                         } else if (max_strain_t >= 0.005) {
                             phi = 0.90;
                         } else {
-                            // Interpolate between phi_compression_base (0.65 or 0.75) and 0.90
+                            // Interpolate
                             phi = phi_compression_base + (0.90 - phi_compression_base) * (max_strain_t - eps_y) / (0.005 - eps_y);
                         }
 
+                        // UNIT CONVERSION:
+                        // Pn: kgf -> tf (divide by 1000)
+                        // Mn: kgf-cm -> tf-m (divide by 100,000)
+                        const Pn_tf = Pn / 1000;
+                        const Mnz_tfm = Mnz / 100000;
+                        const Mnx_tfm = Mnx / 100000;
+
                         curvePoints.push({
-                            Pn: Pn, Mnz: Mnz, Mnx: Mnx, phi: phi,
-                            phiPn: phi * Pn, phiMnz: phi * Mnz, phiMnx: phi * Mnx
+                            Pn: Pn_tf, Mnz: Mnz_tfm, Mnx: Mnx_tfm, phi: phi,
+                            phiPn: phi * Pn_tf, phiMnz: phi * Mnz_tfm, phiMnx: phi * Mnx_tfm
                         });
                     }
                 });
 
-                const Pnt = -Ast * fy;
-                curvePoints.push({ Pn: Pnt, Mnz: 0, Mnx: 0, phi: 0.9, phiPn: 0.9*Pnt, phiMnz: 0, phiMnx: 0 });
+                // Pure Tension Point (also convert units)
+                const Pnt_kgf = -Ast * fy;
+                const Pnt_tf = Pnt_kgf / 1000;
+                
+                curvePoints.push({ Pn: Pnt_tf, Mnz: 0, Mnx: 0, phi: 0.9, phiPn: 0.9*Pnt_tf, phiMnz: 0, phiMnx: 0 });
                 curvePoints.sort((a,b) => b.Pn - a.Pn);
                 curves.push(curvePoints);
             }
-
-            return { curves, Po: Po_nominal, rebarWarnings, isSpiral };
+            
+            // Convert Po (nominal axial capacity) to tf for later use
+            return { curves, Po: Po_nominal / 1000, rebarWarnings, isSpiral };
         }
         
         let nominalMesh; // Variable to hold the second mesh
@@ -2638,7 +2750,7 @@
             ctx.lineTo(ox + drawW/2 + 25, oy + drawH/2);
             ctx.strokeStyle = "#dc2626"; // Red
             ctx.stroke();
-            ctx.fillText("Z", ox + drawW/2 + 32, oy + drawH/2); // Changed "X" to "Z"
+            ctx.fillText("Y", ox + drawW/2 + 32, oy + drawH/2); // Changed "X" to "Z"
 
             // Y Axis Arrow -> CHANGE LABEL TO X
             ctx.beginPath();
@@ -2646,7 +2758,7 @@
             ctx.lineTo(ox + drawW/2, oy + drawH/2 - 25);
             ctx.strokeStyle = "#1d4ed8"; // Blue
             ctx.stroke();
-            ctx.fillText("X", ox + drawW/2, oy + drawH/2 - 32); // Changed "Y" to "X"
+            ctx.fillText("Z", ox + drawW/2, oy + drawH/2 - 32); // Changed "Y" to "X"
         }
         
         function toggleWireframe() {
@@ -2688,13 +2800,13 @@
 
             // X-Axis (Mnz)
             const xDist = maxMnz * vizScales.m;
-            addLabel3D(`+ϕMnz: ${maxMnz.toFixed(1)}`, xDist + offset, midY, 0, "#dc2626");
-            addLabel3D(`-ϕMnz: ${maxMnz.toFixed(1)}`, -(xDist + offset), midY, 0, "#dc2626");
+            addLabel3D(`+ϕMny: ${maxMnz.toFixed(1)}`, xDist + offset, midY, 0, "#dc2626");
+            addLabel3D(`-ϕMny: ${maxMnz.toFixed(1)}`, -(xDist + offset), midY, 0, "#dc2626");
 
             // Z-Axis (Mnx)
             const zDist = maxMnx * vizScales.m;
-            addLabel3D(`+ϕMnx: ${maxMnx.toFixed(1)}`, 0, midY, zDist + offset, "#1d4ed8");
-            addLabel3D(`-ϕMnx: ${maxMnx.toFixed(1)}`, 0, midY, -(zDist + offset), "#1d4ed8");
+            addLabel3D(`+ϕMnz: ${maxMnx.toFixed(1)}`, 0, midY, zDist + offset, "#1d4ed8");
+            addLabel3D(`-ϕMnz: ${maxMnx.toFixed(1)}`, 0, midY, -(zDist + offset), "#1d4ed8");
         }
 
         function addLabel3D(text, x, y, z, colorStr) {
@@ -2969,7 +3081,7 @@
                 // REVISED: Robust Bar Capture
                 bar: getVal('bar_size'), 
                 bar_text: document.getElementById('bar_size').options[document.getElementById('bar_size').selectedIndex].text,
-                nz: getVal('nz_bars'), nx: getVal('nx_bars'), n_circ: getVal('n_circ_bars'),
+                ny: getVal('nz_bars'), nz: getVal('nx_bars'), n_circ: getVal('n_circ_bars'),
                 
                 mode: document.querySelector('input[name="rebar_mode"]:checked').value,
                 
@@ -2978,9 +3090,9 @@
 
                 // ... (rest of loads and shear inputs) ...
                 Pu: getVal('global_vux') ? getText('disp_pu') : "-", 
-                Muz: getText('disp_mux'), Mux: getText('disp_muy'),
-                vux: document.getElementById('global_vux').value, 
-                vuy: document.getElementById('global_vuy').value,
+                Muy: getText('disp_mux'), Muz: getText('disp_muy'),
+                vuy: document.getElementById('global_vux').value, 
+                vuz: document.getElementById('global_vuy').value,
                 s_tie: getVal('shear_s'), db_tie: getVal('shear_db'),
                 legs_x: getVal('shear_nz'), legs_y: getVal('shear_nx')
             };
@@ -2990,8 +3102,8 @@
                 dc: getText('dc-val'),
                 status: getText('safety-msg'),
                 phiPn: getText('max_phi_pn'),
-                phiMnz: getText('max_phi_mnz'),
-                phiMnx: getText('max_phi_mnx'),
+                phiMny: getText('max_phi_mnz'),
+                phiMnz: getText('max_phi_mnx'),
                 warnings: document.getElementById('code-warnings').innerHTML
             };
 
@@ -3056,7 +3168,7 @@
                         appendixHTML += `
                             <div style="border: 1px solid #eee; padding: 10px; page-break-inside: avoid;">
                                 <div style="font-size: 9pt; font-weight: bold; border-bottom: 1px solid #eee; margin-bottom: 5px; padding-bottom: 2px;">
-                                    #${idx+1}: Pu=${Pu}, Mz=${Muz}, Mx=${Mux} (θ=${angleDeg}°)
+                                    #${idx+1}: Pu=${Pu}, My=${Muz}, Mz=${Mux} (θ=${angleDeg}°)
                                 </div>
                                 <img src="${chartImg}" style="width: 100%; height: auto;">
                             </div>
@@ -3080,7 +3192,7 @@
                 legsDisplayHTML = `${I.legs_circ} (${t('lbl_legs_circ')}) - <strong>${typeText}</strong>`;
                 // END MODIFICATION
             } else {
-                legsDisplayHTML = `Z: ${I.legs_x} ${t('rpt_legs_d')} / X: ${I.legs_y} ${t('rpt_legs_w')}`;
+                legsDisplayHTML = `Y: ${I.legs_x} ${t('rpt_legs_d')} / Z: ${I.legs_y} ${t('rpt_legs_w')}`;
             }
 
             // LOGIC: Determine Shear Table Rows based on Shape
@@ -3099,12 +3211,12 @@
                 shearTableRows = `
                     <tr>
                         <td><strong>${t('rpt_xdir')}</strong></td>
-                        <td>${I.vux} tf</td>
+                        <td>${I.vuy} tf</td>
                         <td>${I.legs_y} ${t('rpt_legs_w')}</td> <td>-</td>
                     </tr>
                     <tr>
                         <td><strong>${t('rpt_ydir')}</strong></td>
-                        <td>${I.vuy} tf</td>
+                        <td>${I.vuz} tf</td>
                          <td>${I.legs_x} ${t('rpt_legs_d')}</td>
                         <td>-</td>
                     </tr>
@@ -3209,12 +3321,12 @@
                     <tr>
                         <td><strong>${t('rpt_mx')}</strong></td>
                         <td>${I.Muz} tf-m</td>
-                        <td>ϕMnz(max) = ${R.phiMnz} tf-m</td>
+                        <td>ϕMny(max) = ${R.phiMnz} tf-m</td>
                     </tr>
                     <tr>
                         <td><strong>${t('rpt_my')}</strong></td>
                         <td>${I.Mux} tf-m</td>
-                        <td>ϕMnx(max) = ${R.phiMnx} tf-m</td>
+                        <td>ϕMnz(max) = ${R.phiMnx} tf-m</td>
                     </tr>
                 </table>
                 <div style="background: ${parseFloat(R.dc) > 1 ? '#fee2e2' : '#dcfce7'}; padding: 10px; border-radius: 4px; text-align: center; font-weight: bold; color: ${parseFloat(R.dc) > 1 ? '#991b1b' : '#166534'}; margin-bottom: 20px;">
