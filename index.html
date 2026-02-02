@@ -963,7 +963,7 @@
 
                 // App Headers (Restored/Merged from original logic to match EN)
                 app_title: "RC 鋼筋混凝土柱 3D 交互作用",
-                app_desc: "雙向彎矩強度分析 (台灣規範 112)",
+                app_desc: "雙向彎矩強度分析 (建築物混凝土結構設計規範 112)",
                 status_ready: "就緒",
                 opt_title: "自動優化",
                 opt_lock: "鎖定屬性 (保持不變):",
@@ -1039,7 +1039,7 @@
                 rpt_legs: "剪力肢數",
                 rpt_param: "參數", rpt_app: "作用載重 (Active)", rpt_lim: "強度極限 (Max)", rpt_chk: "檢核",
                 rpt_ax: "軸力 (Pu)", rpt_mx: "彎矩 Y (Muy)", rpt_my: "彎矩 Z (Muz)",
-                rpt_dc: "D/C 比",
+                rpt_dc: "D/C Ratio",
                 rpt_stat: "交互作用狀態",
                 rpt_dir: "方向", rpt_dem: "剪力需求 (Vu)", rpt_prov: "提供肢數", rpt_cap_chk: "容量檢核",
                 rpt_xdir: "Y-方向", rpt_ydir: "Z-方向",
@@ -3066,43 +3066,69 @@
         // --- REPORT GENERATION ---
         window.printReport = function() {
             // 1. Gather Data
-            const getVal = (id) => document.getElementById(id).value;
-            const getText = (id) => document.getElementById(id).innerText;
+            const getVal = (id) => {
+                const el = document.getElementById(id);
+                return el ? el.value : '';
+            };
+            const getText = (id) => {
+                const el = document.getElementById(id);
+                return el ? el.innerText : '';
+            };
             
             // Inputs
             const I = {
                 shape: getVal('col_shape'),
                 legs_circ: getVal('shear_legs_circ'),
                 circ_type: document.querySelector('input[name="circ_type"]:checked')?.value || 'hoop',
-                b: getVal('col_b'), h: getVal('col_h'), cover: getVal('col_cover'),
-                fc: getVal('mat_fc'), fy: getVal('mat_fy'),
+                
+                b: getVal('col_b'), 
+                h: getVal('col_h'), 
+                cover: getVal('col_cover'),
+                fc: getVal('mat_fc'), 
+                fy: getVal('mat_fy'),
                 lu: getVal('col_lu'),
                 
-                // REVISED: Robust Bar Capture
+                // Rebar Info
                 bar: getVal('bar_size'), 
-                bar_text: document.getElementById('bar_size').options[document.getElementById('bar_size').selectedIndex].text,
-                ny: getVal('nz_bars'), nz: getVal('nx_bars'), n_circ: getVal('n_circ_bars'),
+                bar_text: document.getElementById('bar_size') ? document.getElementById('bar_size').options[document.getElementById('bar_size').selectedIndex].text : '',
+                
+                // FIX: Correctly map IDs to logical names (Z and X axes)
+                nz: getVal('nz_bars'), // Was potentially mis-mapped
+                nx: getVal('nx_bars'),
+                n_circ: getVal('n_circ_bars'),
                 
                 mode: document.querySelector('input[name="rebar_mode"]:checked').value,
                 
                 // Count custom bars if needed
                 custom_count: document.querySelectorAll('#table-rebar tbody tr').length,
 
-                // ... (rest of loads and shear inputs) ...
+                // Loads
                 Pu: getVal('global_vux') ? getText('disp_pu') : "-", 
-                Muy: getText('disp_mux'), Muz: getText('disp_muy'),
-                vuy: document.getElementById('global_vux').value, 
-                vuz: document.getElementById('global_vuy').value,
-                s_tie: getVal('shear_s'), db_tie: getVal('shear_db'),
-                legs_x: getVal('shear_nz'), legs_y: getVal('shear_nx')
+                // FIX: Map Display IDs to Logical Report Variables based on Axis Swap
+                // disp_mux label is "Muy", so map to Muy
+                Muy: getText('disp_mux'), 
+                // disp_muy label is "Muz", so map to Muz
+                Muz: getText('disp_muy'),
+                
+                // Shear Inputs
+                vuy: document.getElementById('global_vux').value, // Input 1 (Global Vuy)
+                vuz: document.getElementById('global_vuy').value, // Input 2 (Global Vuz)
+                
+                s_tie: getVal('shear_s'), 
+                db_tie: getVal('shear_db'),
+                legs_z: getVal('shear_nz'), // Input 1 (Z-dir legs)
+                legs_x: getVal('shear_nx')  // Input 2 (X-dir legs)
             };
 
-            // ... (Results object R remains same) ...
+            // Results
             const R = {
                 dc: getText('dc-val'),
                 status: getText('safety-msg'),
                 phiPn: getText('max_phi_pn'),
+                // FIX: Map Capacity IDs to Report Variables
+                // max_phi_mnz label is "phiMny", so map to phiMny
                 phiMny: getText('max_phi_mnz'),
+                // max_phi_mnx label is "phiMnz", so map to phiMnz
                 phiMnz: getText('max_phi_mnx'),
                 warnings: document.getElementById('code-warnings').innerHTML
             };
@@ -3122,7 +3148,6 @@
             
             if (appOpt !== 'none') {
                 // A. 3D Snapshot
-                // Force a render to ensure buffer is populated
                 renderer.render(scene, camera); 
                 const img3D = renderer.domElement.toDataURL("image/png");
                 
@@ -3143,32 +3168,31 @@
                 let count = 0;
                 const limit = appOpt === 'summary' ? 5 : 9999;
                 
-                // We need to iterate over DOM rows to get values
-                // Use Array.from to allow async/looping
                 Array.from(loadRows).forEach((row, idx) => {
                     if (count >= limit) return;
                     
                     const inputs = row.querySelectorAll('input');
                     const Pu = parseFloat(inputs[0].value) || 0;
-                    const Muz = parseFloat(inputs[1].value) || 0;
-                    const Mux = parseFloat(inputs[2].value) || 0;
+                    const Muy = parseFloat(inputs[1].value) || 0; // Col 2 is Muy
+                    const Muz = parseFloat(inputs[2].value) || 0; // Col 3 is Muz
                     
                     // Calculate Resultant and Angle
-                    const Mu_res = Math.sqrt(Muz**2 + Mux**2);
-                    let angleRad = Math.atan2(Mux, Muz);
+                    // Note: Calculation engine uses (Mz, Mx) order often, but for drawing we just need magnitude and direction
+                    // If we treat Muz as X and Muy as Y for local plotting:
+                    const Mu_res = Math.sqrt(Muz**2 + Muy**2);
+                    let angleRad = Math.atan2(Muz, Muy); // atan2(y, x) -> atan2(Muz, Muy)
                     
                     // Get Curve
                     const curve = getCurveAtAngle(angleRad);
                     
                     if (curve.length > 0) {
-                        // Draw Chart
                         const chartImg = drawInteractionChart(curve, Pu, Mu_res, 350, 350);
                         const angleDeg = (angleRad * 180 / Math.PI).toFixed(1);
                         
                         appendixHTML += `
                             <div style="border: 1px solid #eee; padding: 10px; page-break-inside: avoid;">
                                 <div style="font-size: 9pt; font-weight: bold; border-bottom: 1px solid #eee; margin-bottom: 5px; padding-bottom: 2px;">
-                                    #${idx+1}: Pu=${Pu}, My=${Muz}, Mz=${Mux} (θ=${angleDeg}°)
+                                    #${idx+1}: Pu=${Pu}, My=${Muy}, Mz=${Muz} (θ=${angleDeg}°)
                                 </div>
                                 <img src="${chartImg}" style="width: 100%; height: auto;">
                             </div>
@@ -3180,48 +3204,131 @@
                 appendixHTML += `</div>`;
             }
 
-            // LOGIC: Determine Reinforcement Text based on Shape
+            // LOGIC: Determine Reinforcement Text
             let legsDisplayHTML = "";
             if (I.shape === 'circ') {
-                // START MODIFICATION
-                // Determine translation key based on value
                 const typeKey = I.circ_type === 'spiral' ? 'lbl_spiral' : 'lbl_hoop';
-                // Use t() to get the translated string
                 const typeText = t(typeKey);
-                
                 legsDisplayHTML = `${I.legs_circ} (${t('lbl_legs_circ')}) - <strong>${typeText}</strong>`;
-                // END MODIFICATION
             } else {
-                legsDisplayHTML = `Y: ${I.legs_x} ${t('rpt_legs_d')} / Z: ${I.legs_y} ${t('rpt_legs_w')}`;
+                legsDisplayHTML = `Z: ${I.legs_z} ${t('rpt_legs_d')} / X: ${I.legs_x} ${t('rpt_legs_w')}`;
             }
 
-            // LOGIC: Determine Shear Table Rows based on Shape
+            // LOGIC: Shear Calculations & Table
             let shearTableRows = "";
+            
+            // Re-calculate Shear Capacities locally for report to show ratios
+            const Ag = (I.shape === 'rect') ? (parseFloat(I.b) * parseFloat(I.h)) : (Math.PI * Math.pow(parseFloat(I.b)/2, 2));
+            const fc = parseFloat(I.fc);
+            const fy = parseFloat(I.fy);
+            const db_tie = parseFloat(I.db_tie);
+            const s_tie = parseFloat(I.s_tie);
+            const cover = parseFloat(I.cover);
+            
+            // Tie Area (One leg)
+            const Av_tie = Math.PI * Math.pow(db_tie/2, 2);
+            
+            // Helper: Calc PhiVn (0.75 * (Vc + Vs)) - Standard ACI/Taiwan 112 Eq
+            const calcShearCap = (bw, d, legs, Pu_val) => {
+                const Nu_kg = Pu_val * 1000; // Axial Load in kgf (Positive = Compression)
+                
+                // 1. Calculate Vc (Concrete Contribution)
+                let Vc = 0;
+                if (Nu_kg >= 0) {
+                    // Compression: Vc = 0.53 * (1 + Nu/(140*Ag)) * sqrt(fc) * bw * d
+                    const term_axial = 1 + (Nu_kg / (140 * Ag));
+                    const stress_vc = 0.53 * Math.sqrt(fc) * term_axial;
+                    Vc = stress_vc * bw * d; // Result in kgf
+                } else {
+                    // Tension: Vc = 0 (Conservative / Simplified)
+                    Vc = 0;
+                }
+
+                // Seismic Check: Vc = 0 if Special Moment Frame & Low Axial (< Ag*fc/20)
+                const isSeismic = document.getElementById('seismic_mode').checked;
+                if (isSeismic && Nu_kg < (Ag * fc) / 20) {
+                    Vc = 0;
+                }
+
+                // 2. Calculate Vs (Steel Contribution)
+                // Vs = (Av * fy * d) / s
+                const Vs = (legs * Av_tie * fy * d) / s_tie; // kgf
+
+                // 3. Check Vs Max Limit
+                // Vs <= 2.12 * sqrt(fc) * bw * d
+                const Vs_max = 2.12 * Math.sqrt(fc) * bw * d; // kgf
+                
+                // 4. Final Capacity in Ton-Force (tf)
+                const Vn = Vc + Math.min(Vs, Vs_max);
+                const phi = 0.75;
+                
+                return (phi * Vn) / 1000; 
+            };
+
+            // Parse Demands
+            const Vuy_demand = Math.abs(parseFloat(I.vuy) || 0);
+            const Vuz_demand = Math.abs(parseFloat(I.vuz) || 0);
+            const Pu_calc = parseFloat(I.Pu) || 0; 
+
             if (I.shape === 'circ') {
-                const vu_res = Math.sqrt(parseFloat(I.vux)**2 + parseFloat(I.vuy)**2).toFixed(2);
+                // --- Circular ---
+                const D = parseFloat(I.b);
+                const d_eff = 0.8 * D;
+                const legs = parseFloat(I.legs_circ);
+                const Vu_res = Math.sqrt(Vuy_demand**2 + Vuz_demand**2);
+                
+                const phiVn = calcShearCap(D, d_eff, legs, Pu_calc);
+                const ratio = phiVn > 0 ? (Vu_res / phiVn) : 999;
+                const status = ratio <= 1.0 ? `<span class="pass">OK</span>` : `<span class="fail">FAIL</span>`;
+
                 shearTableRows = `
                     <tr>
                         <td><strong>${t('rpt_res')}</strong></td>
-                        <td>${vu_res} tf</td>
+                        <td>${Vu_res.toFixed(2)} tf</td>
                         <td>${I.legs_circ} (${t('lbl_legs_circ')})</td>
-                        <td>-</td>
+                        <td>ϕVn=${phiVn.toFixed(2)} tf <br> (D/C: ${ratio.toFixed(2)}) ${status}</td>
                     </tr>
                 `;
             } else {
+                // --- Rectangular ---
+                const h_dim = parseFloat(I.h); // Z dimension
+                const b_dim = parseFloat(I.b); // Y dimension
+                const bar_db = I.bar > 0 ? Math.sqrt(parseFloat(I.bar) * 4 / Math.PI) : 1.27;
+
+                // Effective depths (approx d = dim - cover - tie - db/2)
+                const d_y = b_dim - cover - db_tie - bar_db/2; // For Shear Y (Width)
+                const d_z = h_dim - cover - db_tie - bar_db/2; // For Shear Z (Depth)
+
+                // 1. Capacity Y (Resisting Vuy)
+                // bw = h (thickness perp to shear Y), d = d_y
+                // Resisted by Legs Y (shear_nx -> I.legs_x)
+                const legs_y = parseFloat(I.legs_x); 
+                const phiVny = calcShearCap(h_dim, d_y, legs_y, Pu_calc);
+                const ratio_y = phiVny > 0 ? (Vuy_demand / phiVny) : 999;
+                const status_y = ratio_y <= 1.0 ? `<span class="pass">OK</span>` : `<span class="fail">FAIL</span>`;
+
+                // 2. Capacity Z (Resisting Vuz)
+                // bw = b (thickness perp to shear Z), d = d_z
+                // Resisted by Legs Z (shear_nz -> I.legs_z)
+                const legs_z = parseFloat(I.legs_z); 
+                const phiVnz = calcShearCap(b_dim, d_z, legs_z, Pu_calc);
+                const ratio_z = phiVnz > 0 ? (Vuz_demand / phiVnz) : 999;
+                const status_z = ratio_z <= 1.0 ? `<span class="pass">OK</span>` : `<span class="fail">FAIL</span>`;
+
                 shearTableRows = `
                     <tr>
-                        <td><strong>${t('rpt_xdir')}</strong></td>
-                        <td>${I.vuy} tf</td>
-                        <td>${I.legs_y} ${t('rpt_legs_w')}</td> <td>-</td>
+                        <td><strong>${t('rpt_xdir')}</strong></td> <td>${Vuy_demand.toFixed(2)} tf</td>
+                        <td>${legs_y} ${t('rpt_legs_w')}</td>
+                        <td>ϕVn=${phiVny.toFixed(2)} tf <br> (D/C: ${ratio_y.toFixed(2)}) ${status_y}</td>
                     </tr>
                     <tr>
-                        <td><strong>${t('rpt_ydir')}</strong></td>
-                        <td>${I.vuz} tf</td>
-                         <td>${I.legs_x} ${t('rpt_legs_d')}</td>
-                        <td>-</td>
+                        <td><strong>${t('rpt_ydir')}</strong></td> <td>${Vuz_demand.toFixed(2)} tf</td>
+                        <td>${legs_z} ${t('rpt_legs_d')}</td>
+                        <td>ϕVn=${phiVnz.toFixed(2)} tf <br> (D/C: ${ratio_z.toFixed(2)}) ${status_z}</td>
                     </tr>
                 `;
             }
+
             // LOGIC: Determine Dimension Text
             let dimDisplay = "";
             if (I.shape === 'circ') {
@@ -3229,17 +3336,20 @@
             } else {
                 dimDisplay = `${I.b} x ${I.h} cm`;
             }
+
+            // LOGIC: Config Display (Fix Undefined)
             let confDisplay = "";
             if (I.mode === 'custom') {
                 confDisplay = `${t('lbl_cust')} (${I.custom_count} ${t('rpt_bars')})`;
             } else {
                 if (I.shape === 'circ') {
-                    // Fallback to "0" if undefined to prevent "undefined Bars"
                     confDisplay = `${I.n_circ || 0} ${t('rpt_bars')}`; 
                 } else {
+                    // Fix: Use correct I.nz and I.nx
                     confDisplay = `${I.nz} x ${I.nx} ${t('rpt_bars')}`;
                 }
             }
+
             // 4. Build HTML Report
             let html = `
                 <div class="rpt-header">
@@ -3275,7 +3385,7 @@
                                 <td><strong>${t('rpt_len')}</strong></td>
                                 <td>${I.lu} m</td>
                                 <td><strong>${t('rpt_mod')}</strong></td>
-                                <td>${I.mode.toUpperCase()}</td>
+                                <td>${I.mode === 'regular' ? t('lbl_reg') : t('lbl_cust')}</td>
                             </tr>
                         </table>
                     </div>
@@ -3319,14 +3429,14 @@
                         </td>
                     </tr>
                     <tr>
-                        <td><strong>${t('rpt_mx')}</strong></td>
-                        <td>${I.Muz} tf-m</td>
-                        <td>ϕMny(max) = ${R.phiMnz} tf-m</td>
+                        <td><strong>${t('rpt_mx')}</strong></td> <!-- Muy -->
+                        <td>${I.Muy} tf-m</td>
+                        <td>ϕMny(max) = ${R.phiMny} tf-m</td>
                     </tr>
                     <tr>
-                        <td><strong>${t('rpt_my')}</strong></td>
-                        <td>${I.Mux} tf-m</td>
-                        <td>ϕMnz(max) = ${R.phiMnx} tf-m</td>
+                        <td><strong>${t('rpt_my')}</strong></td> <!-- Muz -->
+                        <td>${I.Muz} tf-m</td>
+                        <td>ϕMnz(max) = ${R.phiMnz} tf-m</td>
                     </tr>
                 </table>
                 <div style="background: ${parseFloat(R.dc) > 1 ? '#fee2e2' : '#dcfce7'}; padding: 10px; border-radius: 4px; text-align: center; font-weight: bold; color: ${parseFloat(R.dc) > 1 ? '#991b1b' : '#166534'}; margin-bottom: 20px;">
