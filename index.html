@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D RC Column Interaction (Biaxial)</title>
-
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 64 64%22><rect width=%2264%22 height=%2264%22 fill=%22%230e7490%22/></svg>" type="image/svg+xml">
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -15,7 +13,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -42,8 +39,6 @@
         .btn-icon:hover { color: #dc2626; }
         .btn-add { width: 100%; padding: 4px; background: #f1f5f9; border: 1px dashed #cbd5e1; text-align: center; font-size: 0.75rem; color: #64748b; cursor: pointer; margin-top: 4px; border-radius: 4px; }
         .btn-add:hover { background: #e2e8f0; color: #0f172a; }
-        
-        /* --- Dark Mode Overrides --- */
         .dark body { background-color: #0f172a; color: #f1f5f9; }
         .dark #sidebar { background-color: #1e293b; border-color: #334155; }
         .dark .input-group label { color: #94a3b8; }
@@ -58,8 +53,6 @@
         .dark .border-gray-200, .dark .border-gray-300, .dark .border-blue-100 { border-color: #334155 !important; }
         .dark .text-slate-800 { color: #f1f5f9 !important; }
         .dark .text-gray-500, .dark .text-gray-600, .dark .text-gray-700 { color: #94a3b8 !important; }
-        
-        /* Specific Panel Fixes */
         .dark .bg-amber-50 { background-color: #451a03 !important; border-color: #78350f !important; }
         .dark .text-amber-800 { color: #fbbf24 !important; }
         .dark .text-amber-900 { color: #fde68a !important; }
@@ -68,43 +61,29 @@
         .dark td { border-color: #475569 !important; }
         .dark .btn-add { background-color: #334155; color: #94a3b8; border-color: #475569; }
         .dark .btn-add:hover { background-color: #475569; color: #fff; }
-        
-        /* Dark Mode Overrides for Floating Panels */
         .dark .absolute.bottom-4.right-4, 
         .dark .absolute.top-4.right-4 {
-            background-color: rgba(30, 41, 59, 0.95) !important; /* Slate-800 */
+            background-color: rgba(30, 41, 59, 0.95) !important; 
             border-color: #475569;
             color: #f1f5f9;
         }
-        .dark .absolute.bottom-4.right-4 { border-left-color: #fbbf24 !important; } /* Accent color border */
-        
-        /* Text Colors in Panel */
+        .dark .absolute.bottom-4.right-4 { border-left-color: #fbbf24 !important; } 
         .dark h4.text-gray-500 { color: #94a3b8 !important; }
         .dark .text-gray-700 { color: #e2e8f0 !important; }
         .dark .text-gray-600 { color: #cbd5e1 !important; }
-        .dark .text-eng-primary { color: #38bdf8 !important; } /* Lighter blue */
-        
-        /* Status Badges */
+        .dark .text-eng-primary { color: #38bdf8 !important; } 
         .dark #safety-msg.bg-green-100 { background-color: #064e3b !important; color: #6ee7b7 !important; }
         .dark #safety-msg.bg-red-100 { background-color: #7f1d1d !important; color: #fca5a5 !important; }
-        
-        /* Warning List Items */
         .dark #code-warnings .text-green-700 { color: #4ade80 !important; }
         .dark #code-warnings .text-red-600 { color: #f87171 !important; }
         .dark #code-warnings .text-amber-600 { color: #fbbf24 !important; }
         .dark #code-warnings .text-gray-400 { color: #94a3b8 !important; }
         .dark #code-warnings .border-b { border-color: #334155 !important; }
-        /* --- REPORT PRINTING STYLES --- */
         #print-staging { display: none; }
-
         @media print {
             @page { size: A4; margin: 15mm; }
-            
-            /* Hide UI Elements */
             body > nav, 
             body > div.flex { display: none !important; }
-            
-            /* Show Staging Area */
             #print-staging { 
                 display: block !important; 
                 position: absolute;
@@ -116,39 +95,31 @@
                 font-family: 'Segoe UI', sans-serif;
                 font-size: 10pt;
             }
-
-            /* Report Styling */
             .rpt-header {
                 display: flex; justify-content: space-between; align-items: flex-end;
                 border-bottom: 2px solid #0e7490; padding-bottom: 10px; margin-bottom: 20px;
             }
             .rpt-title { color: #0e7490; font-size: 18pt; font-weight: bold; margin: 0; }
             .rpt-subtitle { font-size: 10pt; color: #555; margin: 2px 0 0 0; }
-            
             h3 { 
                 color: #1e293b; font-size: 12pt; margin-top: 20px; margin-bottom: 10px; 
                 background: #f1f5f9; padding: 5px 10px; font-weight: bold; border-left: 4px solid #0e7490;
             }
-            
             table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 9pt; }
             th { background-color: #0e7490; color: white; padding: 6px; text-align: left; font-weight: bold; }
             td { border: 1px solid #cbd5e1; padding: 6px; vertical-align: middle; }
             tr:nth-child(even) { background-color: #f8fafc; }
-            
             .pass { color: #15803d; font-weight: bold; }
             .fail { color: #dc2626; font-weight: bold; }
             .warn { color: #d97706; font-weight: bold; }
-            
             .page-break { break-before: page; }
         }
     </style>
 </head>
 <!-- REPLACE the <nav> and the opening of the main container div with this: -->
 <body class="bg-gray-100 text-slate-800 h-screen flex flex-col overflow-hidden">
-
     <nav class="bg-eng-primary text-white shadow-lg z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            
             <div class="flex items-center gap-3">
                 <button onclick="toggleSidebar()" class="text-white hover:text-eng-accent focus:outline-none">
                     <i class="fa-solid fa-bars text-xl"></i>
@@ -159,7 +130,6 @@
                     <p class="text-xs opacity-80 font-light" data-i18n="app_desc">Biaxial Bending Capacity (Taiwan Code 112)</p>
                 </div>
             </div>
-
             <div id="auth-section" class="flex items-center gap-2">
                 <button onclick="toggleHistoryModal()" class="text-white/80 hover:text-white px-2 transition" title="Database">
                     <i class="fa-solid fa-database"></i>
@@ -173,11 +143,9 @@
                 <button onclick="toggleLanguage()" class="bg-eng-dark hover:bg-cyan-800 text-white px-3 py-1.5 rounded text-xs font-bold border border-cyan-600 transition flex items-center">
                     <i class="fa-solid fa-language mr-1"></i> <span id="lang-label">中文</span>
                 </button>
-
                 <button id="login-btn" onclick="openAuthModal()" class="bg-white text-eng-primary px-4 py-1.5 rounded text-sm font-bold shadow hover:bg-gray-100 transition">
                     <i class="fa-solid fa-user mr-2"></i><span data-i18n="btn_login">Login</span>
                 </button>
-
                 <div id="user-info" class="hidden flex items-center space-x-3">
                     <span id="user-email" class="text-xs opacity-90 hidden sm:inline font-mono bg-eng-dark px-2 py-1 rounded border border-cyan-600"></span>
                     <button onclick="auth.signOut()" class="text-sm hover:text-red-300 transition" title="Logout">
@@ -187,46 +155,38 @@
             </div>
         </div>
     </nav>
-
     <!-- Auth Modal -->
     <div id="auth-modal" class="fixed inset-0 bg-slate-900 bg-opacity-70 flex items-center justify-center z-50 hidden backdrop-blur-sm">
         <div class="bg-white rounded-lg shadow-2xl p-8 w-11/12 max-w-sm border-t-4 border-eng-primary">
             <h2 class="text-2xl font-bold mb-2 text-center text-eng-primary" data-i18n="modal_title">Access Portal</h2>
             <p class="text-gray-500 mb-4 text-center text-sm" data-i18n="modal_desc">Sign in to sync your data across devices.</p>
-
             <div class="space-y-3 mb-4">
                 <input type="email" id="auth-email" placeholder="Email" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-eng-primary outline-none">
                 <input type="password" id="auth-password" placeholder="Password" class="w-full border rounded p-2 text-sm focus:ring-2 focus:ring-eng-primary outline-none">
             </div>
-
             <div class="flex gap-2 mb-4">
                 <button id="email-login-btn" class="flex-1 bg-eng-primary text-white py-2 rounded text-sm font-bold hover:bg-blue-800 transition" data-i18n="btn_login_submit">Login</button>
                 <button id="email-register-btn" class="flex-1 bg-white text-eng-primary border border-eng-primary py-2 rounded text-sm font-bold hover:bg-blue-50 transition" data-i18n="btn_register">Register</button>
             </div>
-
             <div class="relative flex py-2 items-center">
                 <div class="flex-grow border-t border-gray-300"></div>
                 <span class="flex-shrink mx-4 text-gray-400 text-xs">OR</span>
                 <div class="flex-grow border-t border-gray-300"></div>
             </div>
-
             <button id="guest-login" class="w-full bg-gray-200 text-gray-700 py-2 rounded mb-3 text-sm font-semibold hover:bg-gray-300 transition shadow-sm" data-i18n="btn_guest">
                 Continue as Guest
             </button>
             <p id="auth-error" class="text-xs text-red-500 text-center hidden mt-2"></p>
         </div>
     </div>
-
     <!-- Main Content Container (Flex Row: Sidebar Left, 3D Right) -->
     <div class="flex flex-1 overflow-hidden relative">
-        
         <!-- Sidebar -->
         <div id="sidebar" class="w-96 bg-white border-r border-gray-200 overflow-y-auto flex-shrink-0 z-40 shadow-md transition-all duration-300 ease-in-out transform translate-x-0">
             <div class="p-4 space-y-6">
                 <!-- 1. Section Geometry -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_geo">1. Section Geometry</h3>
-                    
                     <!-- Shape Selector -->
                     <div class="mb-2">
                         <label class="text-xs font-bold text-gray-500 block mb-1" data-i18n="lbl_shape">Section Shape</label>
@@ -235,7 +195,6 @@
                             <option value="circ" data-i18n="opt_circ">Circular</option>
                         </select>
                     </div>
-
                     <div class="grid grid-cols-2 gap-3">
                         <div class="input-group">
                             <label id="lbl_dim1" data-i18n="lbl_width">Width b (cm)</label>
@@ -246,7 +205,6 @@
                             <input type="number" id="col_h" value="60" min="20" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm focus:ring-2 focus:ring-eng-primary outline-none" oninput="updateApp()">
                         </div>
                     </div>
-
                     <div class="input-group mt-2">
                         <label data-i18n="lbl_cover">Clear Cover (cm)</label>
                         <input type="number" id="col_cover" value="4.0" min="4.0" max="15.0" step="0.1" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm focus:ring-2 focus:ring-eng-primary outline-none" oninput="updateApp()">
@@ -256,7 +214,6 @@
                         <input type="number" id="col_lu" value="3.0" min="0.1" step="0.1" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm focus:ring-2 focus:ring-eng-primary outline-none" oninput="updateApp()">
                     </div>
                 </div>
-
                 <!-- 2. Materials -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_mat">2. Materials</h3>
@@ -271,16 +228,13 @@
                         </div>
                     </div>
                 </div>
-
                 <!-- 3. Reinforcement -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_rebar">3. Reinforcement</h3>
-                    
                     <div class="flex gap-2 mb-2 text-xs">
                         <label class="flex items-center"><input type="radio" name="rebar_mode" value="regular" checked onchange="toggleRebarMode()"> <span class="ml-1" data-i18n="lbl_reg">Regular</span></label>
                         <label class="flex items-center"><input type="radio" name="rebar_mode" value="custom" onchange="toggleRebarMode()"> <span class="ml-1" data-i18n="lbl_cust">Custom</span></label>
                     </div>
-
                     <div id="rebar-regular">
                         <div class="input-group">
                             <label data-i18n="lbl_size">Rebar Size (Ab)</label>
@@ -310,7 +264,6 @@
                             </div>
                         </div>
                     </div>
-
                     <div id="rebar-custom" class="hidden">
                         <label class="text-xs font-bold text-gray-500 mb-1 block" data-i18n="lbl_cust_layout">Custom Layout (y, z, db)</label>
                         <button class="w-full bg-eng-secondary text-eng-dark border border-eng-primary text-xs font-bold py-1.5 px-2 rounded mb-2 hover:bg-eng-primary hover:text-white transition" onclick="importRegularToCustom()">
@@ -321,7 +274,6 @@
                             <textarea id="paste_rebar" placeholder="Copy columns: z  y  db(cm)" class="w-full h-16 border rounded p-1 text-[10px] font-mono mt-1"></textarea>
                             <button onclick="parseCustomRebar()" class="w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-2 py-1 rounded mt-1" data-i18n="btn_load_rebar">Load Rebar</button>
                         </details>
-
                         <table class="data-table" id="table-rebar">
                             <thead>
                                 <tr>
@@ -338,13 +290,11 @@
                         </button>
                     </div>
                 </div>
-
                 <!-- 4. Loads -->
                 <div class="space-y-3 bg-gray-50 p-3 rounded border border-gray-200">
                     <div class="flex justify-between items-center border-b pb-1 border-red-200">
                         <h3 class="text-sm font-bold text-red-600" data-i18n="sec_loads">4. Factored Loads</h3>
                     </div>
-                    
                     <div class="grid grid-cols-2 gap-2 mb-2">
                         <div class="input-group flex flex-col bg-white p-2 rounded border border-blue-100">
                             <label class="text-blue-800 text-xs" data-i18n="lbl_vux">Global Vuy (tf)</label>
@@ -355,13 +305,11 @@
                             <input type="number" id="global_vuy" value="5" class="w-full border border-blue-300 rounded p-1 text-right text-sm font-bold text-blue-700 bg-blue-50" oninput="updateApp()">
                         </div>
                     </div>
-
                     <details class="text-xs mb-2">
                         <summary class="cursor-pointer text-gray-500 hover:text-eng-primary" data-i18n="sum_paste_load">Batch Paste (Excel)</summary>
                         <textarea id="paste_loads" placeholder="Copy columns from Excel: Pu  Muy  Muz" class="w-full h-16 border rounded p-1 text-[10px] font-mono mt-1"></textarea>
                         <button onclick="parseLoads()" class="w-full bg-white border border-gray-300 hover:bg-gray-100 text-gray-700 px-2 py-1 rounded mt-1" data-i18n="btn_load_data">Load Data</button>
                     </details>
-
                     <div class="mt-2 max-h-40 overflow-y-auto">
                         <table class="data-table" id="table-loads">
                             <thead class="sticky top-0 bg-gray-100 z-10 shadow-sm">
@@ -379,7 +327,6 @@
                         <i class="fa-solid fa-plus mr-1"></i> <span data-i18n="btn_add_case">Add Load Case</span>
                     </button>
                 </div>
-                
                 <!-- 5. Shear -->
                 <div class="space-y-3">
                     <h3 class="text-sm font-bold text-eng-primary border-b pb-1" data-i18n="sec_shear">5. Shear Design (Vu)</h3>
@@ -398,7 +345,6 @@
                                 <label data-i18n="lbl_tie_s">Tie Spacing s (cm)</label>
                                 <input type="number" id="shear_s" value="10" min="3.0" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
                             </div>
-                            
                             <div class="input-group shear-rect">
                                 <label data-i18n="lbl_leg_x"># Legs Z-dir</label>
                                 <input type="number" id="shear_nz" value="2" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
@@ -407,7 +353,6 @@
                                 <label data-i18n="lbl_leg_y"># Legs X-dir</label>
                                 <input type="number" id="shear_nx" value="2" min="2" class="w-full border border-gray-300 rounded p-1.5 text-right text-sm" oninput="updateApp()">
                             </div>
-
                             <div class="input-group shear-circ hidden col-span-2">
                                 <div class="flex gap-4 mb-2 mt-1 text-xs font-bold text-gray-600 border-b border-gray-200 pb-2">
                                     <label class="flex items-center cursor-pointer">
@@ -424,11 +369,9 @@
                             </div>
                         </div>
                 </div>
-                
                 <button id="save-btn" onclick="saveToCloud()" class="w-full bg-green-600 hover:bg-green-700 text-white text-sm font-bold py-2 px-4 rounded shadow transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-cloud-arrow-up"></i> <span data-i18n="btn_save">Save to Cloud</span>
             </button>
-
             <div class="mt-2">
                 <label class="text-xs font-bold text-gray-500 mb-1 block" data-i18n="lbl_app_opt">Report Appendix</label>
                 <select id="rpt_appendix" class="w-full border border-gray-300 rounded p-1.5 text-sm mb-2">
@@ -440,15 +383,11 @@
             <button onclick="printReport()" class="w-full bg-slate-700 hover:bg-slate-800 text-white text-sm font-bold py-2 px-4 rounded shadow transition flex items-center justify-center gap-2">
                 <i class="fa-solid fa-print"></i> <span data-i18n="btn_gen_rpt">Generate Summary Report</span>
             </button>
-
             </div>
         </div>
-
         <!-- 3D Visualization Area -->
         <div class="flex-1 flex flex-col min-w-0 bg-white relative">
-
             <div id="container-3d" class="flex-1 w-full h-full cursor-move"></div>
-
             <!-- Legend / Overlay -->
             <div id="ui-legend" class="absolute bottom-4 right-4 bg-white/95 backdrop-blur p-5 rounded shadow-xl w-80 border-l-4 border-eng-primary ring-1 ring-gray-200">
                 <div class="flex gap-3 mb-3 text-[10px] uppercase font-bold tracking-wider">
@@ -457,24 +396,20 @@
                 </div>
                 <hr class="border-gray-200 mb-2">
                 <h4 class="text-xs font-bold text-gray-500 uppercase mb-2" data-i18n="tit_check">Safety Check (D/C Ratio)</h4>
-                
                 <div class="flex justify-between items-baseline mb-1">
                     <span class="text-sm font-bold text-gray-700" data-i18n="lbl_coord">Coordinates:</span>
                 </div>
-
                 <div class="text-xs font-mono text-gray-600 mb-3 space-y-1">
                     <div class="flex justify-between"><span>Pu:</span> <span><span id="disp_pu"></span> tf</span></div>
                     <div class="flex justify-between"><span>Muy:</span> <span><span id="disp_mux"></span> tf-m</span></div>
                     <div class="flex justify-between"><span>Muz:</span> <span><span id="disp_muy"></span> tf-m</span></div>
                 </div>
-
                 <h4 class="text-xs font-bold text-gray-500 uppercase mb-1" data-i18n="tit_max">Max Design Capacity</h4>
                 <div class="text-[10px] font-mono text-eng-primary mb-3 space-y-1 border-b pb-2">
                     <div class="flex justify-between"><span>ϕPn(max):</span> <span><span id="max_phi_pn"></span> tf</span></div>
                     <div class="flex justify-between"><span>ϕMny(max):</span> <span><span id="max_phi_mnz"></span> tf-m</span></div>
                     <div class="flex justify-between"><span>ϕMnz(max):</span> <span><span id="max_phi_mnx"></span> tf-m</span></div>
                 </div>
-
                 <div class="w-full bg-gray-200 rounded-full h-4 mb-1 overflow-hidden relative">
                     <div id="dc-bar" class="bg-eng-primary h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
                 </div>
@@ -487,17 +422,13 @@
                 </div>
                 <div id="code-warnings" class="text-[10px] font-mono mt-2 space-y-1 text-red-600 font-bold hidden"></div>
             </div>
-
             <div id="ui-section" class="absolute top-4 right-4 bg-white p-3 rounded shadow-lg border border-gray-200">
                 <canvas id="section-canvas" width="120" height="120"></canvas>
                 <p class="text-[10px] text-center text-gray-400 mt-1 uppercase font-bold" data-i18n="lbl_sec_view">Section View</p>
             </div>
-
         </div>
     </div>
-
     <div id="print-staging"></div>
-
     <div id="history-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white rounded-lg shadow-xl w-96 max-h-[80vh] flex flex-col">
             <div class="p-3 border-b flex justify-between items-center bg-gray-50 rounded-t-lg">
@@ -509,22 +440,14 @@
             </div>
         </div>
     </div>
-
     <script>
-        // --- 1. GLOBAL VARIABLES ---
         let scene, camera, renderer, controls;
         let isDarkMode = false;
         let pmnMesh;
-        // CHANGED: Use a Group instead of a single Mesh
         let loadPointsGroup = new THREE.Group(); 
-        
-        // INSERT THIS LINE HERE:
         let limitGroup = new THREE.Group(); 
-
         let isWireframe = false;
         let vizScales = { p: 1, m: 1 };
-        
-        // --- FIREBASE CONFIGURATION ---
         const firebaseConfig = {
             apiKey: "AIzaSyBaORYlb0hpZgAix13QBF71rVGPLo2NI7E",
             authDomain: "column-app-6d9bd.firebaseapp.com",
@@ -534,20 +457,14 @@
             appId: "1:840460637049:web:63895a5995d0fbe8fbd5a8",
             measurementId: "G-DJ5RDVJYW7"
         };
-                
-        // Initialize Firebase
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
         let currentUser = null;
-
-        // --- AUTH EVENT HANDLERS ---
-        // Email Login
         document.getElementById('email-login-btn').addEventListener('click', async () => {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const errorMsg = document.getElementById('auth-error');
-            
             errorMsg.classList.add('hidden');
             if (!email || !password) {
                 errorMsg.innerText = "Please enter both email and password.";
@@ -562,13 +479,10 @@
                 errorMsg.classList.remove('hidden');
             }
         });
-
-        // Email Register
         document.getElementById('email-register-btn').addEventListener('click', async () => {
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
             const errorMsg = document.getElementById('auth-error');
-
             errorMsg.classList.add('hidden');
             if (!email || !password) {
                 errorMsg.innerText = "Please enter both email and password.";
@@ -583,8 +497,6 @@
                 errorMsg.classList.remove('hidden');
             }
         });
-
-        // Guest Login
         document.getElementById('guest-login').addEventListener('click', async () => {
             try {
                 await auth.signInAnonxmously();
@@ -593,55 +505,40 @@
                 console.error(e);
             }
         });
-
-        // --- AUTH UI HELPERS ---
         function openAuthModal() {
             document.getElementById('auth-modal').classList.remove('hidden');
         }
-
         function closeAuthModal() {
             document.getElementById('auth-modal').classList.add('hidden');
         }
-
         function handleGoogleAuth() {
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider)
                 .then(() => closeAuthModal())
                 .catch(e => alert(e.message));
         }
-
-        // Update the Auth Listener to target the new Navbar elements
         auth.onAuthStateChanged(user => {
             currentUser = user;
             const loginBtn = document.getElementById('login-btn');
             const userInfo = document.getElementById('user-info');
             const userEmail = document.getElementById('user-email');
-            
             if (user) {
-                // Logged In State
                 loginBtn.classList.add('hidden');
                 userInfo.classList.remove('hidden');
                 userEmail.innerText = user.email || "User";
                 loadHistory(); 
             } else {
-                // Guest State
                 loginBtn.classList.remove('hidden');
                 userInfo.classList.add('hidden');
                 document.getElementById('history-list').innerHTML = '<div class="text-center text-xs text-gray-400 py-4">Please login to view history.</div>';
             }
         });
-
         function handleAuth() {
-            // Simple Google Login for demo (ensure Google Auth is enabled in Firebase Console)
             const provider = new firebase.auth.GoogleAuthProvider();
             auth.signInWithPopup(provider).catch(e => alert(e.message));
         }
-
-        // --- DATABASE FUNCTIONS ---
         async function saveToCloud() {
             if (!currentUser) return alert("Please login to save.");
-            
-            // Gather CURRENT State
             const state = {
                 timestamp: firebase.firestore.FieldValue.serverTimestamp(),
                 inputs: {
@@ -654,87 +551,66 @@
                     status: document.getElementById('safety-msg').innerText
                 },
                 fullData: {
-                      // ... existing inputs ...
                       col_b: document.getElementById('col_b').value,
                       col_h: document.getElementById('col_h').value,
-                      col_shape: document.getElementById('col_shape').value, // Added: Save Shape (Rect/Circ)
+                      col_shape: document.getElementById('col_shape').value, 
                       col_cover: document.getElementById('col_cover').value,
                       mat_fc: document.getElementById('mat_fc').value,
                       mat_fy: document.getElementById('mat_fy').value,
                       col_lu: document.getElementById('col_lu').value,
                       bar_size: document.getElementById('bar_size').value,
-                      
-                      // Rectangular Inputs
                       nz_bars: document.getElementById('nz_bars').value,
                       nx_bars: document.getElementById('nx_bars').value,
-                      
-                      // ADD: Circular Main Bars "n" and "n ties" (legs)
                       n_circ_bars: document.getElementById('n_circ_bars').value,
                       shear_legs_circ: document.getElementById('shear_legs_circ').value,
-
-                      // Shear Inputs
                       shear_s: document.getElementById('shear_s').value,
                       shear_db: document.getElementById('shear_db').value,
                       shear_nz: document.getElementById('shear_nz').value,
                       shear_nx: document.getElementById('shear_nx').value
                 }
             };
-
             try {
                 await db.collection('users').doc(currentUser.uid).collection('rc_designs').add(state);
                 alert("Design saved to cloud!");
-                loadHistory(); // Refresh list
+                loadHistory(); 
             } catch (e) {
                 console.error(e);
                 alert("Save failed.");
             }
         }
-
         function toggleShapeInputs() {
             const shape = document.getElementById('col_shape').value;
             const dim2 = document.getElementById('div_dim2');
             const lbl1 = document.getElementById('lbl_dim1');
-            
-            // Toggle Shear Inputs
             const rectShear = document.querySelectorAll('.shear-rect');
             const circShear = document.querySelector('.shear-circ');
-
             if (shape === 'circ') {
                 dim2.classList.add('hidden');
                 lbl1.innerText = currentLang === 'zh' ? "直徑 D (cm)" : "Diameter D (cm)";
-                
                 document.getElementById('lbl_nz_container').classList.add('hidden');
                 document.getElementById('lbl_nx_container').classList.add('hidden');
                 document.getElementById('lbl_ntotal_container').classList.remove('hidden');
-
-                // Shear Inputs
                 rectShear.forEach(el => el.classList.add('hidden'));
                 circShear.classList.remove('hidden');
             } else {
                 dim2.classList.remove('hidden');
                 lbl1.innerText = t('lbl_width');
-                
                 document.getElementById('lbl_nz_container').classList.remove('hidden');
                 document.getElementById('lbl_nx_container').classList.remove('hidden');
                 document.getElementById('lbl_ntotal_container').classList.add('hidden');
-
-                // Shear Inputs
                 rectShear.forEach(el => el.classList.remove('hidden'));
                 circShear.classList.add('hidden');
             }
             updateApp();
         }
-
         function toggleHistoryModal() {
             const m = document.getElementById('history-modal');
             m.classList.toggle('hidden');
         }
-
         function loadHistory() {
             if (!currentUser) return;
             const list = document.getElementById('history-list');
             list.innerHTML = '<div class="text-center text-xs text-gray-400"><i class="fa-solid fa-spinner fa-spin"></i> Loading...</div>';
-            
             db.collection('users').doc(currentUser.uid).collection('rc_designs')
               .orderBy('timestamp', 'desc').limit(20)
               .get().then(snap => {
@@ -742,13 +618,11 @@
                       list.innerHTML = '<div class="text-center text-xs text-gray-400 py-4">No records found.</div>';
                       return;
                   }
-                  
                   let html = '';
                   snap.forEach(doc => {
                       const d = doc.data();
                       const date = d.timestamp ? new Date(d.timestamp.seconds * 1000).toLocaleDateString() : '?';
                       const color = d.inputs.status.includes('SAFE') ? 'text-green-600' : 'text-red-600';
-                      
                       html += `
                         <div class="bg-white p-2 rounded border border-gray-200 shadow-sm hover:shadow-md transition cursor-pointer" onclick='restoreDesign(${JSON.stringify(d.fullData)})'>
                             <div class="flex justify-between items-center mb-1">
@@ -768,10 +642,8 @@
                   list.innerHTML = html;
               });
         }
-
         function restoreDesign(data) {
             if(!data) return;
-            // Restore Values
             for (const [key, val] of Object.entries(data)) {
                 const el = document.getElementById(key);
                 if (el) el.value = val;
@@ -779,20 +651,15 @@
             updateApp();
             toggleHistoryModal();
         }
-
         function deleteDesign(id, e) {
-            e.stopPropagation(); // Stop click from triggering restore
+            e.stopPropagation(); 
             if(!confirm("Delete this record?")) return;
             db.collection('users').doc(currentUser.uid).collection('rc_designs').doc(id).delete()
               .then(() => loadHistory());
         }
-
-        // --- INTERNATIONALIZATION (i18n) ---
-        let currentLang = 'en'; // Default English
-
+        let currentLang = 'en'; 
         const translations = {
             en: {
-                // UI Titles
                 lbl_shape: "Section Shape",
                 opt_rect: "Rectangular",
                 opt_circ: "Circular",
@@ -815,28 +682,19 @@
                 w_tie_spacing: "✓ Tie Spacing",
                 rule_gravity: "Gravity (16db, dim)",
                 rule_seismic: "Seismic (d/4, 6db, 15cm)",
-                // UI Elements (Missing in original EN)
                 btn_wireframe: "Wireframe Mode",
                 lbl_sec_view: "Section View",
                 btn_save: "Save to Cloud",
                 btn_saving: "Saving...",
                 btn_saved: "Saved!",
-
-                // Logic/Validation (Missing in original EN)
                 val_mode_regular: "Regular Layout",
                 val_mode_custom: "Custom Config",
                 val_ok: "Compliant",
-
-                // Section 1: Geometry
                 sec_geo: "1. Section Geometry",
                 lbl_width: "Width b (cm)", lbl_depth: "Depth h (cm)",
                 lbl_cover: "Clear Cover (cm)", lbl_lu: "Unbraced Length Lu (m)",
-
-                // Section 2: Materials
                 sec_mat: "2. Materials",
                 lbl_fc: "Concrete f'c (kgf/cm²)", lbl_fy: "Steel fy (kgf/cm²)",
-
-                // Section 3: Rebar
                 sec_rebar: "3. Reinforcement",
                 lbl_reg: "Regular", lbl_cust: "Custom",
                 lbl_size: "Rebar Size (Ab)",
@@ -848,8 +706,6 @@
                 btn_load_rebar: "Load Rebar",
                 th_x: "y (cm)", th_y: "z (cm)", th_db: "db (cm)",
                 btn_add_bar: "Add Bar",
-
-                // Section 4: Loads
                 sec_loads: "4. Factored Loads",
                 lbl_vux: "Global Vuy (tf)", lbl_vuy: "Global Vuz (tf)",
                 sum_paste_load: "Batch Paste (Excel)",
@@ -857,8 +713,6 @@
                 btn_load_data: "Load Data",
                 th_pu: "Pu (tf)", th_mux: "Muy (tf-m)", th_muy: "Muz (tf-m)",
                 btn_add_case: "Add Load Case",
-
-                // Section 5: Shear
                 sec_shear: "5. Shear Design (Vu)",
                 lbl_seismic: "Seismic (Special Moment Frame)",
                 lbl_hoop: "Hoop (Normal)",
@@ -876,16 +730,12 @@
                 lbl_leg_x: "# Legs Y-dir", lbl_leg_y: "# Legs Z-dir",
                 lbl_legs_circ: "Shear Legs (Total)",
                 rpt_res: "Resultant",
-
-                // 3D Legend
                 leg_nom: "Nominal (Pn)", leg_des: "Design (ϕPn)",
                 tit_check: "Safety Check (D/C Ratio)",
                 lbl_coord: "Coordinates:",
                 tit_max: "Max Design Capacity",
                 lbl_ratio: "Capacity Ratio",
                 sts_safe: "SAFE", sts_fail: "FAILURE", sts_shear: "SHEAR FAILURE",
-                
-                // Report
                 rpt_title: "RC Column Analysis Report",
                 rpt_sub: "Biaxial Interaction & Shear Design (Taiwan Code 112)",
                 rpt_sec1: "1. Section Configuration",
@@ -911,8 +761,6 @@
                 rpt_no_warn: "No warnings generated.",
                 rpt_footer: "Generated by RC Column 3D Interaction Tool",
                 btn_gen_rpt: "Generate Summary Report",
-
-                // Warnings
                 w_small_ecc: "⚠️ Small Eccentricity", w_small_ecc_d: "Moments < M_min. Verify accidental torsion.",
                 w_low_rho: "⚠️ Low Rebar Ratio", w_min_1: "(Min 1%)",
                 w_high_rho: "⚠️ High Rebar Ratio", w_max_8: "(Max 8%)",
@@ -925,8 +773,6 @@
                 w_vert_gap: "⚠️ Tight Vertical Spacing", w_agg: "might block aggregate flow.",
                 w_x_cong: "⚠️ X-Legs Congested", w_y_cong: "⚠️ Y-Legs Congested", w_vib: "Hard to vibrate.",
                 w_aspect: "⚠️ High Aspect Ratio", w_wall: "Ratio > 3 classifies as a <b>Wall</b> (ACI 318).",
-
-                // Opt Status
                 opt_run: "Optimizing...", opt_done: "Done! Optimized.", opt_fail: "No better solution found."
             },
             zh: {
@@ -934,7 +780,6 @@
                 opt_rect: "矩形",
                 opt_circ: "圓形",
                 lbl_n_total: "總支數 (n)",
-                // 1. Auth / Login
                 btn_login: "登入",
                 btn_logout: "登出",
                 modal_title: "存取入口",
@@ -942,26 +787,18 @@
                 btn_login_submit: "登入",
                 btn_register: "註冊",
                 btn_guest: "訪客登入",
-
-                // 2. UI Elements
                 btn_wireframe: "線框模式",
                 lbl_sec_view: "斷面視圖",
                 btn_save: "儲存至雲端",
                 btn_saving: "儲存中...",
                 btn_saved: "已儲存!",
-
-                // 3. Report & Logic
                 val_mode_regular: "規則排列",
                 val_mode_custom: "自訂配置",
                 val_ok: "符合",
-                w_reinf_ratio: "✓ 鋼筋比", // For "✓ Rebar Ratio"
-                w_tie_spacing: "✓ 箍筋間距", // For "✓ Tie Spacing"
-                
-                // Specific Logic Terms
+                w_reinf_ratio: "✓ 鋼筋比", 
+                w_tie_spacing: "✓ 箍筋間距", 
                 rule_gravity: "非耐震 (16db, 柱寬)",
                 rule_seismic: "耐震 (d/4, 6db, 15cm)",
-
-                // App Headers (Restored/Merged from original logic to match EN)
                 app_title: "RC 鋼筋混凝土柱 3D 交互作用",
                 app_desc: "雙向彎矩強度分析 (建築物混凝土結構設計規範 112)",
                 status_ready: "就緒",
@@ -969,14 +806,11 @@
                 opt_lock: "鎖定屬性 (保持不變):",
                 lbl_lock_dim: "尺寸", lbl_lock_mat: "材料", lbl_lock_bar: "鋼筋",
                 btn_opt: "自動設計斷面",
-
                 sec_geo: "1. 斷面幾何",
                 lbl_width: "寬度 b (cm)", lbl_depth: "深度 h (cm)",
                 lbl_cover: "保護層 (cm)", lbl_lu: "無支撐長度 Lu (m)",
-
                 sec_mat: "2. 材料性質",
                 lbl_fc: "混凝土 f'c (kgf/cm²)", lbl_fy: "鋼筋 fy (kgf/cm²)",
-
                 sec_rebar: "3. 鋼筋配置",
                 lbl_reg: "規則排列", lbl_cust: "自訂座標",
                 lbl_size: "鋼筋號數 (Ab)",
@@ -988,7 +822,6 @@
                 btn_load_rebar: "載入鋼筋",
                 th_x: "y (cm)", th_y: "z (cm)", th_db: "db (cm)",
                 btn_add_bar: "新增鋼筋",
-
                 sec_loads: "4. 極限載重 (Factored)",
                 lbl_vux: "全域 Vuy (tf)", lbl_vuy: "全域 Vuz (tf)",
                 sum_paste_load: "批次貼上 (Excel)",
@@ -996,7 +829,6 @@
                 btn_load_data: "載入數據",
                 th_pu: "Pu (tf)", th_mux: "Muy (tf-m)", th_muy: "Muz (tf-m)",
                 btn_add_case: "新增載重",
-
                 sec_shear: "5. 剪力設計 (Vu)",
                 lbl_seismic: "耐震設計 (特殊抗彎構架)",
                 lbl_hoop: "閉合箍筋 (一般)",
@@ -1014,14 +846,12 @@
                 lbl_leg_x: "Y向 肢數 (Legs)", lbl_leg_y: "Z向 肢數 (Legs)",
                 lbl_legs_circ: "剪力肢數 (總數)",
                 rpt_res: "合力 (Resultant)",
-
                 leg_nom: "標稱強度 (Pn)", leg_des: "設計強度 (ϕPn)",
                 tit_check: "安全檢核 (D/C Ratio)",
                 lbl_coord: "座標點:",
                 tit_max: "最大設計強度",
                 lbl_ratio: "容量比 (D/C)",
                 sts_safe: "安全 (SAFE)", sts_fail: "破壞 (FAILURE)", sts_shear: "剪力破壞",
-
                 rpt_title: "RC 柱結構分析報告",
                 rpt_sub: "雙向交互作用與剪力設計 (台灣規範 112)",
                 rpt_sec1: "1. 斷面配置",
@@ -1047,7 +877,6 @@
                 rpt_no_warn: "未產生警告訊息。",
                 rpt_footer: "由 RC Column 3D 工具生成",
                 btn_gen_rpt: "生成摘要報告",
-
                 w_small_ecc: "⚠️ 偏心距過小", w_small_ecc_d: "彎矩 < M_min。請確認意外扭矩。",
                 w_low_rho: "⚠️ 鋼筋比過低", w_min_1: "(最小 1%)",
                 w_high_rho: "⚠️ 鋼筋比過高", w_max_8: "(最大 8%)",
@@ -1060,59 +889,39 @@
                 w_vert_gap: "⚠️ 垂直間距過密", w_agg: "可能阻礙骨材流動。",
                 w_x_cong: "⚠️ Z向肢距過密", w_y_cong: "⚠️ X向肢距過密", w_vib: "難以震動搗實。",
                 w_aspect: "⚠️ 長寬比過大", w_wall: "比例 > 3 歸類為<b>牆</b> (ACI 318)。",
-
                 opt_run: "優化中...", opt_done: "完成！已優化。", opt_fail: "未找到更好的解。"
             }
         };
-
         function t(key) {
             return translations[currentLang][key] || key;
         }
-
         function t(key) { return translations[currentLang][key] || key; }
-
         function toggleLanguage() {
             currentLang = currentLang === 'en' ? 'zh' : 'en';
-            // Update Label
             document.getElementById('lang-label').innerText = currentLang === 'en' ? '中文' : 'EN';
-            
-            // Update UI Elements
             document.querySelectorAll('[data-i18n]').forEach(el => {
                 const key = el.getAttribute('data-i18n');
-                // Handle button icons + text
                 const icon = el.querySelector('i');
                 if (translations[currentLang][key]) {
                     el.innerHTML = t(key);
                 }
             });
-
-            // Update Placeholders
             const pasteRebar = document.getElementById('paste_rebar');
             if(pasteRebar) pasteRebar.placeholder = t('ph_paste_rebar');
             const pasteLoads = document.getElementById('paste_loads');
             if(pasteLoads) pasteLoads.placeholder = t('ph_paste_load');
-
-            // --- FIX: Trigger RC Column App Update ---
             updateApp(); 
-            // -----------------------------------------
-            
             if (!document.getElementById('history-modal').classList.contains('hidden')) loadHistory();
         }
-
         function toggleDarkMode() {
             isDarkMode = !isDarkMode;
             const html = document.documentElement;
             const icon = document.getElementById('dark-icon');
-            
-            // Select the buttons in the top-left group
             const overlayBtns = document.querySelectorAll('.absolute.top-4.left-4 button');
-
             if (isDarkMode) {
                 html.classList.add('dark');
                 icon.classList.remove('fa-moon');
                 icon.classList.add('fa-sun');
-                
-                // Switch buttons to Dark Mode style
                 overlayBtns.forEach(btn => {
                     btn.className = "bg-slate-700/80 hover:bg-slate-600 text-white backdrop-blur-sm border border-slate-500/50 px-3 py-1.5 rounded text-xs font-bold transition";
                 });
@@ -1120,14 +929,10 @@
                 html.classList.remove('dark');
                 icon.classList.remove('fa-sun');
                 icon.classList.add('fa-moon');
-                
-                // Switch buttons to Light Mode style
                 overlayBtns.forEach(btn => {
                     btn.className = "bg-gray-100/80 hover:bg-gray-200/80 text-gray-900 backdrop-blur-sm border border-gray-300/50 px-3 py-1.5 rounded text-xs font-bold transition";
                 });
             }
-            
-            // Update 3D Scene Background
             if (scene) {
                 scene.background = new THREE.Color(isDarkMode ? 0x111827 : 0xffffff);
                 const grid = scene.children.find(c => c.type === 'GridHelper');
@@ -1140,10 +945,8 @@
                     scene.add(newGrid);
                 }
             }
-            
             updateApp();
         }
-        
         function toggleSidebar() {
             const sb = document.getElementById('sidebar');
             if (sb.classList.contains('-translate-x-full')) {
@@ -1153,54 +956,37 @@
                 sb.classList.add('-translate-x-full', 'w-0', 'p-0', 'overflow-hidden');
                 sb.classList.remove('translate-x-0', 'w-96');
             }
-            setTimeout(onWindowResize, 350); // Resize 3D canvas after transition
+            setTimeout(onWindowResize, 350); 
         }
-        
         function importRegularToCustom() {
-            // Read Common Inputs
             const shape = document.getElementById('col_shape').value;
             const b = parseFloat(document.getElementById('col_b').value);
             const h = parseFloat(document.getElementById('col_h').value);
             const cover = parseFloat(document.getElementById('col_cover').value) || 4.0;
-            
-            // Rebar params
             const Ab_bar = parseFloat(document.getElementById('bar_size').value);
             const db = Math.sqrt(Ab_bar * 4 / Math.PI);
             const db_tie = parseFloat(document.getElementById('shear_db').value) || 1.3;
-            
-            // Accurate center distance (matches calculation logic)
             const d_center = cover + db_tie + (db / 2); 
-            
             const tbody = document.querySelector('#table-rebar tbody');
-            tbody.innerHTML = ''; // Clear table first
-            
+            tbody.innerHTML = ''; 
             const newRows = [];
-
             if (shape === 'circ') {
-                // --- CIRCULAR LOGIC ---
                 const n_circ = parseInt(document.getElementById('n_circ_bars').value);
-                // b is used as Diameter
                 const radius = (b / 2) - d_center;
-                
                 for(let i=0; i<n_circ; i++) {
-                    // Start at 90 degrees (Top) and distribute clockwise
                     const theta = (Math.PI / 2) - (i * 2 * Math.PI / n_circ);
                     const x = radius * Math.cos(theta);
                     const y = radius * Math.sin(theta);
                     newRows.push({x: x, y: y, db: db});
                 }
             } else {
-                // --- RECTANGULAR LOGIC ---
                 const nz = parseInt(document.getElementById('nz_bars').value);
                 const nx = parseInt(document.getElementById('nx_bars').value);
-                
-                // Top/Bot
                 for(let i=0; i<nz; i++) {
                     const x = -b/2 + d_center + i * (b - 2*d_center) / (nz - 1);
                     newRows.push({x: x, y: h/2 - d_center, db: db});
                     newRows.push({x: x, y: -h/2 + d_center, db: db});
                 }
-                // Sides
                 if (nx > 2) {
                     for(let j=1; j<nx-1; j++) {
                         const y = h/2 - d_center - j * (h - 2*d_center) / (nx - 1);
@@ -1209,8 +995,6 @@
                     }
                 }
             }
-
-            // Create rows efficiently
             const clean = (val) => parseFloat(Number(val).toFixed(2));
             let html = '';
             newRows.forEach(bar => {
@@ -1229,9 +1013,9 @@
             if(!raw) return;
             const rows = raw.trim().split(/\r?\n/);
             const tbody = document.querySelector('#table-loads tbody');
-            tbody.innerHTML = ''; // Clear existing
+            tbody.innerHTML = ''; 
             rows.forEach(r => {
-                const cols = r.trim().split(/\t|\s+/); // Split by tab or space
+                const cols = r.trim().split(/\t|\s+/); 
                 if(cols.length >= 3) {
                     addLoadRow(parseFloat(cols[0]), parseFloat(cols[1]), parseFloat(cols[2]));
                 }
@@ -1239,7 +1023,6 @@
             document.getElementById('paste_loads').value = '';
             updateApp();
         }
-
         function parseCustomRebar() {
             const raw = document.getElementById('paste_rebar').value;
             if(!raw) return;
@@ -1255,7 +1038,6 @@
             document.getElementById('paste_rebar').value = '';
             updateApp();
         }
-
         function toggleRebarMode() {
             const mode = document.querySelector('input[name="rebar_mode"]:checked').value;
             if(mode === 'regular') {
@@ -1267,15 +1049,10 @@
             }
             updateApp();
         }
-
-        // --- Table Management ---
         function addRebarRow(x=25, y=25, db=2.54) {
             const tbody = document.querySelector('#table-rebar tbody');
             const row = document.createElement('tr');
-            
-            // Helper: Clean number for display
             const clean = (val) => parseFloat(Number(val).toFixed(2));
-
             row.innerHTML = `
                 <td><input type="number" step="0.1" value="${clean(x)}" oninput="updateApp()"></td>
                 <td><input type="number" step="0.1" value="${clean(y)}" oninput="updateApp()"></td>
@@ -1283,20 +1060,12 @@
                 <td class="text-center"><i class="fa-solid fa-xmark btn-icon" onclick="removeRow(this)"></i></td>
             `;
             tbody.appendChild(row);
-            // Don't call updateApp here if called in a loop, caller handles it.
-            // But for button click, we need it. We'll leave it out here and ensure callers call it, 
-            // OR checks if it is a single add.
-            // Simplest: Call updateApp(). Performance hit is negligible for single clicks.
             updateApp();
         }
-
-        // --- REPLACE existing addLoadRow function ---
         function addLoadRow(Pu=200, Muz=30, Mux=15) {
             const tbody = document.querySelector('#table-loads tbody');
             const row = document.createElement('tr');
-            
             const clean = (val) => parseFloat(Number(val).toFixed(2));
-
             row.innerHTML = `
                 <td><input type="number" step="1" value="${clean(Pu)}" class="text-red-700 font-bold" oninput="updateApp()"></td>
                 <td><input type="number" step="1" value="${clean(Muz)}" class="text-red-700 font-bold" oninput="updateApp()"></td>
@@ -1306,50 +1075,36 @@
             tbody.appendChild(row);
             updateApp(); 
         }
-
         function removeRow(btn) {
             btn.closest('tr').remove();
             updateApp();
         }
-
-        // Initialize Tables with Default Data
         function initTables() {
             addRebarRow(25, 25, 2.54);
             addRebarRow(-25, 25, 2.54);
             addRebarRow(25, -25, 2.54);
             addRebarRow(-25, -25, 2.54);
-            
             addLoadRow(200, 30, 15, 0);
         }
-        // --- UI SCALING LOGIC ---
         function makeUIResizable(elementId) {
             const el = document.getElementById(elementId);
             if (!el) return;
-
-            // 1. Force Transform Origin to Top-Left for predictable scaling
             el.style.transformOrigin = "0 0";
-
-            // 2. Create Handle (Bottom-Right) if not exists
             if (el.querySelector('.resize-handle')) return;
-
             const handle = document.createElement('div');
             handle.className = 'resize-handle absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize z-50 flex items-center justify-center bg-gray-200/50 hover:bg-eng-accent/80 rounded-tl-lg transition-colors';
             handle.innerHTML = '<i class="fa-solid fa-expand text-[8px] text-gray-600"></i>';
             el.appendChild(handle);
-            
             const getScale = () => {
                 const match = el.style.transform.match(/scale\(([^)]+)\)/);
                 return match ? parseFloat(match[1]) : 1;
             };
-
             handle.addEventListener('mousedown', function(e) {
                 e.preventDefault();
-                e.stopPropagation(); // Prevent drag event
-                
+                e.stopPropagation(); 
                 const startX = e.clientX;
                 const startScale = getScale();
                 const startWidth = el.offsetWidth;
-                
                 const onMove = (em) => {
                     em.preventDefault();
                     em.stopPropagation();
@@ -1357,53 +1112,37 @@
                     const newScale = Math.max(0.5, (startWidth * startScale + dx) / startWidth);
                     el.style.transform = `scale(${newScale})`;
                 };
-
                 const onUp = () => {
                     document.removeEventListener('mousemove', onMove);
                     document.removeEventListener('mouseup', onUp);
                 };
-
                 document.addEventListener('mousemove', onMove);
                 document.addEventListener('mouseup', onUp);
             });
         }
-
         function makeUIDraggable(elementId) {
             const el = document.getElementById(elementId);
             if (!el) return;
-
             el.style.cursor = 'move';
-
             el.addEventListener('mousedown', function(e) {
-                // Ignore inputs, buttons, and the resize handle
                 if (['INPUT', 'SELECT', 'BUTTON', 'TEXTAREA'].includes(e.target.tagName) || e.target.closest('.resize-handle')) {
                     return;
                 }
-                
                 e.preventDefault();
-
-                // Correctly initialize Absolute Position relative to PARENT container
                 const computed = window.getComputedStyle(el);
                 if (computed.right !== 'auto' || computed.bottom !== 'auto') {
-                    // Capture current position relative to offset parent
                     const currentLeft = el.offsetLeft;
                     const currentTop = el.offsetTop;
-                    
-                    // Switch to explicit left/top positioning
                     el.style.right = 'auto';
                     el.style.bottom = 'auto';
                     el.style.left = currentLeft + 'px';
                     el.style.top = currentTop + 'px';
                 }
-
                 const startX = e.clientX;
                 const startY = e.clientY;
                 const startLeft = parseFloat(el.style.left) || 0;
                 const startTop = parseFloat(el.style.top) || 0;
-                
-                // Bring to front
                 el.style.zIndex = 1000;
-
                 const onMove = (em) => {
                     em.preventDefault();
                     const dx = em.clientX - startX;
@@ -1411,115 +1150,74 @@
                     el.style.left = (startLeft + dx) + 'px';
                     el.style.top = (startTop + dy) + 'px';
                 };
-
                 const onUp = () => {
                     document.removeEventListener('mousemove', onMove);
                     document.removeEventListener('mouseup', onUp);
                     el.style.zIndex = '';
                 };
-
                 document.addEventListener('mousemove', onMove);
                 document.addEventListener('mouseup', onUp);
             });
         }
-        // --- 2. INITIALIZATION ---
         function init() {
             const container = document.getElementById('container-3d');
             const w = container.clientWidth;
             const h = container.clientHeight;
-
-            // Scene Setup (WHITE BACKGROUND)
             scene = new THREE.Scene();
             scene.background = new THREE.Color(isDarkMode ? 0x111827 : 0xffffff);
-            
-            // Grid Helper (Floor) - Dark gray for visibility
             const gridHelper = new THREE.GridHelper(2000, 50, 0x94a3b8, 0xe2e8f0);
             gridHelper.position.y = 0; 
             scene.add(gridHelper);
-
-            // Axes Helper
-            // --- REPLACED: Axes Helper with Arrows ---
             const origin = new THREE.Vector3(0, 0, 0);
             const len = 36;
             const headLen = 24;
             const headWidth = 12;
-
-            // X Axis Arrow (Red)
             const arrowX = new THREE.ArrowHelper(new THREE.Vector3(1, 0, 0), origin, 350, 0xdc2626, headLen, headWidth);
             scene.add(arrowX);
-
-            // Y Axis Arrow (Green) - Taller for Axial
             const arrowY = new THREE.ArrowHelper(new THREE.Vector3(0, 1, 0), origin, 700, 0x15803d, headLen, headWidth);
             scene.add(arrowY);
-
-            // Z Axis Arrow (Blue)
             const arrowZ = new THREE.ArrowHelper(new THREE.Vector3(0, 0, 1), origin, 350, 0x1d4ed8, headLen, headWidth);
             scene.add(arrowZ);
             scene.add(loadPointsGroup);
-            
-            // INSERT THIS LINE HERE:
             scene.add(limitGroup);
-
-            // --- MODIFIED: Labels for Axes ---
-            // Adjusted coordinates to sit at the tip of the arrows
-            addLabel("Mny", 290, 16, 0, "#dc2626"); // Red
-            addLabel("Pn", 16, 670, 0, "#15803d");  // Dark Green
-            addLabel("Mnz", 0, 16, 290, "#1d4ed8"); // Dark Blue
-
-            // Camera
+            addLabel("Mny", 290, 16, 0, "#dc2626"); 
+            addLabel("Pn", 16, 670, 0, "#15803d");  
+            addLabel("Mnz", 0, 16, 290, "#1d4ed8"); 
             camera = new THREE.PerspectiveCamera(45, w / h, 0.1, 5000);
             camera.position.set(1000, 1300, 1000);
-            camera.up.set(0, 1, 0); // Y is up (Axial P)
-
-            // Renderer
+            camera.up.set(0, 1, 0); 
             renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false, preserveDrawingBuffer: true });            renderer.setSize(w, h);
             renderer.setPixelRatio(window.devicePixelRatio);
             container.appendChild(renderer.domElement);
-
-            // Controls
             controls = new THREE.OrbitControls(camera, renderer.domElement);
             controls.enableDamping = true;
             controls.dampingFactor = 0.05;
-
-            // Lighting
             const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
             scene.add(ambientLight);
             const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
             dirLight.position.set(50, 200, 100);
             scene.add(dirLight);
-
-            // Resize Listener
             window.addEventListener('resize', onWindowResize, false);
-
-            // Start Animation Loop
             animate();
-            
-            // Initial Calculation
             initTables();
             updateApp();
             updateApp();
-
-            // Initialize Draggable & Resizable UI
             makeUIResizable('ui-section');
             makeUIDraggable('ui-section');
-
             makeUIResizable('ui-legend');
             makeUIDraggable('ui-legend');
         }
-
         function onWindowResize() {
             const container = document.getElementById('container-3d');
             camera.aspect = container.clientWidth / container.clientHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(container.clientWidth, container.clientHeight);
         }
-
         function animate() {
             requestAnimationFrame(animate);
             controls.update();
             renderer.render(scene, camera);
         }
-
         function addLabel(text, x, y, z, color) {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
@@ -1528,7 +1226,6 @@
             ctx.font = "bold 40px Arial";
             ctx.textAlign = "center";
             ctx.fillText(text, 64, 45);
-            
             const tex = new THREE.CanvasTexture(canvas);
             const spriteMat = new THREE.SpriteMaterial({ map: tex });
             const sprite = new THREE.Sprite(spriteMat);
@@ -1536,37 +1233,24 @@
             sprite.scale.set(40, 20, 1);
             scene.add(sprite);
         }
-
-        // --- 3. ENGINEERING CALCULATION LOGIC (Taiwan Code 112) ---
         function calculateInteractionSurface() {
-            // 1. Get Inputs
             const b = parseFloat(document.getElementById('col_b').value);
             const h = parseFloat(document.getElementById('col_h').value);
             const fc = parseFloat(document.getElementById('mat_fc').value);
             const fy = parseFloat(document.getElementById('mat_fy').value);
             const cover = parseFloat(document.getElementById('col_cover').value) || 4.0;
             const shape = document.getElementById('col_shape').value;
-
-            // 2. Constants
             const eps_cu = 0.003;       
             const Es = 2.04 * 1000000;
             const eps_y = fy / Es;
             const beta1 = fc > 280 ? Math.max(0.65, 0.85 - 0.05 * (fc - 280) / 70) : 0.85;
-
-            // 3. Generate Rebar
             let bars = [];
             const isCustom = document.querySelector('input[name="rebar_mode"]:checked').value === 'custom';
             const rebarWarnings = [];
-
-            // --- FIX: Accurate Dimensions based on Code Definition ---
-            // Clear Cover is distance from concrete surface to outer edge of Tie/Stirrup
             const Ab_bar = parseFloat(document.getElementById('bar_size').value);
-            const db_main = Math.sqrt(Ab_bar * 4 / Math.PI); // Main Bar Diameter
-            const db_tie = parseFloat(document.getElementById('shear_db').value); // Tie Bar Diameter
-            
-            // Distance to center of Main Bar = Cover + Tie Diameter + (Main Diameter / 2)
+            const db_main = Math.sqrt(Ab_bar * 4 / Math.PI); 
+            const db_tie = parseFloat(document.getElementById('shear_db').value); 
             const d_center = cover + db_tie + (db_main / 2);
-
             if (isCustom) {
                 const rows = document.querySelectorAll('#table-rebar tbody tr');
                 rows.forEach(row => {
@@ -1584,14 +1268,11 @@
                 if (shape === 'rect') {
                     const nz = parseInt(document.getElementById('nz_bars').value);
                     const nx = parseInt(document.getElementById('nx_bars').value);
-                    
-                    // Top & Bottom Rows
                     for(let i=0; i<nz; i++) {
                         const x = -b/2 + d_center + i * (b - 2*d_center) / (nz - 1);
                         bars.push({ x: x, y: h/2 - d_center, Ab: Ab_bar, db: db_main }); 
                         bars.push({ x: x, y: -h/2 + d_center, Ab: Ab_bar, db: db_main }); 
                     }
-                    // Side Rows (excluding corners)
                     if (nx > 2) {
                         for(let j=1; j<nx-1; j++) {
                             const y = h/2 - d_center - j * (h - 2*d_center) / (nx - 1);
@@ -1600,59 +1281,42 @@
                         }
                     }
                 } else {
-                    // --- CIRCULAR COLUMN LOGIC ---
-                    // b acts as Diameter D
                     const D = b; 
                     const n_circ = parseInt(document.getElementById('n_circ_bars').value);
-                    
-                    // Placement Radius = (Diameter/2) - Clear Cover - Tie - (Main/2)
                     const radius_bar = (D/2) - d_center;
-                    
                     if (n_circ >= 3) {
                         const dTheta = (2 * Math.PI) / n_circ;
-                        // Start at top (12 o'clock) for standard engineering drawing view
                         let currentAngle = Math.PI / 2; 
-                        
                         for(let i=0; i<n_circ; i++) {
                             const x = radius_bar * Math.cos(currentAngle);
                             const y = radius_bar * Math.sin(currentAngle);
                             bars.push({ x: x, y: y, Ab: Ab_bar, db: db_main });
-                            currentAngle -= dTheta; // Distribute bars clockwise
+                            currentAngle -= dTheta; 
                         }
                     }
                 }
             }
-
-            // --- WARNING: Check if bars are outside concrete ---
             let outsideCount = 0;
             bars.forEach(bar => {
                 let isOut = false;
                 const barOuterRadius = bar.db / 2;
-
                 if (shape === 'rect') {
-                    // Check X and Y bounds
                     if (Math.abs(bar.x) + barOuterRadius > b/2 || Math.abs(bar.y) + barOuterRadius > h/2) {
                         isOut = true;
                     }
                 } else {
-                    // Check Radial bound
                     const distFromCenter = Math.sqrt(bar.x*bar.x + bar.y*bar.y);
                     if (distFromCenter + barOuterRadius > b/2) {
                         isOut = true;
                     }
                 }
-                
                 if (isOut) outsideCount++;
             });
-
             if (outsideCount > 0) {
                 rebarWarnings.push(`⚠️ <b>SECTION ERROR:</b> ${outsideCount} rebar(s) extend OUTSIDE the concrete boundary! Increase dimensions or reduce cover.`);
             }
-
-            // Concrete Fibers Generation
             const fibers = [];
             const nzFib = 40, nxFib = 40; 
-            
             if (shape === 'rect') {
                 const dA = (b * h) / (nzFib * nxFib);
                 const dx = b / nzFib, dy = h / nxFib;
@@ -1666,71 +1330,51 @@
                     }
                 }
             } else {
-                // Circular Fibers (Polar coordinates usually better, but grid with check is easier)
                 const D = b; 
                 const R = D/2;
-                const dA = (D * D) / (nzFib * nxFib); // Bounding box area div
+                const dA = (D * D) / (nzFib * nxFib); 
                 const dx = D / nzFib, dy = D / nxFib;
-                
                 for(let i=0; i<nzFib; i++) {
                     for(let j=0; j<nxFib; j++) {
                         const x = -R + (i + 0.5) * dx;
                         const y = -R + (j + 0.5) * dy;
-                        // Check if inside circle
                         if (x*x + y*y <= R*R) {
                             fibers.push({ x, y, dA });
                         }
                     }
                 }
             }
-
             const Ag = shape === 'rect' ? b * h : (Math.PI * Math.pow(b/2, 2));
             let Ast = 0; bars.forEach(b => Ast += b.Ab);
             const Po_nominal = 0.85 * fc * (Ag - Ast) + fy * Ast;
             const isSpiral = shape === 'circ' && document.querySelector('input[name="circ_type"]:checked')?.value === 'spiral';
             const phi_compression_base = isSpiral ? 0.75 : 0.65;
-
-            // 4. Calculate 3D Interaction Surface (True Rotation)
             const curves = [];
-            const numAngles = 72; // 5-degree steps
-            
-            // Generate c/d ratios
+            const numAngles = 72; 
             const c_ratios = [2.0, 1.2, 1.0];
             for(let r=0.9; r>=0.1; r-=0.05) c_ratios.push(r);
             c_ratios.push(0.001);
-
             const corners = [ {x: b/2, y: h/2}, {x: b/2, y: -h/2}, {x: -b/2, y: h/2}, {x: -b/2, y: -h/2} ];
-
             for (let i = 0; i < numAngles; i++) {
                 const theta = (i / numAngles) * Math.PI * 2;
                 const cosT = Math.cos(theta);
                 const sinT = Math.sin(theta);
                 const curvePoints = [];
-
                 let d_max_concrete = -Infinity; 
-                
-                // REVISED: Correctly handle Circular vs Rectangular extreme fiber
                 if (shape === 'circ') {
-                    // For a circle, the distance to the extreme compression fiber 
-                    // is always the radius (b/2), regardless of rotation angle.
                     d_max_concrete = b / 2;
                 } else {
-                    // For rectangle, we check the projected distance of the 4 corners
                     corners.forEach(p => {
                         const d = p.x * cosT + p.y * sinT;
                         if(d > d_max_concrete) d_max_concrete = d;
                     });
                 }
-
                 c_ratios.forEach(ratio => {
                     const c = d_max_concrete * 2 * ratio; 
                     if (c <= 0.001) return; 
-
                     const dist_NA_ref = d_max_concrete - c; 
                     let Pn = 0, Mnz = 0, Mnx = 0, max_strain_t = 0;
                     const dist_limit_comp = d_max_concrete - beta1 * c;
-
-                    // Concrete Integration
                     fibers.forEach(fib => {
                         const proj = fib.x * cosT + fib.y * sinT;
                         if (proj > dist_limit_comp) {
@@ -1740,26 +1384,19 @@
                             Mnx += force * fib.x; 
                         }
                     });
-
-                    // Steel Integration
                     bars.forEach(bar => {
                         const proj = bar.x * cosT + bar.y * sinT;
                         const dist_from_NA = proj - dist_NA_ref;
                         const strain = eps_cu * dist_from_NA / c;
-                        
                         if (-strain > max_strain_t) max_strain_t = -strain;
-
                         let fs = strain * Es;
                         if (fs > fy) fs = fy;
                         if (fs < -fy) fs = -fy;
-
                         const force = fs * bar.Ab;
                         Pn += force;
                         Mnz += force * bar.y;
                         Mnx += force * bar.x;
                     });
-
-                    // Check limiting tension (in kgf)
                     if (Pn > -Ast * fy * 1.5) {
                         let phi = phi_compression_base;
                         if (max_strain_t <= eps_y) {
@@ -1767,44 +1404,28 @@
                         } else if (max_strain_t >= 0.005) {
                             phi = 0.90;
                         } else {
-                            // Interpolate
                             phi = phi_compression_base + (0.90 - phi_compression_base) * (max_strain_t - eps_y) / (0.005 - eps_y);
                         }
-
-                        // UNIT CONVERSION:
-                        // Pn: kgf -> tf (divide by 1000)
-                        // Mn: kgf-cm -> tf-m (divide by 100,000)
                         const Pn_tf = Pn / 1000;
                         const Mnz_tfm = Mnz / 100000;
                         const Mnx_tfm = Mnx / 100000;
-
                         curvePoints.push({
                             Pn: Pn_tf, Mnz: Mnz_tfm, Mnx: Mnx_tfm, phi: phi,
                             phiPn: phi * Pn_tf, phiMnz: phi * Mnz_tfm, phiMnx: phi * Mnx_tfm
                         });
                     }
                 });
-
-                // Pure Tension Point (also convert units)
                 const Pnt_kgf = -Ast * fy;
                 const Pnt_tf = Pnt_kgf / 1000;
-                
                 curvePoints.push({ Pn: Pnt_tf, Mnz: 0, Mnx: 0, phi: 0.9, phiPn: 0.9*Pnt_tf, phiMnz: 0, phiMnx: 0 });
                 curvePoints.sort((a,b) => b.Pn - a.Pn);
                 curves.push(curvePoints);
             }
-            
-            // Convert Po (nominal axial capacity) to tf for later use
             return { curves, Po: Po_nominal / 1000, rebarWarnings, isSpiral };
         }
-        
-        let nominalMesh; // Variable to hold the second mesh
-
+        let nominalMesh; 
         function updateApp() {
-            // --- 0. Enforce Min/Max Limits (Strict Clamping) ---
-            // ADD: Read shape first
             const shape = document.getElementById('col_shape').value;
-
             const clamp = (id, min, max) => {
                 const el = document.getElementById(id);
                 let val = parseFloat(el.value);
@@ -1813,34 +1434,21 @@
                 if (max !== undefined && val > max) val = max;
                 return val;
             };
-
-            // Section Geometry
             const b_clamped = clamp('col_b', 20);
             const h_clamped = clamp('col_h', 20);
             const cover_clamped = clamp('col_cover', 4.0, 15.0);
             const lu_clamped = clamp('col_lu', 0.1);
-
-            // Materials
             const fc_clamped = clamp('mat_fc', 140);
             const fy_clamped = clamp('mat_fy', 2800);
-
-            // Rebar
             let nz_clamped = clamp('nz_bars', 2);
             let nx_clamped = clamp('nx_bars', 2);
-
-            // Shear Design
             const shear_db_clamped = clamp('shear_db', 1.0);
             const shear_s_clamped = clamp('shear_s', 3.0);
-            
-            // Shear Legs Dynamic Max
             let max_legs_x = nz_clamped;
             let max_legs_y = nx_clamped;
-            let shear_circ_clamped = 2; // Default
-
+            let shear_circ_clamped = 2; 
             if (shape === 'circ') {
-                 // For circular, total legs usually = 2 (hoop) or more if cross ties
                  const n_total = parseFloat(document.getElementById('n_circ_bars').value) || 8;
-                 // Clamp Circular Legs (Max = 2 * n_total for safety, though usually just 2 or 4)
                  const max_allowed = 2 + Math.ceil(n_total / 2);
                  shear_circ_clamped = clamp('shear_legs_circ', 2, max_allowed);
                  document.getElementById('shear_legs_circ').value = shear_circ_clamped;
@@ -1850,10 +1458,7 @@
                  document.getElementById('shear_nz').value = shear_nz_clamped;
                  document.getElementById('shear_nx').value = shear_nx_clamped;
             }
-            
             document.getElementById('col_cover').value = cover_clamped;
-
-            // --- 1. Cap Inputs (Regular Mode) to prevent physical overlap ---
             const nzInput = document.getElementById('nz_bars');
             const nxInput = document.getElementById('nx_bars');
             const b_val = parseFloat(document.getElementById('col_b').value);
@@ -1861,7 +1466,6 @@
             const cv_val = parseFloat(document.getElementById('col_cover').value) || 4.0;
             const ab_val = parseFloat(document.getElementById('bar_size').value);
             const db_val = Math.sqrt(ab_val * 4 / Math.PI);
-            
             const capInput = (inp, dim) => {
                 const minS = Math.max(1.5 * db_val, 4.0);
                 const tie = 1.27; 
@@ -1869,27 +1473,21 @@
                 const maxN = Math.floor((available + minS) / (db_val + minS));
                 if(parseInt(inp.value) > maxN) inp.value = Math.max(2, maxN);
             };
-            
             const isCustom = document.querySelector('input[name="rebar_mode"]:checked').value === 'custom';
             if(!isCustom) {
                 capInput(nzInput, b_val);
                 capInput(nxInput, h_val);
             }
-
             drawSection2D();
             const data = calculateInteractionSurface();
             window.latestCalcData = data;
-            
-            // Re-read clean inputs
             const b = parseFloat(document.getElementById('col_b').value);
             const h = parseFloat(document.getElementById('col_h').value);
             const fc = parseFloat(document.getElementById('mat_fc').value);
             const fy = parseFloat(document.getElementById('mat_fy').value);
             const cover = parseFloat(document.getElementById('col_cover').value);
-            // --- 1. GLOBAL BOUNDS ---
             let maxP_nominal = -Infinity, minP_nominal = Infinity;
             let maxMnz = 0, maxMnx = 0;
-
             data.curves.forEach(curve => {
                 if(curve.length > 0) {
                     if (curve[0].Pn > maxP_nominal) maxP_nominal = curve[0].Pn;
@@ -1900,40 +1498,30 @@
                     });
                 }
             });
-
-            // Visual Scales
             const maxM_global = Math.max(maxMnz, maxMnx);
             const TARGET_HEIGHT = 800; 
             const TARGET_RADIUS = 320;
             vizScales.p = maxP_nominal !== minP_nominal ? TARGET_HEIGHT / (maxP_nominal - minP_nominal) : 1;
             vizScales.m = maxM_global > 0 ? TARGET_RADIUS / maxM_global : 1;
-
             const phi_compression = data.isSpiral ? 0.75 : 0.65;
             const P_limit_design = 0.80 * phi_compression * data.Po; 
-            // --- Mesh Generation Function (Restored) ---
             function createMesh(isDesignCurve, matColor, opacity, isWire) {
                 const levels = 80; 
                 const numAngles = data.curves.length; 
                 const vertices = [];
                 const indices = [];
-
                 let curMaxP;
                 if(isDesignCurve) curMaxP = P_limit_design;
                 else curMaxP = maxP_nominal;
-                
                 const stepP = (curMaxP - minP_nominal) / levels;
-
                 for(let i=0; i<=levels; i++) {
                     const P_target = curMaxP - i * stepP;
-                    
                     for(let j=0; j<numAngles; j++) {
                         const curve = data.curves[j];
                         let pt = { Mnz: 0, Mnx: 0 }; 
-
                         for(let k=0; k<curve.length-1; k++) {
                             const p1 = isDesignCurve ? curve[k].phiPn : curve[k].Pn;
                             const p2 = isDesignCurve ? curve[k+1].phiPn : curve[k+1].Pn;
-                            
                             if ((P_target <= p1 && P_target >= p2) || (P_target >= p1 && P_target <= p2)) {
                                 if (Math.abs(p1 - p2) < 0.001) {
                                     pt = curve[k];
@@ -1943,7 +1531,6 @@
                                     const mnz2 = isDesignCurve ? curve[k+1].phiMnz : curve[k+1].Mnz;
                                     const mnx1 = isDesignCurve ? curve[k].phiMnx : curve[k].Mnx;
                                     const mnx2 = isDesignCurve ? curve[k+1].phiMnx : curve[k+1].Mnx;
-                                    
                                     pt = {
                                         Mnz: mnz1 + r * (mnz2 - mnz1),
                                         Mnx: mnx1 + r * (mnx2 - mnx1)
@@ -1952,16 +1539,12 @@
                                 break;
                             }
                         }
-                        
                         const x = pt.Mnz * vizScales.m;
                         const z = pt.Mnx * vizScales.m;
                         const y = (P_target - minP_nominal) * vizScales.p;
-
                         vertices.push(x, y, z);
                     }
                 }
-
-                // Indices
                 for(let i=0; i<levels; i++) {
                     for(let j=0; j<numAngles; j++) {
                         const nextJ = (j + 1) % numAngles;
@@ -1971,8 +1554,6 @@
                         indices.push(row1 + nextJ, row2 + j, row2 + nextJ);
                     }
                 }
-                
-                // Cap Top
                 if (isDesignCurve) {
                     const topY = (curMaxP - minP_nominal) * vizScales.p;
                     const centerIndex = vertices.length / 3;
@@ -1981,77 +1562,54 @@
                         indices.push(centerIndex, j, (j + 1) % numAngles);
                     }
                 }
-
                 const geometry = new THREE.BufferGeometry();
                 geometry.setAttribute('position', new THREE.Float32BufferAttribute(vertices, 3));
                 geometry.setIndex(indices);
                 geometry.computeVertexNormals();
-
                 const mat = new THREE.MeshPhongMaterial({
                     color: matColor,
                     transparent: true, opacity: opacity,
                     side: THREE.DoubleSide, shininess: 100, specular: 0x222222,
                     wireframe: isWireframe || isWire, depthWrite: !isWire && opacity > 0.5 
                 });
-
                 const mesh = new THREE.Mesh(geometry, mat);
                 mesh.position.y = -(0 - minP_nominal) * vizScales.p;
                 return mesh;
             }
-            
-            // Re-render Meshes
             if(nominalMesh) scene.remove(nominalMesh);
-            
-            // Adjust mesh color for visibility
             const meshCol = isDarkMode ? 0xcbd5e1 : 0x94a3b8; 
             const wireCol = isDarkMode ? 0x94a3b8 : 0x64748b;
-
-            nominalMesh = createMesh(false, meshCol, 0.15, false); // Use new color var
+            nominalMesh = createMesh(false, meshCol, 0.15, false); 
             const wireGeo = new THREE.WireframeGeometry(nominalMesh.geometry);
             const wireMat = new THREE.LineBasicMaterial({ color: wireCol, transparent: true, opacity: 0.1 });
             const wireObj = new THREE.LineSegments(wireGeo, wireMat);
             nominalMesh.add(wireObj);
             scene.add(nominalMesh);
-
             if(pmnMesh) scene.remove(pmnMesh);
             pmnMesh = createMesh(true, 0x06b6d4, 0.6, false);
             scene.add(pmnMesh);
-
-            // --- LOAD CHECK ---
             loadPointsGroup.clear();
             const ptGeo = new THREE.SphereGeometry(9, 24, 24); 
             const loadRows = document.querySelectorAll('#table-loads tbody tr');
-            
-            // Get Global Shear Inputs (BIAXIAL)
             const Vux_global = parseFloat(document.getElementById('global_vux').value) || 0;
             const Vuy_global = parseFloat(document.getElementById('global_vuy').value) || 0;
-            
-            // Detailing Inputs
             const s_tie = parseFloat(document.getElementById('shear_s').value);
             const db_tie = parseFloat(document.getElementById('shear_db').value);
             const Av = Math.PI * Math.pow(db_tie/2, 2);
-
-            // Get Legs based on Shape
             const nz_legs = parseFloat(document.getElementById('shear_nz').value);
             const nx_legs = parseFloat(document.getElementById('shear_nx').value);
-            const circ_legs = parseFloat(document.getElementById('shear_legs_circ').value); // Read new input
-            
+            const circ_legs = parseFloat(document.getElementById('shear_legs_circ').value); 
             const isSeismic = document.getElementById('seismic_mode').checked;
-
             let maxDemand = 0;
             let criticalCase = { Pu: 0, Muz: 0, Mux: 0, Vu: 0 };
             let shearFailure = false;
-
             loadRows.forEach(row => {
                 const inputs = row.querySelectorAll('input');
                 const Pu = parseFloat(inputs[0].value) || 0;
                 let Muz = parseFloat(inputs[1].value) || 0;
                 let Mux = parseFloat(inputs[2].value) || 0;
-                // Get row specific shear if columns exist, otherwise global
                 const Vuz = inputs.length > 3 ? parseFloat(inputs[3].value) : Vux_global;
                 const Vux = inputs.length > 4 ? parseFloat(inputs[4].value) : Vuy_global;
-
-                // --- P-Delta Magnification ---
                 const Lu_m = parseFloat(document.getElementById('col_lu').value) || 0;
                 if(Lu_m > 0 && Pu > 0) {
                     const Lu_cm = Lu_m * 100;
@@ -2070,18 +1628,14 @@
                         if(Pu*1000 < 0.75*Pcy) Mux *= Math.max(1.0, 1.0 / (1.0 - (Pu*1000)/(0.75*Pcy)));
                     }
                 }
-
-                // --- P-M Check ---
                 let capM_radial = 0;
                 let loadM_radial = Math.sqrt(Muz*Muz + Mux*Mux);
                 let loadAngle = Math.atan2(Mux, Muz); 
                 if(loadAngle < 0) loadAngle += 2*Math.PI;
-
                 const numAngles = data.curves.length;
                 const stepAngle = (2*Math.PI) / numAngles;
                 const idx = Math.round(loadAngle / stepAngle) % numAngles;
                 const targetCurve = data.curves[idx];
-
                 if (Pu > P_limit_design || Pu < minP_nominal) {
                     capM_radial = 0;
                 } else {
@@ -2097,62 +1651,45 @@
                         }
                     }
                 }
-
                 let demand = (Pu > P_limit_design || Pu < minP_nominal) ? 9.99 : (capM_radial > 0.1 ? loadM_radial / capM_radial : 0);
-
-                // --- Biaxial Shear Check ---
                 const Ag = (shape === 'rect') ? (b * h) : (Math.PI * Math.pow(b/2, 2));
                 const Pu_kg = Pu * 1000;
-                
                 const calcPhiVn = (bw, d_depth, legs) => {
                     let Vc_stress = 0.53 * Math.sqrt(fc) + (Pu_kg / (6 * Ag));
                     if (isSeismic && Pu_kg < (Ag * fc) / 20) Vc_stress = 0;
                     if (Vc_stress < 0) Vc_stress = 0;
-
                     const Vc = Vc_stress * bw * d_depth / 1000;
                     const Av_tie = Math.PI * Math.pow(db_tie/2, 2);
                     const Vs = (legs * Av_tie * fy * d_depth) / s_tie / 1000;
                     const Vs_max = 2.12 * Math.sqrt(fc) * bw * d_depth / 1000;
-                    
                     return 0.75 * (Vc + Math.min(Vs, Vs_max));
                 };
-
                 let DCR_shear = 0;
-
                 if (shape === 'rect') {
-                    // Rectangular Logic
                     const d_x = h - cover - db_tie - (Math.sqrt(parseFloat(document.getElementById('bar_size').value)*4/Math.PI)/2); 
                     const phiVnz = calcPhiVn(b, d_x, nx_legs); 
-                    
                     const d_y = b - cover - db_tie - (Math.sqrt(parseFloat(document.getElementById('bar_size').value)*4/Math.PI)/2);
                     const phiVnx = calcPhiVn(h, d_y, nz_legs);
-
                     const DCR_vux = Math.abs(Vuz) / phiVnz;
                     const DCR_vuy = Math.abs(Vux) / phiVnx;
                     DCR_shear = Math.max(DCR_vux, DCR_vuy);
                 } else {
-                    // Circular Logic
                     const D = b; 
                     const d_eff = 0.8 * D;
                     const Vu_resultant = Math.sqrt(Vuz**2 + Vux**2);
-                    
-                    // Use the specific Circular Legs input
                     const phiVn_circ = calcPhiVn(D, d_eff, circ_legs);
                     DCR_shear = Vu_resultant / phiVn_circ;
                 }
-
                 if (DCR_shear > 1.0) {
                     demand = Math.max(demand, 9.99);
                     shearFailure = true;
                 } else {
                     demand = Math.max(demand, DCR_shear);
                 }
-
                 if (demand > maxDemand) {
                     maxDemand = demand;
                     criticalCase = { Pu, Muz, Mux, Vu: Math.max(Math.abs(Vuz), Math.abs(Vux)) };
                 }
-
                 const isPointSafe = demand <= 1.0;
                 const ptMat = new THREE.MeshStandardMaterial({ 
                     color: isPointSafe ? 0xbf9000 : 0xff0000, 
@@ -2163,8 +1700,6 @@
                 ptMesh.position.set(Muz * vizScales.m, Pu * vizScales.p, Mux * vizScales.m);
                 loadPointsGroup.add(ptMesh);
             });
-
-            // UI Updates
             let globalMaxPhiMnz = 0, globalMaxPhiMnx = 0;
             data.curves.forEach(c => {
                 c.forEach(pt => {
@@ -2172,88 +1707,67 @@
                     if (Math.abs(pt.phiMnx) > globalMaxPhiMnx) globalMaxPhiMnx = Math.abs(pt.phiMnx);
                 });
             });
-
             document.getElementById('max_phi_pn').innerText = P_limit_design.toFixed(1);
             document.getElementById('max_phi_mnz').innerText = globalMaxPhiMnz.toFixed(1);
             document.getElementById('max_phi_mnx').innerText = globalMaxPhiMnx.toFixed(1);
-
             document.getElementById('disp_pu').innerText = criticalCase.Pu.toFixed(1);
             document.getElementById('disp_mux').innerText = criticalCase.Muz.toFixed(1);
             document.getElementById('disp_muy').innerText = criticalCase.Mux.toFixed(1);
             document.getElementById('dc-val').innerText = maxDemand.toFixed(2);
-            
             const isSafe = maxDemand <= 1.0;
             const bar = document.getElementById('dc-bar');
             bar.style.width = Math.min(maxDemand * 100, 100) + "%";
             bar.className = isSafe ? "h-4 rounded-full transition-all duration-500 bg-green-500" : "h-4 rounded-full transition-all duration-500 bg-red-500";
-            
             const badge = document.getElementById('safety-msg');
             if (shearFailure) {
-                badge.innerText = t('sts_shear'); // Uses "剪力破壞"
+                badge.innerText = t('sts_shear'); 
                 badge.className = "text-center text-xs font-bold mt-2 py-1 rounded bg-red-100 text-red-700";
             } else {
-                badge.innerText = isSafe ? t('sts_safe') : t('sts_fail'); // Uses "安全 (SAFE)" or "破壞 (FAILURE)"
+                badge.innerText = isSafe ? t('sts_safe') : t('sts_fail'); 
                 badge.className = isSafe ? "text-center text-xs font-bold mt-2 py-1 rounded bg-green-100 text-green-700" : "text-center text-xs font-bold mt-2 py-1 rounded bg-red-100 text-red-700";
             }
-
             draw3DLimits(data, P_limit_design, globalMaxPhiMnz, globalMaxPhiMnx, criticalCase);
             checkSpacingAndWarnings(b, h, cover, isCustom, data.rebarWarnings);
         }
-        
         function checkSpacingAndWarnings(b, h, cover, isCustom, customWarnings = []) {
             const warningsDiv = document.getElementById('code-warnings');
             warningsDiv.innerHTML = "";
             warningsDiv.classList.remove('hidden');
             const shape = document.getElementById('col_shape').value;
-            
             if (shape === 'circ') {
-                // Check if circular rebar fits
                 const isSpiral = document.querySelector('input[name="circ_type"]:checked')?.value === 'spiral';
-                // Approx perimeter check: n * (db + space) < PI * (D - 2*cover - 2*tie - db)
                 const n_circ = parseInt(document.getElementById('n_circ_bars').value);
                 const db_main = Math.sqrt(parseFloat(document.getElementById('bar_size').value) * 4 / Math.PI);
                 const db_tie = parseFloat(document.getElementById('shear_db').value);
-                
                 const core_dia = b - 2*cover - 2*db_tie - db_main;
                 const perimeter = Math.PI * core_dia;
-                const required_perim = n_circ * (db_main + 4.0); // Assuming min 4cm spacing
-                
+                const required_perim = n_circ * (db_main + 4.0); 
                 if (perimeter < required_perim) {
                      warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">⚠️ Circular Spacing Tight<br><span class="text-[9px]">Check aggregate flow</span></div>`;
                 }
             }
-
             if (isCustom && customWarnings && customWarnings.length > 0) {
                  customWarnings.forEach(msg => {
                     warningsDiv.innerHTML += `<div class="text-amber-700 font-bold border-b pb-1 mb-1 border-amber-300 bg-amber-50 p-1 rounded">⚠️ ${msg}</div>`;
                  });
             }
-
-            // Aspect Ratio Check
             const ratio = Math.max(b, h) / Math.min(b, h);
             if (ratio > 3.0) {
                  warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">${t('w_aspect')} (1:${ratio.toFixed(1)})<br><span class="text-[9px]">${t('w_wall')}</span></div>`;
             }
-
             const isSeismic = document.getElementById('seismic_mode').checked;
-
-            // Minimum Eccentricity
             const pu_val = parseFloat(document.getElementById('disp_pu').innerText) || 0;
             const mux_val = parseFloat(document.getElementById('disp_mux').innerText) || 0;
             const muy_val = parseFloat(document.getElementById('disp_muy').innerText) || 0;
-            
             if (pu_val > 0) {
                 const e_min_x = (1.5 + 0.03 * h) / 100; 
                 const e_min_y = (1.5 + 0.03 * b) / 100;
                 const M_min_x = pu_val * e_min_x;
                 const M_min_y = pu_val * e_min_y;
-
                 if (Math.abs(mux_val) < M_min_x && Math.abs(muy_val) < M_min_y && (Math.abs(mux_val)+Math.abs(muy_val)) > 0.001) {
                     warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">${t('w_small_ecc')}<br><span class="text-[9px]">${t('w_small_ecc_d')}</span></div>`;
                 }
             }
-
-            // Rebar Ratio
             let Ast_total = 0;
             if (isCustom) {
                 const rows = document.querySelectorAll('#table-rebar tbody tr');
@@ -2264,31 +1778,24 @@
                 });
             } else {
                 const ab_val = parseFloat(document.getElementById('bar_size').value);
-                
                 if (shape === 'circ') {
-                    // Circular Regular Logic
                     const n_circ = parseInt(document.getElementById('n_circ_bars').value) || 0;
                     Ast_total = n_circ * ab_val;
                 } else {
-                    // Rectangular Regular Logic
                     const nz = parseInt(document.getElementById('nz_bars').value);
                     const nx = parseInt(document.getElementById('nx_bars').value);
                     const count = (2 * nz) + Math.max(0, 2 * (nx - 2));
                     Ast_total = count * ab_val;
                 }
             }
-            
-            // Calculate Gross Area based on Shape
             let Ag;
             if (shape === 'circ') {
                 Ag = Math.PI * Math.pow(b / 2, 2);
             } else {
                 Ag = b * h;
             }
-
             const rho = Ast_total / Ag;
             const rho_pct = (rho * 100).toFixed(2);
-            
             if (rho < 0.01) {
                 warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">${t('w_low_rho')}: <b>${rho_pct}%</b> <span class="text-[9px]">${t('w_min_1')}</span></div>`;
             } else if (rho > 0.08) {
@@ -2298,24 +1805,18 @@
             } else {
                  warningsDiv.innerHTML += `<div class="text-green-700 border-b pb-1 mb-1">${t('w_reinf_ratio')}: <b>${rho_pct}%</b></div>`;
             }
-
-            // Tie Spacing & Ash
             const s_tie = parseFloat(document.getElementById('shear_s').value);
             const db_tie = parseFloat(document.getElementById('shear_db').value);
             const leastDim = Math.min(b, h);
-            
             let maxS = 0;
             let rule = "";
-
             if (isSeismic) {
-                const ab_val_main = parseFloat(document.getElementById('bar_size').value); // Approx maxDb for regular
-                const maxDb = Math.sqrt(ab_val_main * 4 / Math.PI); // Simplified logic
+                const ab_val_main = parseFloat(document.getElementById('bar_size').value); 
+                const maxDb = Math.sqrt(ab_val_main * 4 / Math.PI); 
                 const limit1 = leastDim / 4;
                 const limit2 = 6 * maxDb;
                 maxS = Math.min(limit1, limit2, 15.0);
                 rule = t('rule_seismic');
-                
-                // Ash Check
                 const bc_x = b - 2*cover;
                 const bc_y = h - 2*cover;
                 const Ach = bc_x * bc_y;
@@ -2323,69 +1824,44 @@
                 const fyt = parseFloat(document.getElementById('mat_fy').value);
                 const fc = parseFloat(document.getElementById('mat_fc').value);
                 const Av_bar = Math.PI * Math.pow(db_tie/2, 2);
-
                 if (shape === 'circ') {
-                    // --- CIRCULAR: Volumetric Ratio Check (ρs) ---
                     const D = b;
                     const d_core = D - 2 * cover;
                     const Ach = Math.PI * Math.pow(d_core/2, 2);
                     const Ag_col = Math.PI * Math.pow(D/2, 2);
-
-                    // START MODIFICATION
                     const isSpiral = document.querySelector('input[name="circ_type"]:checked')?.value === 'spiral';
-
                     if (isSpiral) {
-                        // SPIRAL LOGIC: Volumetric Ratio (ρs)
-                        // ρs = 4 * Asp / (d_core * s)
                         const rho_s_prov = (4 * Av_bar) / (d_core * s_tie);
-
-                        // ACI/Taiwan Code Spiral Req:
                         const req1 = 0.45 * ((Ag_col / Ach) - 1) * (fc / fyt);
                         const req2 = 0.12 * (fc / fyt);
                         const rho_s_req = Math.max(req1, req2);
-
                         if (rho_s_prov < rho_s_req) {
                              warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">⚠️ Low Spiral Ratio ρs<br><span class="text-[9px]">Prov: ${(rho_s_prov*100).toFixed(2)}% < Req: ${(rho_s_req*100).toFixed(2)}%</span></div>`;
                         } else {
-                             // Optional: Show Green OK for Spiral
                              warningsDiv.innerHTML += `<div class="text-green-700 border-b pb-1 mb-1">✓ Spiral ρs OK</div>`;
                         }
                     } else {
-                        // HOOP LOGIC (Circular Ties)
-                        // Treated similar to Rectangular Ash but for total legs crossing
-                        // Simplified check for circular hoops usually involves ensuring standard spacing or min confinement similar to Rect
-                        // For this tool, we simply ensure the shear legs are sufficient (handled in shear check)
-                        // and standard seismic spacing applies.
-                        
-                        // We strictly enforce spacing max for hoops
                         if(isSeismic && s_tie > 15) {
                              warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">⚠️ Hoop Spacing > 15cm</div>`;
                         }
                     }
-                    // END MODIFICATION
                 } else {
-                    // --- RECTANGULAR: Ash Check (Existing Logic) ---
                     const bc_x = b - 2*cover;
                     const bc_y = h - 2*cover;
                     const Ach = bc_x * bc_y;
                     const Ag_col = b * h;
-                    
                     const Ash_prov_x = parseFloat(document.getElementById('shear_nx').value) * Av_bar; 
                     const Ash_prov_y = parseFloat(document.getElementById('shear_nz').value) * Av_bar;
-                    
                     const factor1 = 0.3 * (s_tie * bc_x * fc / fyt) * ((Ag_col / Ach) - 1);
                     const factor2 = 0.09 * (s_tie * bc_x * fc / fyt);
                     const Ash_req_x = Math.max(factor1, factor2);
-                    
                     const factor1_y = 0.3 * (s_tie * bc_y * fc / fyt) * ((Ag_col / Ach) - 1);
                     const factor2_y = 0.09 * (s_tie * bc_y * fc / fyt);
                     const Ash_req_y = Math.max(factor1_y, factor2_y);
-
                     if (Ash_prov_x < Ash_req_x || Ash_prov_y < Ash_req_y) {
                          warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">${t('w_insuff_ash')}<br><span class="text-[9px]">${t('w_need_legs')}</span></div>`;
                     }
                 }
-
             } else {
                 const ab_val_main = parseFloat(document.getElementById('bar_size').value);
                 const maxDb = Math.sqrt(ab_val_main * 4 / Math.PI);
@@ -2394,17 +1870,14 @@
                 maxS = Math.min(limit1, limit2, leastDim);
                 rule = t('rule_gravity');
             }
-
             if (s_tie > maxS) {
                 warningsDiv.innerHTML += `<div class="text-red-600 border-b pb-1 mb-1">${t('w_bad_tie')}: <b>${s_tie} cm</b><br><span class="text-[9px]">${t('w_max_for')} ${rule}: <b>${maxS.toFixed(1)} cm</b></span></div>`;
             } else {
                 warningsDiv.innerHTML += `<div class="text-green-700 border-b pb-1 mb-1">${t('w_tie_spacing')}: ${s_tie} cm<br><span class="text-[9px] text-gray-400">(${rule} ${t('val_ok')})</span></div>`;
             }
-
             if (s_tie < 7.5) {
                  warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">${t('w_vert_gap')}<br><span class="text-[9px]"><b>${s_tie} cm</b> ${t('w_agg')}</span></div>`;
             }
-
             const nLegsX = parseFloat(document.getElementById('shear_nz').value);
             const nLegsY = parseFloat(document.getElementById('shear_nx').value);
             const core_width = b - 2*cover; 
@@ -2412,14 +1885,12 @@
             const core_depth = h - 2*cover;
             const space_between_legs_y = nLegsY > 1 ? core_depth / (nLegsY - 1) : core_depth;
             const MIN_LEG_SPACE = 7.5; 
-
             if (nLegsX > 2 && space_between_legs_x < MIN_LEG_SPACE) {
                 warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">${t('w_x_cong')}<br><span class="text-[9px]">Gap: <b>${space_between_legs_x.toFixed(1)} cm</b>. ${t('w_vib')}</span></div>`;
             }
             if (nLegsY > 2 && space_between_legs_y < MIN_LEG_SPACE) {
                 warningsDiv.innerHTML += `<div class="text-amber-600 border-b pb-1 mb-1">${t('w_y_cong')}<br><span class="text-[9px]">Gap: <b>${space_between_legs_y.toFixed(1)} cm</b>. ${t('w_vib')}</span></div>`;
             }
-
             const Lu = parseFloat(document.getElementById('col_lu').value) || 0;
             if (Lu > 0) {
                 const r = 0.3 * h / 100; 
@@ -2428,93 +1899,60 @@
                      warningsDiv.innerHTML += `<div class="text-amber-600 font-bold border-b pb-1 mb-1">${t('w_slender')} (kL/r=${kLu_r.toFixed(0)})</div><div class="text-[9px] text-amber-700 leading-tight">${t('w_mmag')}</div>`;
                 }
             }
-            
             if (warningsDiv.innerHTML === "") warningsDiv.classList.add('hidden');
         }
-
         function capRebarInput(inputElem, width, cover, db) {
             const minS = Math.max(1.5 * db, 4.0);
             const tie = 1.27;
             const available = width - 2*cover - 2*tie;
-            // Width = n*db + (n-1)*minS
-            // Width = n(db + minS) - minS
-            // n = (Width + minS) / (db + minS)
             const maxN = Math.floor((available + minS) / (db + minS));
-            
             if(parseInt(inputElem.value) > maxN) {
                 inputElem.value = Math.max(2, maxN);
             }
         }
-
-        // --- 5. 2D SECTION DRAWER ---
         function drawSection2D() {
             const canvas = document.getElementById('section-canvas');
             const ctx = canvas.getContext('2d');
             const w = canvas.width;
             const h = canvas.height;
-            
-            // ADD: Read shape first
             const shape = document.getElementById('col_shape').value;
             const col_b = parseFloat(document.getElementById('col_b').value);
-            // MODIFIED: If circular, use Width (Diameter) as Depth for drawing scale
             const col_depth = shape === 'circ' ? col_b : parseFloat(document.getElementById('col_h').value);
             const cover = parseFloat(document.getElementById('col_cover').value) || 4.0;
-
-            // --- ADD THESE LINES TO FIX THE ERROR ---
             const Ab_bar = parseFloat(document.getElementById('bar_size').value);
             const db_main = Math.sqrt(Ab_bar * 4 / Math.PI);
             const db_tie = parseFloat(document.getElementById('shear_db').value);
-            // ----------------------------------------
-
             ctx.clearRect(0, 0, w, h);
-            
-            // Scaling
             const maxDim = Math.max(col_b, col_depth);
             const padding = 20; 
             const scale = (Math.min(w, h) - padding) / maxDim;
-            
             const drawW = col_b * scale;
             const drawH = col_depth * scale;
             const ox = (w - drawW)/2;
             const oy = (h - drawH)/2;
-
-            // 1. Draw Concrete Section
-            // Dynamic Colors based on mode
-            const bgCol = isDarkMode ? '#1e293b' : '#f0f9ff'; // Slate-800 vs Azure-50
-            const borderCol = isDarkMode ? '#94a3b8' : '#475569'; // Slate-400 vs Slate-600
-            
+            const bgCol = isDarkMode ? '#1e293b' : '#f0f9ff'; 
+            const borderCol = isDarkMode ? '#94a3b8' : '#475569'; 
             ctx.fillStyle = bgCol; 
             ctx.strokeStyle = borderCol; 
             ctx.lineWidth = 2;
-
             if (shape === 'rect') {
                 ctx.fillRect(ox, oy, drawW, drawH);
                 ctx.strokeRect(ox, oy, drawW, drawH);
             } else {
-                // Draw Circle
                 ctx.beginPath();
                 ctx.arc(ox + drawW/2, oy + drawW/2, drawW/2, 0, 2*Math.PI);
                 ctx.fill();
                 ctx.stroke();
             }
-
-            // 2. Draw Ties / Stirrups
             const tieColor = isDarkMode ? '#f87171' : '#b91c1c';
             const tieWidth = 1.5;
-            
-            // Visual offset for tie
             const tLeft = ox + (cover * scale);
             const tTop = oy + (cover * scale);
-            
-            // MODIFIED: Clamp values to 0 to prevent negative radius crash
             const tW = Math.max(0, drawW - 2*(cover * scale));
             const tH = Math.max(0, drawH - 2*(cover * scale));
-
             ctx.strokeStyle = tieColor;
             ctx.lineWidth = 1.5;
             ctx.lineJoin = 'round';
-
-            // --- A. Outer Hoop ---
             ctx.beginPath();
             if (shape === 'rect') {
                 ctx.rect(tLeft, tTop, tW, tH);
@@ -2522,147 +1960,97 @@
                 ctx.arc(ox + drawW/2, oy + drawH/2, tW/2, 0, 2*Math.PI);
             }
             ctx.stroke();
-
-            // --- Hook Visuals ---
-            // Fix: Position hooks on the perimeter for circles, corner for rects
             const hookLen = 8;
             let hx, hy;
-            
-            // START MODIFICATION
             const isSpiral = shape === 'circ' && document.querySelector('input[name="circ_type"]:checked')?.value === 'spiral';
-
             if (shape === 'rect') {
                 hx = tLeft; 
                 hy = tTop;
-                
                 ctx.beginPath();
                 ctx.moveTo(hx + 2, hy + 2); ctx.lineTo(hx + hookLen, hy + hookLen);
                 ctx.moveTo(hx + 2, hy + 2); ctx.lineTo(hx + 2, hy + hookLen + 2);
                 ctx.stroke();
             } else if (!isSpiral) { 
-                // ONLY DRAW HOOKS IF NOT SPIRAL
-                // Circular: Hook at 135 degrees (Top-Left quadrant visually)
                 const cx = ox + drawW/2;
                 const cy = oy + drawH/2;
                 const r = tW / 2;
-                
                 const angDraw = 5 * Math.PI / 4;
-                
                 hx = cx + r * Math.cos(angDraw);
                 hy = cy + r * Math.sin(angDraw);
-
                 ctx.beginPath();
-                // Draw simple "inward" hook lines
                 ctx.moveTo(hx, hy); ctx.lineTo(hx + hookLen, hy + hookLen/2);
                 ctx.moveTo(hx, hy); ctx.lineTo(hx + hookLen/2, hy + hookLen);
                 ctx.stroke();
             } else {
-                // Circular: Hook at 135 degrees (Top-Left quadrant visually)
                 const cx = ox + drawW/2;
                 const cy = oy + drawH/2;
                 const r = tW / 2;
-                
-                // 225 degrees (5*PI/4) puts it at Top-Left in Canvas coords (Y is down? No, 0 is right, PI/2 is down)
                 const angDraw = 5 * Math.PI / 4;
-                
                 hx = cx + r * Math.cos(angDraw);
                 hy = cy + r * Math.sin(angDraw);
-
                 ctx.beginPath();
-                // Draw simple "inward" hook lines
                 ctx.moveTo(hx, hy); ctx.lineTo(hx + hookLen, hy + hookLen/2);
                 ctx.moveTo(hx, hy); ctx.lineTo(hx + hookLen/2, hy + hookLen);
                 ctx.stroke();
             }
-
-            // --- B. Inner Crossties ---
             const isCustom = document.querySelector('input[name="rebar_mode"]:checked').value === 'custom';
-            
             if (!isCustom) {
                 ctx.beginPath();
-                
                 if (shape === 'rect') {
-                    // --- RECTANGULAR TIES ---
                     const nz_bars = parseInt(document.getElementById('nz_bars').value);
                     const nx_bars = parseInt(document.getElementById('nx_bars').value);
                     const nLegsX = Math.max(2, parseInt(document.getElementById('shear_nz').value));
                     const nLegsY = Math.max(2, parseInt(document.getElementById('shear_nx').value));
-
-                    // Draw Vertical Inner Legs
                     if (nLegsX > 2 && nz_bars > 2) {
                         for (let i = 1; i < nLegsX - 1; i++) {
                             const barIdx = Math.round(i * (nz_bars - 1) / (nLegsX - 1));
                             const xPos = tLeft + (barIdx * tW / (nz_bars - 1));
                             ctx.moveTo(xPos, tTop); ctx.lineTo(xPos, tTop + tH);
-                            // Hooks
                             ctx.moveTo(xPos, tTop); ctx.lineTo(xPos + 3, tTop + 6);
                             ctx.moveTo(xPos, tTop + tH); ctx.lineTo(xPos - 3, tTop + tH - 6);
                         }
                     }
-                    // Draw Horizontal Inner Legs
                     if (nLegsY > 2 && nx_bars > 2) {
                         for (let i = 1; i < nLegsY - 1; i++) {
                             const barIdx = Math.round(i * (nx_bars - 1) / (nLegsY - 1));
                             const yPos = tTop + (barIdx * tH / (nx_bars - 1));
                             ctx.moveTo(tLeft, yPos); ctx.lineTo(tLeft + tW, yPos);
-                            // Hooks
                             ctx.moveTo(tLeft, yPos); ctx.lineTo(tLeft + 6, yPos + 3);
                             ctx.moveTo(tLeft + tW, yPos); ctx.lineTo(tLeft + tW - 6, yPos - 3);
                         }
                     }
                 } else {
-                    // --- CIRCULAR TIES (Revised for Total Legs) ---
                     const n_circ = parseInt(document.getElementById('n_circ_bars').value);
-                    // Use Total Legs Input
                     const n_legs = parseInt(document.getElementById('shear_legs_circ').value) || 2;
                     const isSpiral = document.querySelector('input[name="circ_type"]:checked')?.value === 'spiral';
                     const d_cen_draw = cover + db_tie + (db_main / 2);
-                    
-                    // MODIFIED: Clamp radius to 0 to prevent negative values
                     const r_draw = Math.max(0, ((col_b/2) - d_cen_draw) * scale);
-                    
                     const cx = ox + drawW/2;
                     const cy = oy + drawH/2;
-                    
                     const barPos = [];
                     for(let i=0; i<n_circ; i++) {
-                        // Match angles with calculation logic (-PI/2 for top start)
                         const theta = (2 * Math.PI * i) / n_circ - (Math.PI / 2);
-                        // FIX: Use minus (-) for sin(theta) to match the dot() function's coordinate system
                         barPos.push({ x: cx + r_draw * Math.cos(theta), y: cy - r_draw * Math.sin(theta) });
                     }
-
-                    // Logic: Hoop = 2 legs. We draw extra lines for (n_legs - 2).
                     const num_ties = Math.max(0, n_legs - 2);
                     const offset = Math.floor(n_circ / 2);
-
                     for(let k=0; k<num_ties; k++) {
                         const idx = k % n_circ;
                         const p1 = barPos[idx];
                         const p2 = barPos[(idx + offset) % n_circ];
-                        
                         ctx.moveTo(p1.x, p1.y);
                         ctx.lineTo(p2.x, p2.y);
-
-                        // REVISED: Hooks for Even Numbered Circular Rebar
                         if (n_circ % 2 === 0) {
                             const dx = p2.x - p1.x;
                             const dy = p2.y - p1.y;
                             const ang = Math.atan2(dy, dx);
                             const hLen = 10; 
-
-                            // Hook at p1: Bend 45 deg (0.25 PI) inward relative to tie
-                            // This ensures the hook stays inside the circular core
                             ctx.moveTo(p1.x, p1.y);
                             ctx.lineTo(p1.x + hLen * Math.cos(ang + Math.PI * 0.25), p1.y + hLen * Math.sin(ang + Math.PI * 0.25));
-
-                            // Hook at p2: Bend 45 deg inward relative to incoming direction
-                            // Using (ang2 - 0.25 PI) creates a symmetrical bracket shape \_______/
                             const ang2 = Math.atan2(-dy, -dx);
                             ctx.moveTo(p2.x, p2.y);
                             ctx.lineTo(p2.x + hLen * Math.cos(ang2 - Math.PI * 0.25), p2.y + hLen * Math.sin(ang2 - Math.PI * 0.25));
                         } else {
-                            // Fallback for odd numbers
                             ctx.fillRect(p1.x - 1.5, p1.y - 1.5, 3, 3);
                             ctx.fillRect(p2.x - 1.5, p2.y - 1.5, 3, 3);
                         }
@@ -2670,14 +2058,8 @@
                 }
                 ctx.stroke();
             }
-
-            // 3. Draw Rebar Dots
-            ctx.fillStyle = '#dc2626'; // Bright Red
-            
-            // Array to store calculated screen coordinates of bars for snapping ties later
+            ctx.fillStyle = '#dc2626'; 
             let barCoordinates = []; 
-
-            // Helper to draw dot and store coordinate
             function dot(rx, ry, area) {
                 const px = ox + (col_b/2 + rx) * scale;
                 const py = oy + (col_depth/2 - ry) * scale; 
@@ -2685,11 +2067,8 @@
                 ctx.beginPath();
                 ctx.arc(px, py, Math.max(rad, 1.5), 0, 2*Math.PI);
                 ctx.fill();
-                
-                // Store for tie connections
                 barCoordinates.push({x: px, y: py});
             }
-
             if(isCustom) {
                 const rows = document.querySelectorAll('#table-rebar tbody tr');
                 rows.forEach(row => {
@@ -2701,21 +2080,16 @@
                     if(area > 0) dot(x, y, area);
                 });
             } else {
-                // Calculate precise d_center for drawing
                 const d_center = cover + db_tie + (db_main / 2);
                 const shape = document.getElementById('col_shape').value;
-
                 if (shape === 'rect') {
                     const nz = parseInt(document.getElementById('nz_bars').value);
                     const nx = parseInt(document.getElementById('nx_bars').value);
-                    
-                    // Top/Bot
                     for(let i=0; i<nz; i++) {
                         const x = -col_b/2 + d_center + i * (col_b - 2*d_center) / (nz - 1);
                         dot(x, col_depth/2 - d_center, Ab_bar); 
                         dot(x, -col_depth/2 + d_center, Ab_bar); 
                     }
-                    // Sides
                     if (nx > 2) {
                         for(let j=1; j<nx-1; j++) {
                             const y = col_depth/2 - d_center - j * (col_depth - 2*d_center) / (nx - 1);
@@ -2724,12 +2098,9 @@
                         }
                     }
                 } else {
-                    // Circular Drawing Logic
                     const n_circ = parseInt(document.getElementById('n_circ_bars').value);
                     const radius_bar = (col_b/2) - d_center;
-                    
                     for(let i=0; i<n_circ; i++) {
-                        // Match angles with calculation logic (-PI/2 for top start)
                         const theta = (2 * Math.PI * i) / n_circ - (Math.PI / 2);
                         const x = radius_bar * Math.cos(theta);
                         const y = radius_bar * Math.sin(theta);
@@ -2737,143 +2108,94 @@
                     }
                 }
             }
-
-            // 4. Draw Axes Labels
             ctx.font = "bold 10px Arial";
             ctx.fillStyle = "#64748b";
             ctx.textAlign = "center";
             ctx.textBaseline = "middle";
-
-            // X Axis Arrow -> CHANGE LABEL TO Z
             ctx.beginPath();
             ctx.moveTo(ox + drawW/2, oy + drawH/2);
             ctx.lineTo(ox + drawW/2 + 25, oy + drawH/2);
-            ctx.strokeStyle = "#dc2626"; // Red
+            ctx.strokeStyle = "#dc2626"; 
             ctx.stroke();
-            ctx.fillText("Y", ox + drawW/2 + 32, oy + drawH/2); // Changed "X" to "Z"
-
-            // Y Axis Arrow -> CHANGE LABEL TO X
+            ctx.fillText("Y", ox + drawW/2 + 32, oy + drawH/2); 
             ctx.beginPath();
             ctx.moveTo(ox + drawW/2, oy + drawH/2);
             ctx.lineTo(ox + drawW/2, oy + drawH/2 - 25);
-            ctx.strokeStyle = "#1d4ed8"; // Blue
+            ctx.strokeStyle = "#1d4ed8"; 
             ctx.stroke();
-            ctx.fillText("Z", ox + drawW/2, oy + drawH/2 - 32); // Changed "Y" to "X"
+            ctx.fillText("Z", ox + drawW/2, oy + drawH/2 - 32); 
         }
-        
         function toggleWireframe() {
             isWireframe = !isWireframe;
             if(pmnMesh) pmnMesh.material.wireframe = isWireframe;
         }
-
-        // Start
         init();
         scene.add(limitGroup);
-
         function draw3DLimits(data, maxPn, maxMnz, maxMnx) {
             limitGroup.clear();
-            
-            // Get Min P from the end of the first curve (all converge to pure tension)
             const minP = data.curves[0][data.curves[0].length-1].phiPn;
-            
             const yTop = (maxPn - minP) * vizScales.p;
             const yBot = 0; 
-
-            // Compression Plane (Green)
             const planeGeo = new THREE.PlaneGeometry(maxMnz * 2.2 * vizScales.m, maxMnx * 2.2 * vizScales.m);
             const planeTop = new THREE.Mesh(planeGeo, new THREE.MeshBasicMaterial({ color: 0x15803d, transparent: true, opacity: 0.15, side: THREE.DoubleSide }));
             planeTop.rotation.x = -Math.PI / 2;
             planeTop.position.set(0, yTop, 0);
             limitGroup.add(planeTop);
             addLabel3D(`ϕPn_max: ${maxPn.toFixed(1)}`, 0, yTop + 30, 0, "#15803d");
-
-            // Tension Plane (Red)
             const planeBot = new THREE.Mesh(planeGeo, new THREE.MeshBasicMaterial({ color: 0xdc2626, transparent: true, opacity: 0.15, side: THREE.DoubleSide }));
             planeBot.rotation.x = -Math.PI / 2;
             planeBot.position.set(0, yBot, 0); 
             limitGroup.add(planeBot);
             addLabel3D(`ϕPn_min: ${minP.toFixed(1)}`, 0, yBot - 30, 0, "#dc2626");
-
-            // Moment Markers
             const midY = yTop * 0.45;
             const offset = 40; 
-
-            // X-Axis (Mnz)
             const xDist = maxMnz * vizScales.m;
             addLabel3D(`+ϕMny: ${maxMnz.toFixed(1)}`, xDist + offset, midY, 0, "#dc2626");
             addLabel3D(`-ϕMny: ${maxMnz.toFixed(1)}`, -(xDist + offset), midY, 0, "#dc2626");
-
-            // Z-Axis (Mnx)
             const zDist = maxMnx * vizScales.m;
             addLabel3D(`+ϕMnz: ${maxMnx.toFixed(1)}`, 0, midY, zDist + offset, "#1d4ed8");
             addLabel3D(`-ϕMnz: ${maxMnx.toFixed(1)}`, 0, midY, -(zDist + offset), "#1d4ed8");
         }
-
         function addLabel3D(text, x, y, z, colorStr) {
-            // Re-uses existing sprite logic or simplify
-            // For simplicity, just adding a small sprite at the corner of the plane
-            // ... implementation uses existing addLabel logic ...
         }
-
-        // --- OPTIMIZATION LOGIC ---
         async function runOptimization() {
             const btn = document.querySelector('button[onclick="runOptimization()"]');
             const status = document.getElementById('opt-status');
             btn.disabled = true;
             status.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ${t('opt_run')}`;
-
-            // Get Locks
             const locks = Array.from(document.querySelectorAll('.opt-lock:checked')).map(cb => cb.value);
             const lockDim = locks.includes('dim');
             const lockBar = locks.includes('bar');
-
             let bestCost = Infinity;
             let bestConfig = {};
-            
-            // Initial State
             const initB = parseFloat(document.getElementById('col_b').value);
             const initH = parseFloat(document.getElementById('col_h').value);
             const initNx = parseInt(document.getElementById('nz_bars').value);
-            
-            // Simple Hill Climbing / Random Walk
             for(let i=0; i<50; i++) {
-                // Mutate
                 if(!lockDim) {
-                    // Try changing dims by 5cm increments
                     const newB = Math.max(30, initB + (Math.floor(Math.random()*5)-2)*5);
                     const newH = Math.max(30, initH + (Math.floor(Math.random()*5)-2)*5);
                     document.getElementById('col_b').value = newB;
                     document.getElementById('col_h').value = newH;
                 }
                 if(!lockBar) {
-                    // Try changing bars
                     const newNx = Math.max(2, Math.min(8, initNx + (Math.floor(Math.random()*3)-1)));
                     document.getElementById('nz_bars').value = newNx;
-                    document.getElementById('nx_bars').value = newNx; // Keep symmetry for simplicity
+                    document.getElementById('nx_bars').value = newNx; 
                 }
-
-                // Calculate
                 updateApp();
-                
-                // Read Results
                 const maxDC = parseFloat(document.getElementById('dc-val').innerText);
                 const b = parseFloat(document.getElementById('col_b').value);
                 const h = parseFloat(document.getElementById('col_h').value);
                 const nz = parseInt(document.getElementById('nz_bars').value);
-                
-                // Cost Function: Area + Penalty for D/C > 0.95
                 let cost = b * h;
-                if (maxDC > 0.95) cost *= 1000; // Penalty
-                
+                if (maxDC > 0.95) cost *= 1000; 
                 if (cost < bestCost && maxDC <= 0.95) {
                     bestCost = cost;
                     bestConfig = { b, h, nz };
                 }
-                
-                await new Promise(r => setTimeout(r, 10)); // Visual delay
+                await new Promise(r => setTimeout(r, 10)); 
             }
-
-            // Set Best
             if(bestConfig.b) {
                 document.getElementById('col_b').value = bestConfig.b;
                 document.getElementById('col_h').value = bestConfig.h;
@@ -2883,7 +2205,6 @@
                 status.innerText = t('opt_done');
                 status.className = "text-[10px] text-center text-green-600 font-bold h-3";
             } else {
-                // Revert
                 document.getElementById('col_b').value = initB;
                 document.getElementById('col_h').value = initH;
                 document.getElementById('nz_bars').value = initNx;
@@ -2893,127 +2214,74 @@
             }
             btn.disabled = false;
         }
-
-        // --- HELPER: Get Precise Curve for Specific Angle ---
         function getCurveAtAngle(thetaRad) {
-            const numPoints = 60; // Resolution of the cut
+            const numPoints = 60; 
             const curve = [];
-            
-            // Re-run the integration logic from calculateInteractionSurface for a SINGLE angle
-            // 1. Get current inputs (reuse global getters or pass them)
             const b = parseFloat(document.getElementById('col_b').value);
             const h = parseFloat(document.getElementById('col_h').value);
             const fc = parseFloat(document.getElementById('mat_fc').value);
             const fy = parseFloat(document.getElementById('mat_fy').value);
-            // Need bars array (re-generate or access global if stored, easier to regenerate here safely)
-            // ... (Copy/Paste light version of bar generation or extract logic) ...
-            
-            // OPTIMIZATION: Call the main calculation again to get bars, 
-            // but usually we don't expose bars globally. 
-            // Let's create a lightweight bar generator or assume 'data' is available if we scope it.
-            // BETTER APPROACH: Interpolate from existing data.curves!
-            // Interpolating 72 curves (5 deg steps) is accurate enough for printing.
-            
-            // 1. Find two closest curves
-            // Normalize theta to 0 - 2PI
             let angle = thetaRad % (2*Math.PI);
             if(angle < 0) angle += 2*Math.PI;
-            
-            const numAngles = 72; // From calculation logic
+            const numAngles = 72; 
             const step = (2*Math.PI) / numAngles;
-            
             const idx1 = Math.floor(angle / step) % numAngles;
             const idx2 = (idx1 + 1) % numAngles;
-            
             const ratio = (angle - (idx1 * step)) / step;
-            
-            // Access the GLOBAL calculation data (we need to return 'data' from updateApp or store it)
-            // WE NEED TO STORE calculation result globally.
             if(!window.latestCalcData || !window.latestCalcData.curves) return [];
-
             const c1 = window.latestCalcData.curves[idx1];
             const c2 = window.latestCalcData.curves[idx2];
-            
-            // Interpolate points
-            // Assuming both curves have same number of points (they do, based on c_ratios)
             for(let i=0; i<c1.length; i++) {
                 const p1 = c1[i];
                 const p2 = c2[i];
-                
-                // Linear Interpolation of Pn and Mn
                 const phiPn = p1.phiPn + ratio * (p2.phiPn - p1.phiPn);
-                
-                // Moment is radial magnitude
                 const M1 = Math.sqrt(p1.phiMnz**2 + p1.phiMnx**2);
                 const M2 = Math.sqrt(p2.phiMnz**2 + p2.phiMnx**2);
                 const M = M1 + ratio * (M2 - M1);
-                
                 curve.push({P: phiPn, M: M});
             }
-            
             return curve;
         }
-
-        // --- HELPER: Draw 2D Interaction Diagram to Canvas URL ---
         function drawInteractionChart(curve, Pu, Mu, width, height) {
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
-            
-            // Setup style
             ctx.fillStyle = "white";
             ctx.fillRect(0, 0, width, height);
-            
-            // Margins
             const pad = 40;
             const w = width - 2*pad;
             const h = height - 2*pad;
-            
-            // Determine Scales
             let maxP = -Infinity, minP = Infinity, maxM = 0;
             curve.forEach(pt => {
                 if(pt.P > maxP) maxP = pt.P;
                 if(pt.P < minP) minP = pt.P;
                 if(pt.M > maxM) maxM = pt.M;
             });
-            // Include load point
             if(Pu > maxP) maxP = Pu;
             if(Pu < minP) minP = Pu;
             if(Mu > maxM) maxM = Mu;
-            
-            // Add breathing room
             maxP += (maxP - minP) * 0.1;
             minP -= (maxP - minP) * 0.1;
             maxM *= 1.1;
-            if(maxM === 0) maxM = 10; // Avoid div/0
-            
+            if(maxM === 0) maxM = 10; 
             const rangeP = maxP - minP;
             const scaleX = w / maxM;
             const scaleY = h / rangeP;
-            
             const toX = (m) => pad + m * scaleX;
             const toY = (p) => pad + h - (p - minP) * scaleY;
-            
-            // Draw Axes
             ctx.strokeStyle = "#cbd5e1";
             ctx.lineWidth = 1;
             ctx.beginPath();
-            // Y Axis
             ctx.moveTo(toX(0), toY(minP)); ctx.lineTo(toX(0), toY(maxP));
-            // X Axis (at P=0 if visible, else bottom)
             const yZero = (minP <= 0 && maxP >= 0) ? 0 : minP;
             ctx.moveTo(toX(0), toY(yZero)); ctx.lineTo(toX(maxM), toY(yZero));
             ctx.stroke();
-            
-            // Draw Axes Labels
             ctx.fillStyle = "#64748b";
             ctx.font = "10px Arial";
             ctx.textAlign = "right"; ctx.fillText("P (tf)", toX(0) - 5, toY(maxP));
             ctx.textAlign = "left"; ctx.fillText("M (tf-m)", toX(maxM) + 5, toY(yZero));
-            
-            // Draw Curve
-            ctx.strokeStyle = "#0e7490"; // Primary Blue
+            ctx.strokeStyle = "#0e7490"; 
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(toX(curve[0].M), toY(curve[0].P));
@@ -3021,51 +2289,30 @@
                 ctx.lineTo(toX(curve[i].M), toY(curve[i].P));
             }
             ctx.stroke();
-            
-            // Fill Curve Area (Light Blue)
             ctx.fillStyle = "rgba(14, 116, 144, 0.1)";
-            ctx.lineTo(toX(0), toY(curve[curve.length-1].P)); // Return to axis
-            ctx.lineTo(toX(0), toY(curve[0].P)); // Close loop
+            ctx.lineTo(toX(0), toY(curve[curve.length-1].P)); 
+            ctx.lineTo(toX(0), toY(curve[0].P)); 
             ctx.fill();
-
-            // Draw Point
             const ptX = toX(Mu);
             const ptY = toY(Pu);
-            
-            // D/C Line (Origin to Point)
             ctx.strokeStyle = "#94a3b8";
             ctx.setLineDash([4, 2]);
             ctx.beginPath();
-            ctx.moveTo(toX(0), toY(0)); // Origin (0,0) approx
+            ctx.moveTo(toX(0), toY(0)); 
             ctx.lineTo(ptX, ptY);
             ctx.stroke();
             ctx.setLineDash([]);
-            
-            // The Dot
-            // Determine Color
-            // Check approx capacity (simple ray check or just use isSafe passed in?)
-            // We'll just use the visual bounds. If it's inside the filled area, safe.
-            // But we have the specific D/C from calculation, let's color based on logic?
-            // Simple approach: red if outside bounding box of curve? No, curve isn't a box.
-            // Let's just use Blue dot.
-            
-            ctx.fillStyle = "#dc2626"; // Red dot for Load
+            ctx.fillStyle = "#dc2626"; 
             ctx.beginPath();
             ctx.arc(ptX, ptY, 4, 0, 2*Math.PI);
             ctx.fill();
-            
-            // Text Label
             ctx.fillStyle = "black";
             ctx.font = "bold 10px Arial";
             ctx.textAlign = "left";
             ctx.fillText(`(${Mu.toFixed(1)}, ${Pu.toFixed(1)})`, ptX + 6, ptY);
-
             return canvas.toDataURL("image/png");
         }
-
-        // --- REPORT GENERATION ---
         window.printReport = function() {
-            // 1. Gather Data
             const getVal = (id) => {
                 const el = document.getElementById(id);
                 return el ? el.value : '';
@@ -3074,121 +2321,73 @@
                 const el = document.getElementById(id);
                 return el ? el.innerText : '';
             };
-            
-            // Inputs
             const I = {
                 shape: getVal('col_shape'),
                 legs_circ: getVal('shear_legs_circ'),
                 circ_type: document.querySelector('input[name="circ_type"]:checked')?.value || 'hoop',
-                
                 b: getVal('col_b'), 
                 h: getVal('col_h'), 
                 cover: getVal('col_cover'),
                 fc: getVal('mat_fc'), 
                 fy: getVal('mat_fy'),
                 lu: getVal('col_lu'),
-                
-                // Rebar Info
                 bar: getVal('bar_size'), 
                 bar_text: document.getElementById('bar_size') ? document.getElementById('bar_size').options[document.getElementById('bar_size').selectedIndex].text : '',
-                
-                // FIX: Correctly map IDs to logical names (Z and X axes)
-                nz: getVal('nz_bars'), // Was potentially mis-mapped
+                nz: getVal('nz_bars'), 
                 nx: getVal('nx_bars'),
                 n_circ: getVal('n_circ_bars'),
-                
                 mode: document.querySelector('input[name="rebar_mode"]:checked').value,
-                
-                // Count custom bars if needed
                 custom_count: document.querySelectorAll('#table-rebar tbody tr').length,
-
-                // Loads
                 Pu: getVal('global_vux') ? getText('disp_pu') : "-", 
-                // FIX: Map Display IDs to Logical Report Variables based on Axis Swap
-                // disp_mux label is "Muy", so map to Muy
                 Muy: getText('disp_mux'), 
-                // disp_muy label is "Muz", so map to Muz
                 Muz: getText('disp_muy'),
-                
-                // Shear Inputs
-                vuy: document.getElementById('global_vux').value, // Input 1 (Global Vuy)
-                vuz: document.getElementById('global_vuy').value, // Input 2 (Global Vuz)
-                
+                vuy: document.getElementById('global_vux').value, 
+                vuz: document.getElementById('global_vuy').value, 
                 s_tie: getVal('shear_s'), 
                 db_tie: getVal('shear_db'),
-                legs_z: getVal('shear_nz'), // Input 1 (Z-dir legs)
-                legs_x: getVal('shear_nx')  // Input 2 (X-dir legs)
+                legs_z: getVal('shear_nz'), 
+                legs_x: getVal('shear_nx')  
             };
-
-            // Results
             const R = {
                 dc: getText('dc-val'),
                 status: getText('safety-msg'),
                 phiPn: getText('max_phi_pn'),
-                // FIX: Map Capacity IDs to Report Variables
-                // max_phi_mnz label is "phiMny", so map to phiMny
                 phiMny: getText('max_phi_mnz'),
-                // max_phi_mnx label is "phiMnz", so map to phiMnz
                 phiMnz: getText('max_phi_mnx'),
                 warnings: document.getElementById('code-warnings').innerHTML
             };
-
-            // 2. Capture Section Image
             const canvas = document.getElementById('section-canvas');
             const imgData = canvas.toDataURL("image/png");
-            
-            // 3. Prepare Dynamic HTML content
             const dateStr = new Date().toLocaleDateString();
-
-            // 1. Get Appendix Option
             const appOpt = document.getElementById('rpt_appendix').value;
-
-            // 2. Prepare Appendix HTML
             let appendixHTML = "";
-            
             if (appOpt !== 'none') {
-                // A. 3D Snapshot
                 renderer.render(scene, camera); 
                 const img3D = renderer.domElement.toDataURL("image/png");
-                
                 appendixHTML += `
                     <div class="page-break"></div>
                     <h3>${t('rpt_app_title')}</h3>
-                    
                     <div style="border: 1px solid #ccc; padding: 10px; margin-bottom: 20px; text-align: center;">
                         <h4 style="margin: 0 0 10px 0; color: #555;">${t('rpt_3d_view')}</h4>
                         <img src="${img3D}" style="max-width: 100%; max-height: 400px; border: 1px solid #eee;">
                     </div>
-                    
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
                 `;
-                
-                // B. Load Cases Slices
                 const loadRows = document.querySelectorAll('#table-loads tbody tr');
                 let count = 0;
                 const limit = appOpt === 'summary' ? 5 : 9999;
-                
                 Array.from(loadRows).forEach((row, idx) => {
                     if (count >= limit) return;
-                    
                     const inputs = row.querySelectorAll('input');
                     const Pu = parseFloat(inputs[0].value) || 0;
-                    const Muy = parseFloat(inputs[1].value) || 0; // Col 2 is Muy
-                    const Muz = parseFloat(inputs[2].value) || 0; // Col 3 is Muz
-                    
-                    // Calculate Resultant and Angle
-                    // Note: Calculation engine uses (Mz, Mx) order often, but for drawing we just need magnitude and direction
-                    // If we treat Muz as X and Muy as Y for local plotting:
+                    const Muy = parseFloat(inputs[1].value) || 0; 
+                    const Muz = parseFloat(inputs[2].value) || 0; 
                     const Mu_res = Math.sqrt(Muz**2 + Muy**2);
-                    let angleRad = Math.atan2(Muz, Muy); // atan2(y, x) -> atan2(Muz, Muy)
-                    
-                    // Get Curve
+                    let angleRad = Math.atan2(Muz, Muy); 
                     const curve = getCurveAtAngle(angleRad);
-                    
                     if (curve.length > 0) {
                         const chartImg = drawInteractionChart(curve, Pu, Mu_res, 350, 350);
                         const angleDeg = (angleRad * 180 / Math.PI).toFixed(1);
-                        
                         appendixHTML += `
                             <div style="border: 1px solid #eee; padding: 10px; page-break-inside: avoid;">
                                 <div style="font-size: 9pt; font-weight: bold; border-bottom: 1px solid #eee; margin-bottom: 5px; padding-bottom: 2px;">
@@ -3200,11 +2399,8 @@
                         count++;
                     }
                 });
-                
                 appendixHTML += `</div>`;
             }
-
-            // LOGIC: Determine Reinforcement Text
             let legsDisplayHTML = "";
             if (I.shape === 'circ') {
                 const typeKey = I.circ_type === 'spiral' ? 'lbl_spiral' : 'lbl_hoop';
@@ -3213,74 +2409,45 @@
             } else {
                 legsDisplayHTML = `Z: ${I.legs_z} ${t('rpt_legs_d')} / X: ${I.legs_x} ${t('rpt_legs_w')}`;
             }
-
-            // LOGIC: Shear Calculations & Table
             let shearTableRows = "";
-            
-            // Re-calculate Shear Capacities locally for report to show ratios
             const Ag = (I.shape === 'rect') ? (parseFloat(I.b) * parseFloat(I.h)) : (Math.PI * Math.pow(parseFloat(I.b)/2, 2));
             const fc = parseFloat(I.fc);
             const fy = parseFloat(I.fy);
             const db_tie = parseFloat(I.db_tie);
             const s_tie = parseFloat(I.s_tie);
             const cover = parseFloat(I.cover);
-            
-            // Tie Area (One leg)
             const Av_tie = Math.PI * Math.pow(db_tie/2, 2);
-            
-            // Helper: Calc PhiVn (0.75 * (Vc + Vs)) - Standard ACI/Taiwan 112 Eq
             const calcShearCap = (bw, d, legs, Pu_val) => {
-                const Nu_kg = Pu_val * 1000; // Axial Load in kgf (Positive = Compression)
-                
-                // 1. Calculate Vc (Concrete Contribution)
+                const Nu_kg = Pu_val * 1000; 
                 let Vc = 0;
                 if (Nu_kg >= 0) {
-                    // Compression: Vc = 0.53 * (1 + Nu/(140*Ag)) * sqrt(fc) * bw * d
                     const term_axial = 1 + (Nu_kg / (140 * Ag));
                     const stress_vc = 0.53 * Math.sqrt(fc) * term_axial;
-                    Vc = stress_vc * bw * d; // Result in kgf
+                    Vc = stress_vc * bw * d; 
                 } else {
-                    // Tension: Vc = 0 (Conservative / Simplified)
                     Vc = 0;
                 }
-
-                // Seismic Check: Vc = 0 if Special Moment Frame & Low Axial (< Ag*fc/20)
                 const isSeismic = document.getElementById('seismic_mode').checked;
                 if (isSeismic && Nu_kg < (Ag * fc) / 20) {
                     Vc = 0;
                 }
-
-                // 2. Calculate Vs (Steel Contribution)
-                // Vs = (Av * fy * d) / s
-                const Vs = (legs * Av_tie * fy * d) / s_tie; // kgf
-
-                // 3. Check Vs Max Limit
-                // Vs <= 2.12 * sqrt(fc) * bw * d
-                const Vs_max = 2.12 * Math.sqrt(fc) * bw * d; // kgf
-                
-                // 4. Final Capacity in Ton-Force (tf)
+                const Vs = (legs * Av_tie * fy * d) / s_tie; 
+                const Vs_max = 2.12 * Math.sqrt(fc) * bw * d; 
                 const Vn = Vc + Math.min(Vs, Vs_max);
                 const phi = 0.75;
-                
                 return (phi * Vn) / 1000; 
             };
-
-            // Parse Demands
             const Vuy_demand = Math.abs(parseFloat(I.vuy) || 0);
             const Vuz_demand = Math.abs(parseFloat(I.vuz) || 0);
             const Pu_calc = parseFloat(I.Pu) || 0; 
-
             if (I.shape === 'circ') {
-                // --- Circular ---
                 const D = parseFloat(I.b);
                 const d_eff = 0.8 * D;
                 const legs = parseFloat(I.legs_circ);
                 const Vu_res = Math.sqrt(Vuy_demand**2 + Vuz_demand**2);
-                
                 const phiVn = calcShearCap(D, d_eff, legs, Pu_calc);
                 const ratio = phiVn > 0 ? (Vu_res / phiVn) : 999;
                 const status = ratio <= 1.0 ? `<span class="pass">OK</span>` : `<span class="fail">FAIL</span>`;
-
                 shearTableRows = `
                     <tr>
                         <td><strong>${t('rpt_res')}</strong></td>
@@ -3290,31 +2457,19 @@
                     </tr>
                 `;
             } else {
-                // --- Rectangular ---
-                const h_dim = parseFloat(I.h); // Z dimension
-                const b_dim = parseFloat(I.b); // Y dimension
+                const h_dim = parseFloat(I.h); 
+                const b_dim = parseFloat(I.b); 
                 const bar_db = I.bar > 0 ? Math.sqrt(parseFloat(I.bar) * 4 / Math.PI) : 1.27;
-
-                // Effective depths (approx d = dim - cover - tie - db/2)
-                const d_y = b_dim - cover - db_tie - bar_db/2; // For Shear Y (Width)
-                const d_z = h_dim - cover - db_tie - bar_db/2; // For Shear Z (Depth)
-
-                // 1. Capacity Y (Resisting Vuy)
-                // bw = h (thickness perp to shear Y), d = d_y
-                // Resisted by Legs Y (shear_nx -> I.legs_x)
+                const d_y = b_dim - cover - db_tie - bar_db/2; 
+                const d_z = h_dim - cover - db_tie - bar_db/2; 
                 const legs_y = parseFloat(I.legs_x); 
                 const phiVny = calcShearCap(h_dim, d_y, legs_y, Pu_calc);
                 const ratio_y = phiVny > 0 ? (Vuy_demand / phiVny) : 999;
                 const status_y = ratio_y <= 1.0 ? `<span class="pass">OK</span>` : `<span class="fail">FAIL</span>`;
-
-                // 2. Capacity Z (Resisting Vuz)
-                // bw = b (thickness perp to shear Z), d = d_z
-                // Resisted by Legs Z (shear_nz -> I.legs_z)
                 const legs_z = parseFloat(I.legs_z); 
                 const phiVnz = calcShearCap(b_dim, d_z, legs_z, Pu_calc);
                 const ratio_z = phiVnz > 0 ? (Vuz_demand / phiVnz) : 999;
                 const status_z = ratio_z <= 1.0 ? `<span class="pass">OK</span>` : `<span class="fail">FAIL</span>`;
-
                 shearTableRows = `
                     <tr>
                         <td><strong>${t('rpt_xdir')}</strong></td> <td>${Vuy_demand.toFixed(2)} tf</td>
@@ -3328,16 +2483,12 @@
                     </tr>
                 `;
             }
-
-            // LOGIC: Determine Dimension Text
             let dimDisplay = "";
             if (I.shape === 'circ') {
                 dimDisplay = `D = ${I.b} cm`;
             } else {
                 dimDisplay = `${I.b} x ${I.h} cm`;
             }
-
-            // LOGIC: Config Display (Fix Undefined)
             let confDisplay = "";
             if (I.mode === 'custom') {
                 confDisplay = `${t('lbl_cust')} (${I.custom_count} ${t('rpt_bars')})`;
@@ -3345,12 +2496,9 @@
                 if (I.shape === 'circ') {
                     confDisplay = `${I.n_circ || 0} ${t('rpt_bars')}`; 
                 } else {
-                    // Fix: Use correct I.nz and I.nx
                     confDisplay = `${I.nz} x ${I.nx} ${t('rpt_bars')}`;
                 }
             }
-
-            // 4. Build HTML Report
             let html = `
                 <div class="rpt-header">
                     <div>
@@ -3359,7 +2507,6 @@
                     </div>
                     <div>${dateStr}</div>
                 </div>
-
                 <h3>${t('rpt_sec1')}</h3>
                 <div style="display: flex; gap: 20px; align-items: flex-start; margin-bottom: 20px;">
                     <div style="flex: 0 0 150px; border: 1px solid #ccc; padding: 10px; text-align: center;">
@@ -3390,7 +2537,6 @@
                         </table>
                     </div>
                 </div>
-
                 <table>
                     <tr><th colspan="4">${t('rpt_reinf_det')}</th></tr>
                     <tr>
@@ -3410,7 +2556,6 @@
                         <td colspan="3">${legsDisplayHTML}</td>
                     </tr>
                 </table>
-
                 <h3>${t('rpt_sec2')}</h3>
                 <table>
                     <tr>
@@ -3442,7 +2587,6 @@
                 <div style="background: ${parseFloat(R.dc) > 1 ? '#fee2e2' : '#dcfce7'}; padding: 10px; border-radius: 4px; text-align: center; font-weight: bold; color: ${parseFloat(R.dc) > 1 ? '#991b1b' : '#166534'}; margin-bottom: 20px;">
                     ${t('rpt_stat')}: ${R.status}
                 </div>
-
                 <h3>${t('rpt_sec3')}</h3>
                 <table>
                     <tr>
@@ -3453,21 +2597,16 @@
                     </tr>
                     ${shearTableRows}
                 </table>
-
                 <h3>${t('rpt_sec4')}</h3>
                 <div style="border: 1px solid #e2e8f0; padding: 10px; border-radius: 4px;">
                     ${R.warnings || `<p style="color:#64748b; font-style:italic;">${t('rpt_no_warn')}</p>`}
                 </div>
-
                 ${appendixHTML} <div style="margin-top: 30px; border-top: 1px solid #ccc; padding-top: 5px; font-size: 8pt; text-align: center; color: #888;">
                     ${t('rpt_footer')} | ${new Date().getFullYear()}
                 </div>
             `;
-
-            // 5. Inject and Print
             const staging = document.getElementById('print-staging');
             staging.innerHTML = html;
-            
             setTimeout(() => {
                 window.print();
             }, 500);
